@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.robotcontroller.FlamingPhoenix;
 
+import android.support.annotation.StringDef;
+
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
@@ -8,7 +10,7 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.util.Range;
 
-
+//Chassis
 public class MecanumDriveTrain {
 
     private DcMotor frontLeft;
@@ -16,20 +18,43 @@ public class MecanumDriveTrain {
     private DcMotor backLeft;
     private DcMotor backRight;
 
-    public MecanumDriveTrain(DcMotor FrontLeft, DcMotor FrontRight, DcMotor BackLeft, DcMotor BackRight) {
-        frontLeft = FrontLeft;
-        frontRight = FrontRight;
-        backLeft = BackLeft;
-        backRight = BackRight;
+    private OpMode opMode;
+
+    private float wheelDiameter;  //wheel diameter in inch
+    private int encoderPPR; //wheel encoder PPR (Pulse per Rotation)
+
+    public MecanumDriveTrain(String FrontLeftName, String FrontRightName, String BackLeftName, String BackRightName, OpMode OperatorMode) {
+        opMode = OperatorMode;
+
+        frontLeft = opMode.hardwareMap.dcMotor.get(FrontLeftName);
+        frontRight = opMode.hardwareMap.dcMotor.get(FrontRightName);
+        backLeft = opMode.hardwareMap.dcMotor.get(BackLeftName);
+        backRight = opMode.hardwareMap.dcMotor.get(BackRightName);
 
         frontLeft.setDirection(DcMotorSimple.Direction.REVERSE);
         backLeft.setDirection(DcMotorSimple.Direction.REVERSE);
+
+        wheelDiameter = 4; //default is 4 inch, most of wheels we have used are 4 inch diamete;
+        encoderPPR = 1320; //default to Tetrix encoder;  AndyMark will have different values
     }
 
-    public void Drive(Gamepad gamePad, OpMode opModeInstance) {
+    /*
+     * Initilize the MecanumDriveTrain to set the value of WheelDiameter and EncoderPPR
+     * @param WheelDiameter Drive Wheel's diameter in inch
+     * @param EncoderPPR  Encoder's Pulse per Rotation
+     */
+    public void init(float WheelDiameter, int EncoderPPR) {
+        wheelDiameter = WheelDiameter;
+        encoderPPR = EncoderPPR;
+    }
+
+    /*
+     * Control or drive the robot using gamepad
+     * @param gamePad
+     */
+    public void Drive(Gamepad gamePad) {
         mecanumDrive(-gamePad.left_stick_x, gamePad.left_stick_y, gamePad.right_stick_x);
     }
-
 
     private void mecanumDrive(float x1, float y1, float x2) {
         x1 = (float)scaleInput(x1);

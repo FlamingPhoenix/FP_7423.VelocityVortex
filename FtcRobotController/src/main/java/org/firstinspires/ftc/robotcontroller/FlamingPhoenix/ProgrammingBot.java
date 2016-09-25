@@ -11,26 +11,14 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 public class ProgrammingBot extends OpMode {
 
     MecanumDriveTrain DriveTrain;
-    DcMotor frontLeft;
-    DcMotor backLeft;
-    DcMotor frontRight;
-    DcMotor backRight;
 
     @Override
     public void init() {
-        frontLeft = this.hardwareMap.dcMotor.get("frontleft");
-        backLeft = this.hardwareMap.dcMotor.get("backleft");
-        frontRight = this.hardwareMap.dcMotor.get("frontright");
-        backRight = this.hardwareMap.dcMotor.get("backright");
-
-        DriveTrain = new MecanumDriveTrain(frontLeft, frontRight, backLeft, backRight);
+        DriveTrain = new MecanumDriveTrain("frontleft", "frontright", "backleft", "backright", this); //Initialize a drive train using MecanumDriveTrain
     }
 
     @Override
     public void loop() {
-        DriveTrain.Drive(this.gamepad1, this);
-        telemetry.addData("x1 ", gamepad1.left_stick_x);
-        telemetry.addData("y1 ", gamepad1.left_stick_y);
-        telemetry.addData("x2 ", gamepad1.right_stick_x);
+        DriveTrain.Drive(this.gamepad1);
     }
 }
