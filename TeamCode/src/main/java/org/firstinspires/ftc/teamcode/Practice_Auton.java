@@ -1,15 +1,17 @@
-package org.firstinspires.ftc.robotcontroller.FlamingPhoenix;
+package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.GyroSensor;
+
+import org.firstinspires.ftc.teamcode.FlamingPhoenix.MecanumDriveTrain;
+import org.firstinspires.ftc.teamcode.FlamingPhoenix.TurnDirection;
 
 /**
  * Created by brand on 9/29/2016.
  */
 
-@Autonomous
+@Autonomous(name = "Auton", group = "Practice")
 public class Practice_Auton extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {

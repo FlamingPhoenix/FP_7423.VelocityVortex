@@ -1,15 +1,16 @@
-package org.firstinspires.ftc.robotcontroller.FlamingPhoenix;
+package org.firstinspires.ftc.teamcode;
 
 
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.DcMotor;
+
+import org.firstinspires.ftc.teamcode.FlamingPhoenix.MecanumDriveTrain;
 
 /**
  * Created by Steve on 9/24/2016.
  */
 
-@TeleOp
+@TeleOp(name = "Mechanum", group = "Practice")
 public class ProgrammingBot extends OpMode {
 
     MecanumDriveTrain DriveTrain;
