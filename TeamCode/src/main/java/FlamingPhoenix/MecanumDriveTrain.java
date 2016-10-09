@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.FlamingPhoenix;
+package FlamingPhoenix;
 
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
@@ -65,6 +65,7 @@ public class MecanumDriveTrain {
         int pulseNeeded = (int) Math.round((encoderPPR * d) / (wheelDiameter * Math.PI));
 
         while(backLeft.getCurrentPosition() < pulseNeeded) {
+            opMode.telemetry.addData("Encoder: ", backLeft.getCurrentPosition());
             frontLeft.setPower(power);
             frontRight.setPower(power);
             backRight.setPower(power);

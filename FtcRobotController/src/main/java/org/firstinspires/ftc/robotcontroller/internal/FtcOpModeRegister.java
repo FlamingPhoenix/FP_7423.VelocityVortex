@@ -81,8 +81,8 @@ public class FtcOpModeRegister implements OpModeRegister {
         /**
          * Any manual OpMode class registrations should go here.
          */
-        manager.register("Mecannum", ProgrammingBot.class);
-        manager.register("Practice_Auton", Practice_Auton.class);
+        //manager.register("Mecannum", ProgrammingBot.class);
+        //manager.register("Practice_Auton", Practice_Auton.class);
 
 
     }

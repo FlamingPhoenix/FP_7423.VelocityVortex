@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.FlamingPhoenix;
+package FlamingPhoenix;
 
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 

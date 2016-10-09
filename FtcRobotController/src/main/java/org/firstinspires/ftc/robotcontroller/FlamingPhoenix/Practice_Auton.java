@@ -10,6 +10,7 @@ import com.qualcomm.robotcore.hardware.GyroSensor;
  */
 
 @Autonomous
+@Disabled
 public class Practice_Auton extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {

@@ -4,8 +4,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.GyroSensor;
 
-import org.firstinspires.ftc.teamcode.FlamingPhoenix.MecanumDriveTrain;
-import org.firstinspires.ftc.teamcode.FlamingPhoenix.TurnDirection;
+import FlamingPhoenix.*;
 
 /**
  * Created by brand on 9/29/2016.
@@ -21,7 +20,7 @@ public class Practice_Auton extends LinearOpMode {
 
         waitForStart();
 
-        //wheels.Drive(12,25,this);
-        wheels.turnUsingGyro(90, 40, TurnDirection.RIGHT, true, gyro, this);
+        wheels.Drive(12,25,this);
+        //wheels.turnUsingGyro(90, 40, TurnDirection.RIGHT, true, gyro, this);
     }
 }
