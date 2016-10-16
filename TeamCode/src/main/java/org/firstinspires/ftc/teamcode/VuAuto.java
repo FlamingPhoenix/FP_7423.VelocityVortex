@@ -56,9 +56,13 @@ public class VuAuto extends LinearOpMode {
 
         this.vuforia = ClassFactory.createVuforiaLocalizer(parms);
 
-        VuforiaTrackables myPanda = vuforia.loadTrackablesFromAsset("Trial_OT");
+        VuforiaTrackables myPanda = vuforia.loadTrackablesFromAsset("FTC_2016-17");
 
-        myPanda.get(0).setName("spaceshuttle");
+        myPanda.get(0).setName("Wheels");
+        myPanda.get(1).setName("Tools");
+        myPanda.get(2).setName("Legos");
+        myPanda.get(3).setName("Gears");
+//        myPanda.get(1).setName("Legos");
 
         waitForStart();
         runtime.reset();
@@ -67,7 +71,17 @@ public class VuAuto extends LinearOpMode {
 
         while (opModeIsActive()) {
 
-            OpenGLMatrix pos = ((VuforiaTrackableDefaultListener) myPanda.get(0).getListener()).getPose();
+            OpenGLMatrix pos = ((VuforiaTrackableDefaultListener) myPanda.get(1).getListener()).getPose();
+
+            if (pos != null)  //The front of folder is visible
+                telemetry.addData("Tools Visible", "true");
+            else {
+                pos = ((VuforiaTrackableDefaultListener) myPanda.get(2).getListener()).getPose(); //The front is not visible, look for the back
+                if (pos != null)
+                    telemetry.addData("Legos Visible", "true");
+                else
+                    telemetry.addData("Folder Tools & Legos Visible", "false");
+            }
 
             if (pos != null) {
                 VectorF translation = pos.getTranslation();
@@ -93,16 +107,17 @@ public class VuAuto extends LinearOpMode {
                 }
 
                 //The following is to adjust the power to keep a distance from the robot
-                float td = 400; //Target Distance, in millimeter
+                float td = 600; //Target Distance, in millimeter
 
                 float diff = newY - td;
-                if (Math.abs(diff) > 50) {//distance has changed by more than 50 millimeter (5 centermeter)
-                    lp = lp + diff * 0.01f; //move forward or background based on the change in distance
-                    rp = rp + diff * 0.01f;
+                if (Math.abs(diff) > 100) {//distance has changed by more than 50 millimeter (5 centermeter)
+                    lp = lp + diff * 0.0015f; //move forward or background based on the change in distance
+                    rp = rp + diff * 0.0015f;
 
                     lp = lp /(float) Math.max(Math.abs(lp), Math.abs(rp)); //adjust the space so it will not be more han 1
                     rp = rp /(float) Math.max(Math.abs(lp), Math.abs(rp));
                 }
+
 
                 lp = Range.clip(lp, -1, 1);
                 rp = Range.clip(rp, -1, 1);
@@ -123,8 +138,6 @@ public class VuAuto extends LinearOpMode {
                 backLeft.setPower(0);
                 frontRight.setPower(0);
                 backRight.setPower(0);
-
-                telemetry.addData("Visible:", "false");
             }
 
             telemetry.update();
