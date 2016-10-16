@@ -72,26 +72,50 @@ public class VuAuto extends LinearOpMode {
             if (pos != null) {
                 VectorF translation = pos.getTranslation();
 
-                float x = translation.get(0); //phone is sitting up (portrait)
-                float y = translation.get(2) * -1f; //phone is setting up, z is y and reverse (portrait)
+                float x = translation.get(0); //phone is sitting up (portrait), distance from the object.
+                float y = translation.get(2) * -1f; //phone is setting up, z is y and reverse (portrait) distance
+                float z = translation.get(1) * -1f; //vertical
 
-                float d = (float) Math.toDegrees(Math.atan2((double)x, (double)y));
+                float newY = (float) Math.sqrt((Math.pow(y, 2) - Math.pow(z, 2))); //distance of the object the same plain as the phone
+                float d = (float) Math.toDegrees(Math.atan2((double)x, (double)newY));  //get the angle
 
-                float p;
-                if (Math.abs(d) < 10) //only move if the target is outside of plus/minus 10 degree angle.
-                    p = Range.clip(d * 0.02f, -1f, 1f);
-                else
-                    p = 0;
+                float lp; //left power
+                float rp; //right power
 
-                frontLeft.setPower(p);
-                backLeft.setPower(p);
-                frontRight.setPower(p * -1);
-                backRight.setPower(p * -1);
+                //The following is change the left and right power to turn right or left to follow the object
+                if (Math.abs(d) > 5) { //only move if the target is outside of plus/minus 10 degree angle
+                    lp = Range.clip(d * 0.02f, -1f, 1f);
+                    rp = lp * -1;
+                }
+                else {
+                    lp = 0;
+                    rp = 0;
+                }
 
+                //The following is to adjust the power to keep a distance from the robot
+                float td = 400; //Target Distance, in millimeter
+
+                float diff = newY - td;
+                if (Math.abs(diff) > 50) {//distance has changed by more than 50 millimeter (5 centermeter)
+                    lp = lp + diff * 0.01f; //move forward or background based on the change in distance
+                    rp = rp + diff * 0.01f;
+
+                    lp = lp /(float) Math.max(Math.abs(lp), Math.abs(rp)); //adjust the space so it will not be more han 1
+                    rp = rp /(float) Math.max(Math.abs(lp), Math.abs(rp));
+                }
+
+                lp = Range.clip(lp, -1, 1);
+                rp = Range.clip(rp, -1, 1);
+
+                frontLeft.setPower(lp);
+                backLeft.setPower(lp);
+                frontRight.setPower(rp);
+                backRight.setPower(rp);
 
                 telemetry.addData("Translation - x", x);
                 telemetry.addData("Translation - y", y);
-                telemetry.addData("Translation - z", translation.get(2));
+                telemetry.addData("Translation - newY", newY);
+                telemetry.addData("Translation - z", z);
                 telemetry.addData("Degree", d);
             }
             else {
