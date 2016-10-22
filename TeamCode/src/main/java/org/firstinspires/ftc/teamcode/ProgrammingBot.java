@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.GyroSensor;
 
 import FlamingPhoenix.*;
 
@@ -14,10 +15,12 @@ import FlamingPhoenix.*;
 public class ProgrammingBot extends OpMode {
 
     MecanumDriveTrain DriveTrain;
+    GyroSensor gyro;
 
     @Override
-    public void init() {
-        DriveTrain = new MecanumDriveTrain("frontleft", "frontright", "backleft", "backright", this); //Initialize a drive train using MecanumDriveTrain
+    public void init()  {
+        gyro = hardwareMap.gyroSensor.get("gyro");
+        DriveTrain = new MecanumDriveTrain("frontleft", "frontright", "backleft", "backright", gyro,this); //Initialize a drive train using MecanumDriveTrain
     }
 
     @Override
