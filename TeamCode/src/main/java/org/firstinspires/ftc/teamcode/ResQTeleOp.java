@@ -83,7 +83,7 @@ public class ResQTeleOp extends OpMode {
 
         winch = new TapeMeasure(winchMotor, positionServo);
 
-        //FrontArm = new ServoArm(hardwareMap.servo.get("servobase"), hardwareMap.servo.get("servojoint"), rotationServo);
+        FrontArm = new ServoArm(hardwareMap.servo.get("servobase"), hardwareMap.servo.get("servojoint"), hardwareMap.servo.get("servorotate"));
     }
 
     @Override
