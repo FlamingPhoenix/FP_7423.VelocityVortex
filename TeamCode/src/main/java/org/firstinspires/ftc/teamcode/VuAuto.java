@@ -2,11 +2,13 @@ package org.firstinspires.ftc.teamcode;
 
 import android.database.sqlite.SQLiteBindOrColumnIndexOutOfRangeException;
 
+import com.qualcomm.ftccommon.DbgLog;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.Range;
 import com.vuforia.Vuforia;
 
@@ -37,13 +39,17 @@ public class VuAuto extends LinearOpMode {
     private DcMotor frontLeft;
     private DcMotor frontRight;
 
-    @Override
-    public void runOpMode() throws InterruptedException {
+    private Servo Phone;
+    VuforiaTrackables myPanda;
 
+    private void initialize() {
         backLeft = hardwareMap.dcMotor.get("backleft");
         backRight = hardwareMap.dcMotor.get("backright");
         frontLeft = hardwareMap.dcMotor.get("frontleft");
         frontRight = hardwareMap.dcMotor.get("frontright");
+
+        Phone = hardwareMap.servo.get("phone");
+        Phone.setPosition(0.9);
 
         //Left Side motors should rotate opposite of right side motors
         frontLeft.setDirection(DcMotorSimple.Direction.REVERSE);
@@ -56,12 +62,18 @@ public class VuAuto extends LinearOpMode {
 
         this.vuforia = ClassFactory.createVuforiaLocalizer(parms);
 
-        VuforiaTrackables myPanda = vuforia.loadTrackablesFromAsset("FTC_2016-17");
-
+        myPanda = vuforia.loadTrackablesFromAsset("FTC_2016-17");
         myPanda.get(0).setName("Wheels");
         myPanda.get(1).setName("Tools");
         myPanda.get(2).setName("Legos");
         myPanda.get(3).setName("Gears");
+    }
+
+    @Override
+    public void runOpMode() throws InterruptedException {
+
+        initialize();
+
 //        myPanda.get(1).setName("Legos");
 
         waitForStart();
@@ -98,37 +110,56 @@ public class VuAuto extends LinearOpMode {
 
                 //The following is change the left and right power to turn right or left to follow the object
                 if (Math.abs(d) > 5) { //only move if the target is outside of plus/minus 10 degree angle
-                    lp = Range.clip(d * 0.02f, -1f, 1f);
+                    lp = Range.clip(d * 0.015f, -1f, 1f);
                     rp = lp * -1;
                 }
                 else {
                     lp = 0;
                     rp = 0;
+
+                    //The following is to adjust the power to keep a distance from the robot
+
+                    DbgLog.msg("[Phoenix] Control Distance");
+
+                    float td = 600; //Target Distance, in millimeter
+
+                    float diff = newY - td;
+                    DbgLog.msg("[Phoenix] Diff="+ Float.toString(diff));
+                    if (Math.abs(diff) > 100) {//distance has changed by more than 100 millimeter (10 centermeter)
+
+                        lp = lp + diff * 0.002f; //move forward or background based on the change in distance
+                        rp = rp + diff * 0.002f;
+
+                        DbgLog.msg("[Phoenix] lp-before-rationalize="+ Float.toString(lp));
+                        DbgLog.msg("[Phoenix] rp-before-rationalize="+ Float.toString(rp));
+
+                        if ((Math.abs(rp) > 1) || (Math.abs(lp) > 1)) { //either left power or right power are greater than 1, too much power
+                            //The following is to adjust the power proportionally between left and right
+                            float lrp = (float) Math.max(Math.abs(lp), Math.abs(rp));
+
+                            lp = lp / lrp; //adjust the space so it will not be more han 1
+                            rp = rp / lrp;
+
+                            DbgLog.msg("[Phoenix] lp-after-rationalize="+ Float.toString(lp));
+                            DbgLog.msg("[Phoenix] rp-after-rationalize="+ Float.toString(rp));
+                        }
+                    }
+
                 }
-
-                //The following is to adjust the power to keep a distance from the robot
-                float td = 600; //Target Distance, in millimeter
-
-                float diff = newY - td;
-                if (Math.abs(diff) > 100) {//distance has changed by more than 50 millimeter (5 centermeter)
-                    lp = lp + diff * 0.0015f; //move forward or background based on the change in distance
-                    rp = rp + diff * 0.0015f;
-
-                    lp = lp /(float) Math.max(Math.abs(lp), Math.abs(rp)); //adjust the space so it will not be more han 1
-                    rp = rp /(float) Math.max(Math.abs(lp), Math.abs(rp));
-                }
-
 
                 lp = Range.clip(lp, -1, 1);
                 rp = Range.clip(rp, -1, 1);
+
+                DbgLog.msg("[Phoenix] lp-after-range="+ Float.toString(lp));
+                DbgLog.msg("[Phoenix] rp-after-range="+ Float.toString(rp));
 
                 frontLeft.setPower(lp);
                 backLeft.setPower(lp);
                 frontRight.setPower(rp);
                 backRight.setPower(rp);
 
-                telemetry.addData("Translation - x", x);
-                telemetry.addData("Translation - y", y);
+                telemetry.addData("lp", lp);
+                telemetry.addData("rp", rp);
                 telemetry.addData("Translation - newY", newY);
                 telemetry.addData("Translation - z", z);
                 telemetry.addData("Degree", d);
