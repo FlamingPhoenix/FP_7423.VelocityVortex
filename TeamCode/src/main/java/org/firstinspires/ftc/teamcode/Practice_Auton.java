@@ -12,15 +12,18 @@ import FlamingPhoenix.*;
 
 @Autonomous(name = "Auton", group = "Practice")
 public class Practice_Auton extends LinearOpMode {
+
+
     @Override
     public void runOpMode() throws InterruptedException {
-        MecanumDriveTrain wheels = new MecanumDriveTrain("frontleft", "frontright", "backleft", "backright", this);
 
         GyroSensor gyro = hardwareMap.gyroSensor.get("gyro");
 
+        MecanumDriveTrain wheels = new MecanumDriveTrain("frontleft", "frontright", "backleft", "backright", gyro, this);
+
         waitForStart();
 
-        wheels.Drive(12,25,this);
+        wheels.gyroTurn(25, 90, this);
         //wheels.turnUsingGyro(90, 40, TurnDirection.RIGHT, true, gyro, this);
     }
 }

@@ -20,10 +20,12 @@ public class MecanumDriveTrain {
 
     private OpMode opMode;
 
+    private GyroSensor gyro;
+
     private float wheelDiameter;  //wheel diameter in inch
     private int encoderPPR; //wheel encoder PPR (Pulse per Rotation)
 
-    public MecanumDriveTrain(String FrontLeftName, String FrontRightName, String BackLeftName, String BackRightName, OpMode OperatorMode) {
+    public MecanumDriveTrain(String FrontLeftName, String FrontRightName, String BackLeftName, String BackRightName, GyroSensor gyroscope, OpMode OperatorMode) {
         opMode = OperatorMode;
 
         frontLeft = opMode.hardwareMap.dcMotor.get(FrontLeftName);
@@ -33,6 +35,8 @@ public class MecanumDriveTrain {
 
         frontLeft.setDirection(DcMotorSimple.Direction.REVERSE);
         backLeft.setDirection(DcMotorSimple.Direction.REVERSE);
+
+        gyro = gyroscope;
 
         wheelDiameter = 4; //default is 4 inch, most of wheels we have used are 4 inch diamete;
         encoderPPR = 1320; //default to Tetrix encoder;  AndyMark will have different values
@@ -257,5 +261,81 @@ public class MecanumDriveTrain {
         }
 
         return m;
+    }
+
+    public void gyroTurn (double speed, double angle, LinearOpMode opMode)
+            throws InterruptedException {
+
+        // keep looping while we are still active, and not on heading.
+        while (opMode.opModeIsActive() && !onHeading(speed, angle, 0.1, opMode)) {
+            // Update telemetry & Allow time for other processes to run.
+            opMode.telemetry.update();
+            opMode.idle();
+        }
+    }
+
+
+
+    boolean onHeading(double speed, double angle, double PCoeff, LinearOpMode opMode) {
+        double   error ;
+        double   steer ;
+        boolean  onTarget = false ;
+        double leftSpeed;
+        double rightSpeed;
+
+        // determine turn power based on +/- error
+        error = getError(angle);
+
+        if (Math.abs(error) <= 1) {
+            steer = 0.0;
+            leftSpeed  = 0.0;
+            rightSpeed = 0.0;
+            onTarget = true;
+        }
+        else {
+            steer = getSteer(error, PCoeff);
+            rightSpeed  = speed * steer;
+            leftSpeed   = -rightSpeed;
+        }
+
+        // Send desired speeds to motors.
+        backLeft.setPower(leftSpeed);
+        frontLeft.setPower(leftSpeed);
+        backRight.setPower(rightSpeed);
+        frontRight.setPower(rightSpeed);
+
+        // Display it for the driver.
+        opMode.telemetry.addData("Target", "%5.2f", angle);
+        opMode.telemetry.addData("Err/St", "%5.2f/%5.2f", error, steer);
+        opMode.telemetry.addData("Speed.", "%5.2f:%5.2f", leftSpeed, rightSpeed);
+
+        return onTarget;
+    }
+
+    /**
+     * getError determines the error between the target angle and the robot's current heading
+     * @param   targetAngle  Desired angle (relative to global reference established at last Gyro Reset).
+     * @return  error angle: Degrees in the range +/- 180. Centered on the robot's frame of reference
+     *          +ve error means the robot should turn LEFT (CCW) to reduce error.
+     */
+    public double getError(double targetAngle) {
+
+        double robotError;
+
+        // calculate error in -179 to +180 range  (
+        robotError = targetAngle - gyro.getHeading();
+        while (robotError > 180)  robotError -= 360;
+        while (robotError <= -180) robotError += 360;
+        return robotError;
+    }
+
+    /**
+     * returns desired steering force.  +/- 1 range.  +ve = steer left
+     * @param error   Error angle in robot relative degrees
+     * @param PCoeff  Proportional Gain Coefficient
+     * @return
+     */
+    public double getSteer(double error, double PCoeff) {
+        return Range.clip(error * PCoeff, -1, 1);
     }
 }
