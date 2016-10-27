@@ -49,7 +49,7 @@ public class VuAuto extends LinearOpMode {
         frontRight = hardwareMap.dcMotor.get("frontright");
 
         Phone = hardwareMap.servo.get("phone");
-        Phone.setPosition(0.9);
+        Phone.setPosition(0.8);
 
         //Left Side motors should rotate opposite of right side motors
         frontLeft.setDirection(DcMotorSimple.Direction.REVERSE);
@@ -100,51 +100,58 @@ public class VuAuto extends LinearOpMode {
 
                 float x = translation.get(0); //phone is sitting up (portrait), distance from the object.
                 float y = translation.get(2) * -1f; //phone is setting up, z is y and reverse (portrait) distance
-                float z = translation.get(1) * -1f; //vertical
+                float z = translation.get(1); //vertical
 
-                float newY = (float) Math.sqrt((Math.pow(y, 2) - Math.pow(z, 2))); //distance of the object the same plain as the phone
-                float d = (float) Math.toDegrees(Math.atan2((double)x, (double)newY));  //get the angle
+                float newY = (float) Math.sqrt((Math.pow(x, 2) + Math.pow(y, 2))); //distance of the object on the same plain as the phone
+                float d = (float) Math.toDegrees(Math.atan2((double)x, (double)y));  //get the angle
 
                 float lp; //left power
                 float rp; //right power
 
+
                 //The following is change the left and right power to turn right or left to follow the object
-                if (Math.abs(d) > 5) { //only move if the target is outside of plus/minus 10 degree angle
-                    lp = Range.clip(d * 0.015f, -1f, 1f);
+                if (Math.abs(d) > 10) { //only move if the target is outside of plus/minus 10 degree angle
+                    lp = 0.15f * (d/Math.abs(d));
+
                     rp = lp * -1;
                 }
                 else {
                     lp = 0;
                     rp = 0;
+                }
 
-                    //The following is to adjust the power to keep a distance from the robot
+                //The following is to adjust the power to keep a distance from the robot
+                DbgLog.msg("[Phoenix] Control Distance");
 
-                    DbgLog.msg("[Phoenix] Control Distance");
+                float td = 600; //Target Distance, in millimeter
 
-                    float td = 600; //Target Distance, in millimeter
+                float diff = newY - td;
+                DbgLog.msg("[Phoenix] Diff="+ Float.toString(diff));
+                if (Math.abs(diff) > 100) {//distance has changed by more than 100 millimeter (10 centermeter)
 
-                    float diff = newY - td;
-                    DbgLog.msg("[Phoenix] Diff="+ Float.toString(diff));
-                    if (Math.abs(diff) > 100) {//distance has changed by more than 100 millimeter (10 centermeter)
+                    float ap = diff * 0.0015f;
 
-                        lp = lp + diff * 0.002f; //move forward or background based on the change in distance
-                        rp = rp + diff * 0.002f;
+                    if (ap > 0.2)
+                        ap = 0.2f;
+                    else if (ap < -0.2)
+                        ap = -0.2f;
 
-                        DbgLog.msg("[Phoenix] lp-before-rationalize="+ Float.toString(lp));
-                        DbgLog.msg("[Phoenix] rp-before-rationalize="+ Float.toString(rp));
+                    lp = lp + ap; //move forward or background based on the change in distance
+                    rp = rp + ap;
 
-                        if ((Math.abs(rp) > 1) || (Math.abs(lp) > 1)) { //either left power or right power are greater than 1, too much power
-                            //The following is to adjust the power proportionally between left and right
-                            float lrp = (float) Math.max(Math.abs(lp), Math.abs(rp));
+                    DbgLog.msg("[Phoenix] lp-before-rationalize="+ Float.toString(lp));
+                    DbgLog.msg("[Phoenix] rp-before-rationalize="+ Float.toString(rp));
 
-                            lp = lp / lrp; //adjust the space so it will not be more han 1
-                            rp = rp / lrp;
+                    if ((Math.abs(rp) > 1) || (Math.abs(lp) > 1)) { //either left power or right power are greater than 1, too much power
+                        //The following is to adjust the power proportionally between left and right
+                        float lrp = (float) Math.max(Math.abs(lp), Math.abs(rp));
 
-                            DbgLog.msg("[Phoenix] lp-after-rationalize="+ Float.toString(lp));
-                            DbgLog.msg("[Phoenix] rp-after-rationalize="+ Float.toString(rp));
-                        }
+                        lp = lp / lrp; //adjust the space so it will not be more han 1
+                        rp = rp / lrp;
+
+                        DbgLog.msg("[Phoenix] lp-after-rationalize="+ Float.toString(lp));
+                        DbgLog.msg("[Phoenix] rp-after-rationalize="+ Float.toString(rp));
                     }
-
                 }
 
                 lp = Range.clip(lp, -1, 1);
@@ -158,9 +165,10 @@ public class VuAuto extends LinearOpMode {
                 frontRight.setPower(rp);
                 backRight.setPower(rp);
 
-                telemetry.addData("lp", lp);
-                telemetry.addData("rp", rp);
+
                 telemetry.addData("Translation - newY", newY);
+                telemetry.addData("Translation - x", x);
+                telemetry.addData("Translation - y", y);
                 telemetry.addData("Translation - z", z);
                 telemetry.addData("Degree", d);
             }
@@ -174,5 +182,25 @@ public class VuAuto extends LinearOpMode {
             telemetry.update();
             idle();
         }
+    }
+
+    //get the phone's angle
+    private int phoneAngle() {
+
+        //0.8 is 0, 1 is the max
+        double s = Phone.getPosition();
+
+        return (int) Math.round(((s - 0.8) / 1) * 175);
+    }
+
+    private void moveUp() {
+        double n = Phone.getPosition() + 0.005;
+        if (n <= 1)
+            Phone.setPosition(n);
+    }
+    private void moveDown() {
+        double n = Phone.getPosition() - 0.005;
+        if (n >= 0.75)
+            Phone.setPosition(n);
     }
 }

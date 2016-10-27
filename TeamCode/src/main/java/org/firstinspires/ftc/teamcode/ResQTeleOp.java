@@ -100,7 +100,7 @@ public class ResQTeleOp extends OpMode {
         }
 
         sDriveTrain.JoystickDrive(gamepad1, gamepad2);
-        //FrontArm.operateByRemote(gamepad1, this); //move all-clear arm
+        FrontArm.operateByRemote(gamepad1, this); //move all-clear arm
     }
 
     public void moveHooks(Gamepad gamepad1) {
