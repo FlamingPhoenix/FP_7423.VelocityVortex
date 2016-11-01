@@ -1,5 +1,7 @@
 package FlamingPhoenix;
 
+import com.qualcomm.ftccommon.DbgLog;
+import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cGyro;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
@@ -20,12 +22,12 @@ public class MecanumDriveTrain {
 
     private OpMode opMode;
 
-    private GyroSensor gyro;
+    private ModernRoboticsI2cGyro gyro;
 
     private float wheelDiameter;  //wheel diameter in inch
     private int encoderPPR; //wheel encoder PPR (Pulse per Rotation)
 
-    public MecanumDriveTrain(String FrontLeftName, String FrontRightName, String BackLeftName, String BackRightName, GyroSensor gyroscope, OpMode OperatorMode) {
+    public MecanumDriveTrain(String FrontLeftName, String FrontRightName, String BackLeftName, String BackRightName, ModernRoboticsI2cGyro gyroscope, OpMode OperatorMode) {
         opMode = OperatorMode;
 
         frontLeft = opMode.hardwareMap.dcMotor.get(FrontLeftName);
@@ -41,6 +43,11 @@ public class MecanumDriveTrain {
         wheelDiameter = 4; //default is 4 inch, most of wheels we have used are 4 inch diamete;
         encoderPPR = 1320; //default to Tetrix encoder;  AndyMark will have different values
     }
+
+    //
+    //
+    //
+    //TeleOp Methods
 
     /*
      * Initilize the MecanumDriveTrain to set the value of WheelDiameter and EncoderPPR
@@ -60,7 +67,7 @@ public class MecanumDriveTrain {
         mecanumDrive(-gamePad.left_stick_x, gamePad.left_stick_y, gamePad.right_stick_x);
     }
 
-   public void Drive(int d, int power, LinearOpMode opMode) throws InterruptedException {
+    public void Drive(int d, int power, LinearOpMode opMode) throws InterruptedException {
         backLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         backLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         opMode.idle();
@@ -68,7 +75,7 @@ public class MecanumDriveTrain {
 
         int pulseNeeded = (int) Math.round((encoderPPR * d) / (wheelDiameter * Math.PI));
 
-        while(backLeft.getCurrentPosition() < pulseNeeded) {
+        while (backLeft.getCurrentPosition() < pulseNeeded) {
             opMode.telemetry.addData("Encoder: ", backLeft.getCurrentPosition());
             frontLeft.setPower(power);
             frontRight.setPower(power);
@@ -81,7 +88,7 @@ public class MecanumDriveTrain {
         backLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
 
-        while(backLeft.getCurrentPosition() < 1051) {
+        while (backLeft.getCurrentPosition() < 1051) {
             frontLeft.setPower(75);
             frontRight.setPower(75);
             backRight.setPower(75);
@@ -90,16 +97,16 @@ public class MecanumDriveTrain {
     }
 
     private void mecanumDrive(float x1, float y1, float x2) {
-        x1 = (float)scaleInput(x1);
-        y1 =  (float)scaleInput(y1);
+        x1 = (float) scaleInput(x1);
+        y1 = (float) scaleInput(y1);
 
-        float FL =  y1 + x1 + x2;
-        float FR =  y1 - x1 - x2;
-        float BL =  y1 - x1 + x2;
-        float BR =  y1 + x1 - x2;
+        float FL = y1 + x1 + x2;
+        float FR = y1 - x1 - x2;
+        float BL = y1 - x1 + x2;
+        float BR = y1 + x1 - x2;
 
         float mv = max(Math.abs(FL), Math.abs(FR), Math.abs(BL), Math.abs(BR));
-        if (mv > 0) {
+        if (Math.abs(mv) > 1) {
             FL = FL / mv;
             FR = FR / mv;
             BL = BL / mv;
@@ -117,7 +124,13 @@ public class MecanumDriveTrain {
         backRight.setPower(BR);
     }
 
-    public void turnUsingGyro(int degree, double power, TurnDirection direction, boolean bothWheels, GyroSensor gyro, LinearOpMode opModeInstance) throws InterruptedException {
+
+    //
+    //
+    //
+    //Autonomous methods
+
+    public void turnUsingGyro(int degree, double power, TurnDirection direction, boolean bothWheels, ModernRoboticsI2cGyro gyro, LinearOpMode opModeInstance) throws InterruptedException {
         while (gyro.isCalibrating())
             Thread.sleep(50);
 
@@ -129,6 +142,7 @@ public class MecanumDriveTrain {
         double speed = Math.abs(power);
 
         int targetOffset = getOffsetToTarget(startHeading, newHeading, direction, gyro, opModeInstance);
+        DbgLog.msg("[Phoenix] targetOffset =  " + Integer.toString(targetOffset));
         int previousOffset = targetOffset;
         while (targetOffset > 2) {
             int degreeChanged = Math.abs(targetOffset - previousOffset);
@@ -150,79 +164,76 @@ public class MecanumDriveTrain {
                 if (bothWheels) {
                     frontRight.setPower(speed);
                     backRight.setPower(speed);
-                    frontRight.setPower(speed * -1);
+                    frontLeft.setPower(speed * -1);
                     backLeft.setPower(speed * -1);
-                }
-                else if (direction == TurnDirection.RIGHT_FORWARD) {
+                } else if (direction == TurnDirection.RIGHT_FORWARD) {
                     frontRight.setPower(0);
                     backRight.setPower(0);
-                    frontRight.setPower(speed * -1);
+                    frontLeft.setPower(speed * -1);
                     backLeft.setPower(speed * -1);
-                }
-                else {
+                } else {
                     frontRight.setPower(speed);
                     backRight.setPower(speed);
-                    frontRight.setPower(0);
+                    frontLeft.setPower(0);
                     backLeft.setPower(0);
                 }
             } else {
                 if (bothWheels) {
                     frontRight.setPower(speed * -1);
                     backRight.setPower(speed * -1);
-                    frontRight.setPower(speed);
+                    frontLeft.setPower(speed);
                     backLeft.setPower(speed);
-                }
-                else if (direction == TurnDirection.LEFT_FORWARD) {
+                } else if (direction == TurnDirection.LEFT_FORWARD) {
                     frontRight.setPower(speed * -1);
                     backRight.setPower(speed * -1);
-                    frontRight.setPower(0);
+                    frontLeft.setPower(0);
                     backLeft.setPower(0);
-                }
-                else {
+                } else {
                     frontRight.setPower(0);
                     backRight.setPower(0);
-                    frontRight.setPower(speed);
+                    frontLeft.setPower(speed);
                     backLeft.setPower(speed);
                 }
             }
             previousOffset = targetOffset;
-            opModeInstance.waitForNextHardwareCycle();
+            opModeInstance.idle();
             targetOffset = getOffsetToTarget(startHeading, newHeading, direction, gyro, opModeInstance);
+            DbgLog.msg("[Phoenix] targetOffset =  " + Integer.toString(targetOffset));
         }
 
         frontRight.setPower(0);
         backRight.setPower(0);
         frontRight.setPower(0);
         backLeft.setPower(0);
-        opModeInstance.waitOneFullHardwareCycle();
+        opModeInstance.idle();
 
         opModeInstance.telemetry.addData("startHeading: ", startHeading);
         opModeInstance.telemetry.addData("newHeading: ", newHeading);
         int finalHeading = gyro.getHeading();
         opModeInstance.telemetry.addData("Final Heading", finalHeading);
-        //DbgLog.msg("[Phoenix] turnUsingGyro finalHeading: " + Integer.toString(finalHeading));
     }
 
-    private int getOffsetToTarget(int startHeading, int newHeading, TurnDirection direction, GyroSensor gyro, OpMode OpModeInstance) {
+    private int getOffsetToTarget(int startHeading, int newHeading, TurnDirection direction, ModernRoboticsI2cGyro gyro, OpMode OpModeInstance) {
         int currentHeading = gyro.getHeading();
         OpModeInstance.telemetry.addData("current Heading ", currentHeading);
         OpModeInstance.telemetry.addData("startHeading: ", startHeading);
         OpModeInstance.telemetry.addData("newHeading: ", newHeading);
 
-        if( (direction == TurnDirection.RIGHT) || direction == TurnDirection.RIGHT_FORWARD) {
-            if( (currentHeading < startHeading) && ((currentHeading >= 0) && (currentHeading < 180) && (startHeading >= 180))) {
+        DbgLog.msg("[Phoenix] currentHeading =  " + Integer.toString(currentHeading));
+        DbgLog.msg("[Phoenix] startHeading =  " + Integer.toString(startHeading));
+        DbgLog.msg("[Phoenix] newHeading =  " + Integer.toString(newHeading));
+
+        if ((direction == TurnDirection.RIGHT) || direction == TurnDirection.RIGHT_FORWARD) {
+            if ((currentHeading < startHeading) && ((currentHeading >= 0) && (currentHeading < 180) && (startHeading >= 180))) {
                 currentHeading += 360;
-            }
-            else if ((Math.abs(currentHeading - startHeading) == 1) || ((currentHeading == 359) && (startHeading == 0)))
+            } else if ((Math.abs(currentHeading - startHeading) == 1) || ((currentHeading == 359) && (startHeading == 0)))
                 currentHeading = startHeading;
 
             return newHeading - currentHeading;
-        }
-        else {
-            if ((currentHeading > startHeading) && ((currentHeading >= 180) && (currentHeading < 360) && (startHeading >=0) && (startHeading < 180))) {
+        } else {
+            if ((currentHeading > startHeading) && ((currentHeading >= 180) && (currentHeading < 360) && (startHeading >= 0) && (startHeading < 180))) {
                 currentHeading -= 360;
-            }
-            else if ((Math.abs(currentHeading - startHeading) == 1) || ((currentHeading == 0) && (startHeading == 359))) {
+            } else if ((Math.abs(currentHeading - startHeading) == 1) || ((currentHeading == 0) && (startHeading == 359))) {
                 currentHeading = startHeading;
             }
 
@@ -230,9 +241,61 @@ public class MecanumDriveTrain {
         }
     }
 
-    private double scaleInput(double dVal)  {
-        double[] scaleArray = { 0.0, 0.05, 0.09, 0.10, 0.12, 0.15, 0.18, 0.24,
-                0.30, 0.36, 0.43, 0.50, 0.60, 0.72, 0.85, 1.00, 1.00 };
+    public void turnWithGyro(int degree, double power, TurnDirection direction, boolean allWheels, ModernRoboticsI2cGyro gyro, LinearOpMode opMode) throws InterruptedException {
+        while (gyro.isCalibrating())
+            Thread.sleep(50);
+
+        gyro.resetZAxisIntegrator();
+
+        int startHeading = gyro.getIntegratedZValue();
+        int targetHeading = startHeading + (direction == TurnDirection.RIGHT ? degree * -1 : degree);
+
+        DbgLog.msg("[Phoenix] targetHeading = " + targetHeading);
+
+        double speed = Math.abs(power);
+
+        int currentHeading = gyro.getIntegratedZValue();
+        DbgLog.msg("[Phoenix] currentHeading = " + currentHeading);
+
+        if(targetHeading < 0) { //negative means turning right and vice versa
+            while((currentHeading > targetHeading) && (opMode.opModeIsActive())) {
+                if(Math.abs(currentHeading - targetHeading) < 7.5)
+                    break;
+                frontRight.setPower(speed * -1);
+                backRight.setPower(speed * -1);
+                frontLeft.setPower(speed);
+                backLeft.setPower(speed);
+                currentHeading = gyro.getIntegratedZValue();
+
+                DbgLog.msg("[Phoenix] currentHeading = " + currentHeading);
+            }
+        } else {
+            while((currentHeading < targetHeading) && (opMode.opModeIsActive())){
+                if(Math.abs(targetHeading - currentHeading) < 7.5)
+                    break;
+                frontRight.setPower(speed);
+                backRight.setPower(speed);
+                frontLeft.setPower(speed * -1);
+                backLeft.setPower(speed * -1);
+                currentHeading = gyro.getIntegratedZValue();
+
+                DbgLog.msg("[Phoenix] currentHeading = " + currentHeading);
+            }
+        }
+
+        frontRight.setPower(0);
+        backRight.setPower(0);
+        frontLeft.setPower(0);
+        backLeft.setPower(0);
+
+        DbgLog.msg("[Phoenix] final1currentHeading = " + Double.toString(gyro.getIntegratedZValue()));
+        Thread.sleep(1000);
+        DbgLog.msg("[Phoenix] final2currentHeading = " + Double.toString(gyro.getIntegratedZValue()));
+    }
+
+    private double scaleInput(double dVal) {
+        double[] scaleArray = {0.0, 0.05, 0.09, 0.10, 0.12, 0.15, 0.18, 0.24,
+                0.30, 0.36, 0.43, 0.50, 0.60, 0.72, 0.85, 1.00, 1.00};
 
         // get the corresponding index for the scaleInput array.
         int index = (int) (dVal * 16.0);
@@ -255,87 +318,12 @@ public class MecanumDriveTrain {
     private float max(float... args) {
         float m = 0;
 
-        for (int i=0; i<args.length; i++ ) {
+        for (int i = 0; i < args.length; i++) {
             if (args[i] > m)
                 m = args[i];
         }
 
         return m;
     }
-
-    public void gyroTurn (double speed, double angle, LinearOpMode opMode)
-            throws InterruptedException {
-
-        // keep looping while we are still active, and not on heading.
-        while (opMode.opModeIsActive() && !onHeading(speed, angle, 0.1, opMode)) {
-            // Update telemetry & Allow time for other processes to run.
-            opMode.telemetry.update();
-            opMode.idle();
-        }
-    }
-
-
-
-    boolean onHeading(double speed, double angle, double PCoeff, LinearOpMode opMode) {
-        double   error ;
-        double   steer ;
-        boolean  onTarget = false ;
-        double leftSpeed;
-        double rightSpeed;
-
-        // determine turn power based on +/- error
-        error = getError(angle);
-
-        if (Math.abs(error) <= 1) {
-            steer = 0.0;
-            leftSpeed  = 0.0;
-            rightSpeed = 0.0;
-            onTarget = true;
-        }
-        else {
-            steer = getSteer(error, PCoeff);
-            rightSpeed  = speed * steer;
-            leftSpeed   = -rightSpeed;
-        }
-
-        // Send desired speeds to motors.
-        backLeft.setPower(leftSpeed);
-        frontLeft.setPower(leftSpeed);
-        backRight.setPower(rightSpeed);
-        frontRight.setPower(rightSpeed);
-
-        // Display it for the driver.
-        opMode.telemetry.addData("Target", "%5.2f", angle);
-        opMode.telemetry.addData("Err/St", "%5.2f/%5.2f", error, steer);
-        opMode.telemetry.addData("Speed.", "%5.2f:%5.2f", leftSpeed, rightSpeed);
-
-        return onTarget;
-    }
-
-    /**
-     * getError determines the error between the target angle and the robot's current heading
-     * @param   targetAngle  Desired angle (relative to global reference established at last Gyro Reset).
-     * @return  error angle: Degrees in the range +/- 180. Centered on the robot's frame of reference
-     *          +ve error means the robot should turn LEFT (CCW) to reduce error.
-     */
-    public double getError(double targetAngle) {
-
-        double robotError;
-
-        // calculate error in -179 to +180 range  (
-        robotError = targetAngle - gyro.getHeading();
-        while (robotError > 180)  robotError -= 360;
-        while (robotError <= -180) robotError += 360;
-        return robotError;
-    }
-
-    /**
-     * returns desired steering force.  +/- 1 range.  +ve = steer left
-     * @param error   Error angle in robot relative degrees
-     * @param PCoeff  Proportional Gain Coefficient
-     * @return
-     */
-    public double getSteer(double error, double PCoeff) {
-        return Range.clip(error * PCoeff, -1, 1);
-    }
 }
+

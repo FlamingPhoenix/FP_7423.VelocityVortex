@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode;
 
 
+import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cGyro;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.GyroSensor;
@@ -15,11 +16,11 @@ import FlamingPhoenix.*;
 public class ProgrammingBot extends OpMode {
 
     MecanumDriveTrain DriveTrain;
-    GyroSensor gyro;
+    ModernRoboticsI2cGyro gyro;
 
     @Override
     public void init()  {
-        gyro = hardwareMap.gyroSensor.get("gyro");
+        gyro = (ModernRoboticsI2cGyro) hardwareMap.gyroSensor.get("gyro");
         DriveTrain = new MecanumDriveTrain("frontleft", "frontright", "backleft", "backright", gyro,this); //Initialize a drive train using MecanumDriveTrain
     }
 

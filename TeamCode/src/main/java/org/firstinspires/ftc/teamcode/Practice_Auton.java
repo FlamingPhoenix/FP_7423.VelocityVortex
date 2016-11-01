@@ -22,9 +22,11 @@ public class Practice_Auton extends LinearOpMode {
 
         MecanumDriveTrain wheels = new MecanumDriveTrain("frontleft", "frontright", "backleft", "backright", gyro, this);
 
+        gyro.calibrate();
+
         waitForStart();
 
-        wheels.gyroTurn(25, 90, this);
+        wheels.turnWithGyro(90, .25, TurnDirection.LEFT, true, gyro, this);
         //wheels.turnUsingGyro(90, 40, TurnDirection.RIGHT, true, gyro, this);
     }
 }
