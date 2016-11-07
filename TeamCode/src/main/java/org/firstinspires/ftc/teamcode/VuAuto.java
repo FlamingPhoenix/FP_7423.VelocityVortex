@@ -98,8 +98,8 @@ public class VuAuto extends LinearOpMode {
             if (pos != null) {
                 VectorF translation = pos.getTranslation();
 
-                float x = translation.get(0) * -1f; //phone is sitting up (portrait), distance from the object.
-                float y = translation.get(2) * -1f; //phone is setting up, z is y and reverse (portrait) distance
+                float x = translation.get(0) * -1f; //phone is sitting down (portrait), x is reverse.
+                float y = translation.get(2) * -1f; //phone is setting down, z is y and reverse (portrait) distance
                 float z = translation.get(1); //vertical
 
                 float newY = (float) Math.sqrt((Math.pow(x, 2) + Math.pow(y, 2))); //distance of the object on the same plain as the phone
