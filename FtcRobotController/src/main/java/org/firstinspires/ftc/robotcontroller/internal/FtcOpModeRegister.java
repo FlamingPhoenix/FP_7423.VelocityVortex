@@ -35,11 +35,7 @@ import com.google.blocks.ftcrobotcontroller.runtime.BlocksOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.OpModeManager;
 import com.qualcomm.robotcore.eventloop.opmode.OpModeRegister;
 import com.qualcomm.robotcore.eventloop.opmode.AnnotatedOpModeRegistrar;
-
-import org.firstinspires.ftc.robotcontroller.FlamingPhoenix.Practice_Auton;
-import org.firstinspires.ftc.robotcontroller.FlamingPhoenix.ProgrammingBot;
 import org.firstinspires.ftc.robotcontroller.external.samples.ConceptNullOp;
-import org.firstinspires.ftc.robotcontroller.FlamingPhoenix.MecanumDriveTrain;
 
 /**
  * {@link FtcOpModeRegister} is responsible for registering opmodes for use in an FTC game.
@@ -81,9 +77,5 @@ public class FtcOpModeRegister implements OpModeRegister {
         /**
          * Any manual OpMode class registrations should go here.
          */
-        //manager.register("Mecannum", ProgrammingBot.class);
-        //manager.register("Practice_Auton", Practice_Auton.class);
-
-
     }
 }

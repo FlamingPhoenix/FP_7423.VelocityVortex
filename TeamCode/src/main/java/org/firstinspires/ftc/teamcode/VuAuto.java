@@ -48,8 +48,8 @@ public class VuAuto extends LinearOpMode {
         frontLeft = hardwareMap.dcMotor.get("frontleft");
         frontRight = hardwareMap.dcMotor.get("frontright");
 
-        Phone = hardwareMap.servo.get("phone");
-        Phone.setPosition(0.8);
+        //Phone = hardwareMap.servo.get("phone");
+        //Phone.setPosition(0.8);
 
         //Left Side motors should rotate opposite of right side motors
         frontLeft.setDirection(DcMotorSimple.Direction.REVERSE);
@@ -98,26 +98,26 @@ public class VuAuto extends LinearOpMode {
             if (pos != null) {
                 VectorF translation = pos.getTranslation();
 
-                float x = translation.get(0); //phone is sitting up (portrait), distance from the object.
+                float x = translation.get(0) * -1f; //phone is sitting up (portrait), distance from the object.
                 float y = translation.get(2) * -1f; //phone is setting up, z is y and reverse (portrait) distance
                 float z = translation.get(1); //vertical
 
                 float newY = (float) Math.sqrt((Math.pow(x, 2) + Math.pow(y, 2))); //distance of the object on the same plain as the phone
                 float d = (float) Math.toDegrees(Math.atan2((double)x, (double)y));  //get the angle
 
-                float lp; //left power
-                float rp; //right power
+                float flp = 0; //front left power
+                float frp = 0; //front right power
+                float blp = 0;
+                float brp = 0;
 
 
                 //The following is change the left and right power to turn right or left to follow the object
                 if (Math.abs(d) > 10) { //only move if the target is outside of plus/minus 10 degree angle
-                    lp = 0.15f * (d/Math.abs(d));
+                    flp = 0.4f * (d/Math.abs(d));
+                    blp = flp;
 
-                    rp = lp * -1;
-                }
-                else {
-                    lp = 0;
-                    rp = 0;
+                    frp = flp * -1;
+                    brp = flp * -1;
                 }
 
                 //The following is to adjust the power to keep a distance from the robot
@@ -129,42 +129,54 @@ public class VuAuto extends LinearOpMode {
                 DbgLog.msg("[Phoenix] Diff="+ Float.toString(diff));
                 if (Math.abs(diff) > 100) {//distance has changed by more than 100 millimeter (10 centermeter)
 
-                    float ap = diff * 0.0015f;
+                    float ap = diff * 0.0030f;
 
-                    if (ap > 0.2)
-                        ap = 0.2f;
-                    else if (ap < -0.2)
-                        ap = -0.2f;
+                    if (ap > 0.45)
+                        ap = 0.45f;
+                    else if (ap < -0.45)
+                        ap = -0.45f;
 
-                    lp = lp + ap; //move forward or background based on the change in distance
-                    rp = rp + ap;
+                    flp = flp + ap; //move forward or background based on the change in distance
+                    blp = blp - ap;
+                    frp = frp - ap;
+                    brp = brp + ap;
 
-                    DbgLog.msg("[Phoenix] lp-before-rationalize="+ Float.toString(lp));
-                    DbgLog.msg("[Phoenix] rp-before-rationalize="+ Float.toString(rp));
+                    DbgLog.msg("[Phoenix] flp-before-rationalize="+ Float.toString(flp));
+                    DbgLog.msg("[Phoenix] frp-before-rationalize="+ Float.toString(frp));
+                    DbgLog.msg("[Phoenix] blp-before-rationalize="+ Float.toString(blp));
+                    DbgLog.msg("[Phoenix] brp-before-rationalize="+ Float.toString(brp));
 
-                    if ((Math.abs(rp) > 1) || (Math.abs(lp) > 1)) { //either left power or right power are greater than 1, too much power
+                    if ((Math.abs(frp) > 1) || (Math.abs(flp) > 1) || (Math.abs(brp) > 1) || (Math.abs(blp) > 1)) { //either left power or right power are greater than 1, too much power
                         //The following is to adjust the power proportionally between left and right
-                        float lrp = (float) Math.max(Math.abs(lp), Math.abs(rp));
+                        float lrp = (float) myMax(Math.abs(flp), Math.abs(frp), Math.abs(brp), Math.abs(blp));
 
-                        lp = lp / lrp; //adjust the space so it will not be more han 1
-                        rp = rp / lrp;
+                        flp = flp / lrp; //adjust the space so it will not be more han 1
+                        frp = frp / lrp;
+                        blp = blp / lrp;
+                        brp = brp / lrp;
 
-                        DbgLog.msg("[Phoenix] lp-after-rationalize="+ Float.toString(lp));
-                        DbgLog.msg("[Phoenix] rp-after-rationalize="+ Float.toString(rp));
+                        DbgLog.msg("[Phoenix] flp-after-rationalize="+ Float.toString(flp));
+                        DbgLog.msg("[Phoenix] frp-after-rationalize="+ Float.toString(frp));
+                        DbgLog.msg("[Phoenix] blp-after-rationalize="+ Float.toString(blp));
+                        DbgLog.msg("[Phoenix] brp-after-rationalize="+ Float.toString(brp));
                     }
                 }
 
-                lp = Range.clip(lp, -1, 1);
-                rp = Range.clip(rp, -1, 1);
+                flp = Range.clip(flp, -1, 1);
+                frp = Range.clip(frp, -1, 1);
+                blp = Range.clip(blp, -1, 1);
+                brp = Range.clip(brp, -1, 1);
 
-                DbgLog.msg("[Phoenix] lp-after-range="+ Float.toString(lp));
-                DbgLog.msg("[Phoenix] rp-after-range="+ Float.toString(rp));
 
-                frontLeft.setPower(lp);
-                backLeft.setPower(lp);
-                frontRight.setPower(rp);
-                backRight.setPower(rp);
+                DbgLog.msg("[Phoenix] flp-after-range="+ Float.toString(flp));
+                DbgLog.msg("[Phoenix] frp-after-range="+ Float.toString(frp));
+                DbgLog.msg("[Phoenix] blp-after-range="+ Float.toString(blp));
+                DbgLog.msg("[Phoenix] brp-after-range="+ Float.toString(brp));
 
+                frontLeft.setPower(flp);
+                backLeft.setPower(blp);
+                frontRight.setPower(frp);
+                backRight.setPower(brp);
 
                 telemetry.addData("Translation - newY", newY);
                 telemetry.addData("Translation - x", x);
@@ -184,6 +196,21 @@ public class VuAuto extends LinearOpMode {
         }
     }
 
+    private float myMax(float v1, float v2, float v3, float v4) {
+        if ((v1 >= v2) && (v1 >= v3) && (v1 >= v4))
+            return v1;
+
+        if ((v2 >= v1) && (v2 >= v3) && (v2 >= v4))
+            return v2;
+
+
+        if ((v3 >= v1) && (v3 >= v2) && (v3 >= v4))
+            return v3;
+
+        return v4;
+    }
+
+    /*
     //get the phone's angle
     private int phoneAngle() {
 
@@ -203,4 +230,6 @@ public class VuAuto extends LinearOpMode {
         if (n >= 0.75)
             Phone.setPosition(n);
     }
+
+    */
 }

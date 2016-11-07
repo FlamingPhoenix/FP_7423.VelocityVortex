@@ -87,12 +87,12 @@ public class MecanumDriveTrain {
 
     private void mecanumDrive(float x1, float y1, float x2) {
         x1 = (float) scaleInput(x1);
-        y1 = (float) scaleInput(y1);
+        y1 = (float) scaleInput(y1) * -1;
 
-        float FL = y1 - x1 + x2;
-        float FR = y1 + x1 - x2;
-        float BL = y1 + x1 + x2;
-        float BR = y1 - x1 - x2;
+        float FL = y1 + x1 + x2;
+        float FR = y1 - x1 - x2;
+        float BL = y1 - x1 + x2;
+        float BR = y1 + x1 - x2;
 
         float mv = max(Math.abs(FL), Math.abs(FR), Math.abs(BL), Math.abs(BR));
         if (Math.abs(mv) > 1) {
