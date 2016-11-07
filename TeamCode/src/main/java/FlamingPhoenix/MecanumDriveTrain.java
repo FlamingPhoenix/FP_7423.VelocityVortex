@@ -41,7 +41,24 @@ public class MecanumDriveTrain {
         gyro = gyroscope;
 
         wheelDiameter = 4; //default is 4 inch, most of wheels we have used are 4 inch diamete;
-        encoderPPR = 1320; //default to Tetrix encoder;  AndyMark will have different values
+        //encoderPPR = 1320; //default to Tetrix encoder;  AndyMark will have different values
+        encoderPPR = 560;
+    }
+
+    public MecanumDriveTrain(String FrontLeftName, String FrontRightName, String BackLeftName, String BackRightName, OpMode OperatorMode) {
+        opMode = OperatorMode;
+
+        frontLeft = opMode.hardwareMap.dcMotor.get(FrontLeftName);
+        frontRight = opMode.hardwareMap.dcMotor.get(FrontRightName);
+        backLeft = opMode.hardwareMap.dcMotor.get(BackLeftName);
+        backRight = opMode.hardwareMap.dcMotor.get(BackRightName);
+
+        frontLeft.setDirection(DcMotorSimple.Direction.REVERSE);
+        backLeft.setDirection(DcMotorSimple.Direction.REVERSE);
+
+        wheelDiameter = 4; //default is 4 inch, most of wheels we have used are 4 inch diamete;
+        //encoderPPR = 1320; //default to Tetrix encoder;  AndyMark will have different values
+        encoderPPR = 560;
     }
 
     //
@@ -67,43 +84,15 @@ public class MecanumDriveTrain {
         mecanumDrive(-gamePad.left_stick_x, gamePad.left_stick_y, gamePad.right_stick_x);
     }
 
-    public void Drive(int d, int power, LinearOpMode opMode) throws InterruptedException {
-        backLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        backLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        opMode.idle();
-        backLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-
-        int pulseNeeded = (int) Math.round((encoderPPR * d) / (wheelDiameter * Math.PI));
-
-        while (backLeft.getCurrentPosition() < pulseNeeded) {
-            opMode.telemetry.addData("Encoder: ", backLeft.getCurrentPosition());
-            frontLeft.setPower(power);
-            frontRight.setPower(power);
-            backRight.setPower(power);
-            backLeft.setPower(power);
-        }
-    }
-
-    public void Drive() {
-        backLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-
-
-        while (backLeft.getCurrentPosition() < 1051) {
-            frontLeft.setPower(75);
-            frontRight.setPower(75);
-            backRight.setPower(75);
-            backLeft.setPower(75);
-        }
-    }
 
     private void mecanumDrive(float x1, float y1, float x2) {
         x1 = (float) scaleInput(x1);
         y1 = (float) scaleInput(y1);
 
-        float FL = y1 + x1 + x2;
-        float FR = y1 - x1 - x2;
-        float BL = y1 - x1 + x2;
-        float BR = y1 + x1 - x2;
+        float FL = y1 - x1 + x2;
+        float FR = y1 + x1 - x2;
+        float BL = y1 + x1 + x2;
+        float BR = y1 - x1 - x2;
 
         float mv = max(Math.abs(FL), Math.abs(FR), Math.abs(BL), Math.abs(BR));
         if (Math.abs(mv) > 1) {
@@ -129,6 +118,23 @@ public class MecanumDriveTrain {
     //
     //
     //Autonomous methods
+
+    public void Drive(int d, int power, LinearOpMode opMode) throws InterruptedException {
+        backLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        backLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        opMode.idle();
+        backLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
+        int pulseNeeded = (int) Math.round((encoderPPR * d) / (wheelDiameter * Math.PI));
+
+        while (backLeft.getCurrentPosition() < pulseNeeded) {
+            opMode.telemetry.addData("Encoder: ", backLeft.getCurrentPosition());
+            frontLeft.setPower(power);
+            frontRight.setPower(power);
+            backRight.setPower(power);
+            backLeft.setPower(power);
+        }
+    }
 
     public void turnUsingGyro(int degree, double power, TurnDirection direction, boolean bothWheels, ModernRoboticsI2cGyro gyro, LinearOpMode opModeInstance) throws InterruptedException {
         while (gyro.isCalibrating())
@@ -324,6 +330,36 @@ public class MecanumDriveTrain {
         }
 
         return m;
+    }
+
+    public void strafe(int distance, double power, TurnDirection direction, LinearOpMode opMode) throws InterruptedException {
+        backLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        backLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        opMode.idle();
+        backLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
+        int pulseNeeded = (int) Math.round((encoderPPR * distance) / (wheelDiameter * Math.PI));
+
+        pulseNeeded *= .45; //the distance is around .45 the normal
+
+        while((frontRight.getCurrentPosition() < pulseNeeded) && opMode.opModeIsActive()) {
+            if (direction == TurnDirection.LEFT) {
+                frontLeft.setPower(power * -1);
+                backLeft.setPower(power);
+                frontRight.setPower(power);
+                backRight.setPower(power * -1);
+            } else {
+                frontLeft.setPower(power);
+                backLeft.setPower(power * -1);
+                frontRight.setPower(power * -1);
+                backRight.setPower(power);
+            }
+        }
+
+        frontLeft.setPower(0  );
+        frontRight.setPower(0);
+        backRight.setPower(0);
+        backLeft.setPower(0);
     }
 }
 
