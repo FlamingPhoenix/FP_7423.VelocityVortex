@@ -361,5 +361,48 @@ public class MecanumDriveTrain {
         backRight.setPower(0);
         backLeft.setPower(0);
     }
+
+    public void strafe(int distance, double power, TurnDirection direction, ModernRoboticsI2cGyro gyroscope,LinearOpMode opMode) throws InterruptedException {
+        while (gyroscope .isCalibrating())
+            Thread.sleep(50);
+
+        backLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        backLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        opMode.idle();
+        backLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
+        int pulseNeeded = (int) Math.round((encoderPPR * distance) / (wheelDiameter * Math.PI));
+
+        pulseNeeded *= .45; //the distance is around .45 the normal
+
+        while((frontRight.getCurrentPosition() < pulseNeeded) && opMode.opModeIsActive()) {
+            if (direction == TurnDirection.LEFT) {
+                if(gyroscope.getHeading() >= 0) {
+                    frontLeft.setPower(power * -1);
+                    backLeft.setPower(power);
+                    frontRight.setPower(power);
+                    backRight.setPower(power * -1);
+                }
+            } else {
+                if (gyroscope.getIntegratedZValue() <= 0) {
+                    frontLeft.setPower(power);
+                    backLeft.setPower(power * -1);
+                    frontRight.setPower((power * -1) - .025 * (gyroscope.getIntegratedZValue()));
+                    opMode.telemetry.addData("power to wheel ", (power * -1) - .04 * (gyroscope.getIntegratedZValue()));
+                    opMode.telemetry.update();
+                    backRight.setPower(power);
+                }
+            }
+
+            DbgLog.msg("[Phoenix] Gyro heading" + gyroscope.getIntegratedZValue());
+            opMode.telemetry.addData("gyro ", gyroscope.getIntegratedZValue());
+            opMode.telemetry.update();
+        }
+
+        frontLeft.setPower(0);
+        frontRight.setPower(0);
+        backRight.setPower(0);
+        backLeft.setPower(0);
+    }
 }
 

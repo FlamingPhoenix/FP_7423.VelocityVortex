@@ -18,7 +18,7 @@ public class Practice_Auton extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
 
-        //ModernRoboticsI2cGyro gyro = (ModernRoboticsI2cGyro) hardwareMap.gyroSensor.get("gyro");
+        ModernRoboticsI2cGyro gyro = (ModernRoboticsI2cGyro) hardwareMap.gyroSensor.get("gyro");
 
         MecanumDriveTrain wheels = new MecanumDriveTrain("frontleft", "frontright", "backleft", "backright", this);
 
@@ -28,6 +28,6 @@ public class Practice_Auton extends LinearOpMode {
 
         //wheels.turnWithGyro(90, .25, TurnDirection.LEFT, true, gyro, this);
         //wheels.turnUsingGyro(90, 40, TurnDirection.RIGHT, true, gyro, this);
-        wheels.strafe(10, .25, TurnDirection.LEFT, this);
+        wheels.strafe(10, .25, TurnDirection.LEFT, gyro, this);
     }
 }
