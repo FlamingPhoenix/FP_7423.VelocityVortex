@@ -363,7 +363,8 @@ public class MecanumDriveTrain {
     }
 
     public void strafe(int distance, double power, TurnDirection direction, ModernRoboticsI2cGyro gyroscope,LinearOpMode opMode) throws InterruptedException {
-        while (gyroscope .isCalibrating())
+        gyroscope.resetZAxisIntegrator();
+        while (gyroscope.isCalibrating())
             Thread.sleep(50);
 
         backLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -375,10 +376,10 @@ public class MecanumDriveTrain {
 
         pulseNeeded *= .45; //the distance is around .45 the normal
 
-        while((frontRight.getCurrentPosition() < pulseNeeded) && opMode.opModeIsActive()) {
+        while(opMode.opModeIsActive()) {
             if (direction == TurnDirection.LEFT) {
                 if(gyroscope.getHeading() >= 0) {
-                    frontLeft.setPower(power * -1);
+                    frontLeft.setPower((power * -1) + .025 * (Math.abs(gyroscope.getIntegratedZValue())));
                     backLeft.setPower(power);
                     frontRight.setPower(power);
                     backRight.setPower(power * -1);
@@ -387,12 +388,15 @@ public class MecanumDriveTrain {
                 if (gyroscope.getIntegratedZValue() <= 0) {
                     frontLeft.setPower(power);
                     backLeft.setPower(power * -1);
-                    frontRight.setPower((power * -1) - .025 * (gyroscope.getIntegratedZValue()));
-                    opMode.telemetry.addData("power to wheel ", (power * -1) - .04 * (gyroscope.getIntegratedZValue()));
-                    opMode.telemetry.update();
+                    frontRight.setPower((power * -1) - .025 * (Math.abs(gyroscope.getIntegratedZValue())));
+                    //opMode.telemetry.addData("power to wheel ", (power * -1) - .04 * (gyroscope.getIntegratedZValue()));
+                    //opMode.telemetry.update();
                     backRight.setPower(power);
                 }
             }
+
+            DbgLog.msg("adb: " + gyroscope.getIntegratedZValue());
+            DbgLog.msg("power: " + Double.toString((power * -1) + .025 * (Math.abs(gyroscope.getIntegratedZValue()))));
 
             DbgLog.msg("[Phoenix] Gyro heading" + gyroscope.getIntegratedZValue());
             opMode.telemetry.addData("gyro ", gyroscope.getIntegratedZValue());
