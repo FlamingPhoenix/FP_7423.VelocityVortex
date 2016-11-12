@@ -119,7 +119,7 @@ public class MecanumDriveTrain {
     //
     //Autonomous methods
 
-    public void Drive(int d, int power, LinearOpMode opMode) throws InterruptedException {
+    public void Drive(int d, double power, LinearOpMode opMode) throws InterruptedException {
         backLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         backLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         opMode.idle();
@@ -127,13 +127,21 @@ public class MecanumDriveTrain {
 
         int pulseNeeded = (int) Math.round((encoderPPR * d) / (wheelDiameter * Math.PI));
 
-        while (backLeft.getCurrentPosition() < pulseNeeded) {
+        while ((backLeft.getCurrentPosition() < pulseNeeded) && opMode.opModeIsActive()) {
             opMode.telemetry.addData("Encoder: ", backLeft.getCurrentPosition());
             frontLeft.setPower(power);
             frontRight.setPower(power);
             backRight.setPower(power);
             backLeft.setPower(power);
+            DbgLog.msg("[Phoenix] Back Left encoder: " + backLeft.getCurrentPosition());
+            DbgLog.msg("[Phoenix] Back Right encoder: " + backRight.getCurrentPosition());
         }
+
+        frontLeft.setPower(0);
+        frontRight.setPower(0);
+        backRight.setPower(0);
+        backLeft.setPower(0);
+
     }
 
     public void turnUsingGyro(int degree, double power, TurnDirection direction, boolean bothWheels, ModernRoboticsI2cGyro gyro, LinearOpMode opModeInstance) throws InterruptedException {
@@ -321,6 +329,7 @@ public class MecanumDriveTrain {
         return dScale;
     }
 
+    //get the maximum value among the values in the input
     private float max(float... args) {
         float m = 0;
 
@@ -331,6 +340,18 @@ public class MecanumDriveTrain {
 
         return m;
     }
+    //get the maximum value among the values in the input
+    private double max(double... args) {
+        double m = 0;
+
+        for (int i = 0; i < args.length; i++) {
+            if (args[i] > m)
+                m = args[i];
+        }
+
+        return m;
+    }
+
 
     public void strafe(int distance, double power, TurnDirection direction, LinearOpMode opMode) throws InterruptedException {
         backLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -363,9 +384,8 @@ public class MecanumDriveTrain {
     }
 
     public void strafe(int distance, double power, TurnDirection direction, ModernRoboticsI2cGyro gyroscope,LinearOpMode opMode) throws InterruptedException {
-        gyroscope.resetZAxisIntegrator();
-        while (gyroscope.isCalibrating())
-            Thread.sleep(50);
+        int startingDirection = gyroscope.getIntegratedZValue();
+        DbgLog.msg("[Phoenix] startingDirection: " + startingDirection);
 
         backLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         backLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -374,33 +394,72 @@ public class MecanumDriveTrain {
 
         int pulseNeeded = (int) Math.round((encoderPPR * distance) / (wheelDiameter * Math.PI));
 
-        pulseNeeded *= .45; //the distance is around .45 the normal
+        pulseNeeded /= .65; //the distance is around .45 the normal
 
-        while(opMode.opModeIsActive()) {
-            if (direction == TurnDirection.LEFT) {
-                if(gyroscope.getHeading() >= 0) {
-                    frontLeft.setPower((power * -1) + .025 * (Math.abs(gyroscope.getIntegratedZValue())));
-                    backLeft.setPower(power);
-                    frontRight.setPower(power);
-                    backRight.setPower(power * -1);
-                }
-            } else {
-                if (gyroscope.getIntegratedZValue() <= 0) {
-                    frontLeft.setPower(power);
-                    backLeft.setPower(power * -1);
-                    frontRight.setPower((power * -1) - .025 * (Math.abs(gyroscope.getIntegratedZValue())));
-                    //opMode.telemetry.addData("power to wheel ", (power * -1) - .04 * (gyroscope.getIntegratedZValue()));
-                    //opMode.telemetry.update();
-                    backRight.setPower(power);
-                }
+        while(opMode.opModeIsActive() && Math.abs(backLeft.getCurrentPosition()) < pulseNeeded) {
+            int currentDirection = gyroscope.getIntegratedZValue(); //currentDirection will be updated in the while loop to track the robot's direction.
+            int changeInDirection = currentDirection - startingDirection;  //track how much direction has changed. Positive value means going left, negative means going to the right
+
+            double frontLeftPower = power; //we need to determine if we need to adjust the left front power to adjust for direction to the right
+            double backLeftPower = power; //this is to increase the back left if we need to go left
+            double frontRightPower = power; //need to increase this power if need to move the left
+            double backRightPower = power; //need to increase this power if need to move the right
+
+            double adjustmentUnit = power / 15;
+            DbgLog.msg("[Phoenix] adjustmentUnit: " + adjustmentUnit);
+
+            double powerAdjustment = 0;
+            if (Math.abs(changeInDirection) > 1) //direction has change more than 2 degree, let's calculate how much power we need to adjust
+                powerAdjustment = ((double) Math.abs(changeInDirection)) * adjustmentUnit;
+
+                if (direction == TurnDirection.LEFT) {
+                    if (changeInDirection > 1) {//direction has moved to the left more than 2 degree, let's adjust
+                        frontLeftPower = frontLeftPower + powerAdjustment * 4;
+                        frontRightPower = frontRightPower + powerAdjustment * 4;
+                    }
+                    else if (changeInDirection < -1) { //direction has move to the right more than 2 degree
+                        backLeftPower = backLeftPower + powerAdjustment;
+                        backRightPower = backRightPower + powerAdjustment;
+                    }
+
+                    backLeftPower = backLeftPower * -1;  //strafing left, the power of back left is oposite of front left
+                    frontRightPower = frontRightPower * -1;  //strafing left, the power of the front Right is opposite of back right
+                } else {
+                    if (changeInDirection > 1) { //direction has moved to the left more than 2 degree, let's adjust
+                        backRightPower = backRightPower + powerAdjustment;
+                        backLeftPower = backLeftPower + powerAdjustment;
+                    }
+                    else if (changeInDirection < -1) {//direction has move to the right more than 2 degree
+                        frontRightPower = frontRightPower + powerAdjustment;
+                        frontLeftPower = frontLeftPower + powerAdjustment;
+                    }
+
+                frontLeftPower = frontLeftPower * -1;
+                backRightPower = backRightPower * -1;
             }
 
-            DbgLog.msg("adb: " + gyroscope.getIntegratedZValue());
-            DbgLog.msg("power: " + Double.toString((power * -1) + .025 * (Math.abs(gyroscope.getIntegratedZValue()))));
+            //if any of wheel is higher than 1.0, we need to reduce the power of all wheels proportionally.
+            double mv = max(Math.abs(frontLeftPower), Math.abs(frontRightPower), Math.abs(backRightPower), Math.abs(backLeftPower));
+            if (mv > 1) {
+                frontLeftPower = frontLeftPower * Math.abs(frontLeftPower / mv);
+                frontRightPower = frontRightPower * Math.abs(frontRightPower /mv);
+                backLeftPower = backLeftPower * Math.abs(backLeftPower /mv);
+                backRightPower = backRightPower * Math.abs(backRightPower /mv);
+            }
 
-            DbgLog.msg("[Phoenix] Gyro heading" + gyroscope.getIntegratedZValue());
-            opMode.telemetry.addData("gyro ", gyroscope.getIntegratedZValue());
+            frontLeft.setPower(frontLeftPower);
+            backLeft.setPower(backLeftPower);
+            frontRight.setPower(frontRightPower);
+            backRight.setPower(backRightPower);
+
+            DbgLog.msg("[Phoenix] currentDirection: " + currentDirection);
+            DbgLog.msg("[Phoenix] changeInDirection: " + changeInDirection);
+
+            opMode.telemetry.addData("currentDirection ", currentDirection);
+            opMode.telemetry.addData("changeInDirection ", changeInDirection);
             opMode.telemetry.update();
+
+            opMode.idle();
         }
 
         frontLeft.setPower(0);
