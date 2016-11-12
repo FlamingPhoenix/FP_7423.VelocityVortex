@@ -9,7 +9,12 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.GyroSensor;
+import com.qualcomm.robotcore.hardware.OpticalDistanceSensor;
 import com.qualcomm.robotcore.util.Range;
+
+import org.firstinspires.ftc.robotcore.external.matrices.OpenGLMatrix;
+import org.firstinspires.ftc.robotcore.external.matrices.VectorF;
+import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackableDefaultListener;
 
 //Chassis
 @Disabled
@@ -119,7 +124,7 @@ public class MecanumDriveTrain {
     //
     //Autonomous methods
 
-    public void Drive(int d, double power, LinearOpMode opMode) throws InterruptedException {
+    public void drive(int d, double power, LinearOpMode opMode) throws InterruptedException {
         backLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         backLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         opMode.idle();
@@ -377,7 +382,7 @@ public class MecanumDriveTrain {
             }
         }
 
-        frontLeft.setPower(0  );
+        frontLeft.setPower(0);
         frontRight.setPower(0);
         backRight.setPower(0);
         backLeft.setPower(0);
@@ -460,6 +465,120 @@ public class MecanumDriveTrain {
             opMode.telemetry.update();
 
             opMode.idle();
+        }
+
+        frontLeft.setPower(0);
+        frontRight.setPower(0);
+        backRight.setPower(0);
+        backLeft.setPower(0);
+    }
+
+    public void strafe(int distance, double power, TurnDirection direction, VuforiaTrackableDefaultListener image, LinearOpMode opMode) throws InterruptedException {
+
+        backLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        backLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        opMode.idle();
+        backLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
+        int pulseNeeded = (int) Math.round((encoderPPR * distance) / (wheelDiameter * Math.PI));
+
+        pulseNeeded /= .65; //the distance is around .45 the normal
+        double adjustmentUnit = power / 20;
+        DbgLog.msg("[Phoenix] adjustmentUnit: " + adjustmentUnit);
+
+        OpenGLMatrix pos = image.getPose();
+        VectorF translation;
+        double x = 0;
+        double y = distance;
+
+        while(opMode.opModeIsActive() && y >= (double) distance) {
+            pos = image.getPose();
+
+            if(pos != null) {
+                translation = pos.getTranslation();
+
+                x = translation.get(0) * -1;
+                y = translation.get(2) * -1;
+                DbgLog.msg("[Phoenix] y: " + y);
+
+                double angle = Math.toDegrees(Math.atan2(x, y));
+                DbgLog.msg("[Phoenix] angle: " + angle);
+                opMode.telemetry.addData("angle ", angle);
+
+                double frontLeftPower = power; //we need to determine if we need to adjust the left front power to adjust for direction to the right
+                double backLeftPower = power; //this is to increase the back left if we need to go left
+                double frontRightPower = power; //need to increase this power if need to move the left
+                double backRightPower = power; //need to increase this power if need to move the right
+
+                double powerAdjustment = 0;
+                if (Math.abs(angle) > 1) //direction has change more than 1 degree, let's calculate how much power we need to adjust
+                    powerAdjustment = (Math.abs(angle)) * adjustmentUnit;
+
+                if (direction == TurnDirection.LEFT) {
+                    if (angle > 1) {//direction has moved to the left more than 1 degree, let's adjust
+                        frontLeftPower = frontLeftPower + powerAdjustment * 3;
+                        frontRightPower = frontRightPower + powerAdjustment * 3;
+                    }
+                    else if (angle < -1) { //direction has move to the right more than 1 degree
+                        backLeftPower = backLeftPower + powerAdjustment;
+                        backRightPower = backRightPower + powerAdjustment;
+                    }
+
+                    backLeftPower = backLeftPower * -1;  //strafing left, the power of back left is oposite of front left
+                    frontRightPower = frontRightPower * -1;  //strafing left, the power of the front Right is opposite of back right
+                }
+                else {
+                    if (angle < -1) { //direction has moved to the left more than 2 degree, let's adjust
+                        backRightPower = backRightPower + powerAdjustment;
+                        backLeftPower = backLeftPower + powerAdjustment;
+                    }
+                    else if (angle > 1) {//direction has move to the right more than 2 degree
+                        frontRightPower = frontRightPower + powerAdjustment;
+                        frontLeftPower = frontLeftPower + powerAdjustment;
+                    }
+
+                    frontLeftPower = frontLeftPower * -1;
+                    backRightPower = backRightPower * -1;
+                }
+
+                //if any of wheel is higher than 1.0, we need to reduce the power of all wheels proportionally.
+                double mv = max(Math.abs(frontLeftPower), Math.abs(frontRightPower), Math.abs(backRightPower), Math.abs(backLeftPower));
+                if (mv > 1) {
+                    frontLeftPower = frontLeftPower * Math.abs(frontLeftPower / mv);
+                    frontRightPower = frontRightPower * Math.abs(frontRightPower / mv);
+                    backLeftPower = backLeftPower * Math.abs(backLeftPower / mv);
+                    backRightPower = backRightPower * Math.abs(backRightPower / mv);
+                }
+
+                frontLeft.setPower(frontLeftPower);
+                backLeft.setPower(backLeftPower);
+                frontRight.setPower(frontRightPower);
+                backRight.setPower(backRightPower);
+            }
+
+            opMode.idle();
+        }
+
+
+        frontLeft.setPower(0);
+        frontRight.setPower(0);
+        backRight.setPower(0);
+        backLeft.setPower(0);
+    }
+
+    public void driveUntilWhite(double power, OpticalDistanceSensor opt, LinearOpMode opMode) {
+        opt.enableLed(true);
+
+        double sensorValue = opt.getLightDetected();
+
+        while(sensorValue <= 0 && opMode.opModeIsActive()) {
+            frontLeft.setPower(power);
+            frontRight.setPower(power);
+            backRight.setPower(power);
+            backLeft.setPower(power);
+
+            sensorValue = opt.getLightDetected();
+            DbgLog.msg("[Phoenix] opt val: " + sensorValue);
         }
 
         frontLeft.setPower(0);
