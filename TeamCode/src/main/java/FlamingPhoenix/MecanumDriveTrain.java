@@ -132,7 +132,7 @@ public class MecanumDriveTrain {
 
         int pulseNeeded = (int) Math.round((encoderPPR * d) / (wheelDiameter * Math.PI));
 
-        while ((backLeft.getCurrentPosition() < pulseNeeded) && opMode.opModeIsActive()) {
+        while ((Math.abs(backLeft.getCurrentPosition()) < pulseNeeded) && opMode.opModeIsActive()) {
             opMode.telemetry.addData("Encoder: ", backLeft.getCurrentPosition());
             frontLeft.setPower(power);
             frontRight.setPower(power);
