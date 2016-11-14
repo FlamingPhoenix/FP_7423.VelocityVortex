@@ -66,9 +66,7 @@ public class MecanumDriveTrain {
         encoderPPR = 560;
     }
 
-    //
-    //
-    //
+
     //TeleOp Methods
 
     /*
@@ -86,7 +84,28 @@ public class MecanumDriveTrain {
      * @param gamePad
      */
     public void Drive(Gamepad gamePad) {
-        mecanumDrive(-gamePad.left_stick_x, gamePad.left_stick_y, gamePad.right_stick_x);
+
+        float x1;
+        float y1;
+        float x2;
+
+        if ((gamePad.right_trigger > 0.5) && (gamePad.left_trigger > 0.5))  //both trigger are pressed, let's slow down a lot more
+        {
+            x1 = gamePad.left_stick_x * 0.25f;
+            y1 = gamePad.left_stick_y * 0.25f;
+            x2 = gamePad.right_stick_x * 0.25f;
+        } else if ((gamePad.right_trigger > 0.5) || (gamePad.left_trigger > 0.5)) { //only one of the trigger is pressed, let's slow down by 50%
+            x1 = gamePad.left_stick_x * 0.5f;
+            y1 = gamePad.left_stick_y * 0.5f;
+            x2 = gamePad.right_stick_x * 0.5f;
+        }
+        else {
+            x1 = gamePad.left_stick_x;
+            y1 = gamePad.left_stick_y;
+            x2 = gamePad.right_stick_x;
+        }
+
+        mecanumDrive(x1, y1, x2);
     }
 
 
@@ -132,7 +151,7 @@ public class MecanumDriveTrain {
 
         int pulseNeeded = (int) Math.round((encoderPPR * d) / (wheelDiameter * Math.PI));
 
-        while ((backLeft.getCurrentPosition() < pulseNeeded) && opMode.opModeIsActive()) {
+        while ((Math.abs(backLeft.getCurrentPosition()) < pulseNeeded) && opMode.opModeIsActive()) {
             opMode.telemetry.addData("Encoder: ", backLeft.getCurrentPosition());
             frontLeft.setPower(power);
             frontRight.setPower(power);
@@ -146,8 +165,49 @@ public class MecanumDriveTrain {
         frontRight.setPower(0);
         backRight.setPower(0);
         backLeft.setPower(0);
-
     }
+
+    public void drive(int d, Direction direction, int speed, LinearOpMode opMode) throws InterruptedException {
+        backLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        backLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        backRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        backRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        frontLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        frontLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        frontRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        frontRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        opMode.idle();
+        backLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        backRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        frontLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        frontRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+        backLeft.setMaxSpeed(speed);
+        backRight.setMaxSpeed(speed);
+        frontLeft.setMaxSpeed(speed);
+        frontRight.setMaxSpeed(speed);
+
+        int pulseNeeded = (int) Math.round((encoderPPR * d) / (wheelDiameter * Math.PI));
+        double power = 1;
+        if (direction == Direction.BACKWARD)
+            power = -1;
+
+        while ((Math.abs(backLeft.getCurrentPosition()) < pulseNeeded) && opMode.opModeIsActive()) {
+            opMode.telemetry.addData("Encoder: ", backLeft.getCurrentPosition());
+            frontLeft.setPower(power);
+            frontRight.setPower(power);
+            backRight.setPower(power);
+            backLeft.setPower(power);
+            DbgLog.msg("[Phoenix] Back Left encoder: " + backLeft.getCurrentPosition());
+            DbgLog.msg("[Phoenix] Back Right encoder: " + backRight.getCurrentPosition());
+        }
+
+        frontLeft.setPower(0);
+        frontRight.setPower(0);
+        backRight.setPower(0);
+        backLeft.setPower(0);
+    }
+
 
     public void turnUsingGyro(int degree, double power, TurnDirection direction, boolean bothWheels, ModernRoboticsI2cGyro gyro, LinearOpMode opModeInstance) throws InterruptedException {
         while (gyro.isCalibrating())
