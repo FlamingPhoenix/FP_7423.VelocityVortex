@@ -10,6 +10,7 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.GyroSensor;
 import com.qualcomm.robotcore.hardware.OpticalDistanceSensor;
+import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.robotcore.external.matrices.OpenGLMatrix;
@@ -31,6 +32,7 @@ public class MecanumDriveTrain {
 
     private float wheelDiameter;  //wheel diameter in inch
     private int encoderPPR; //wheel encoder PPR (Pulse per Rotation)
+    private ElapsedTime runtime = new ElapsedTime();
 
     public MecanumDriveTrain(String FrontLeftName, String FrontRightName, String BackLeftName, String BackRightName, ModernRoboticsI2cGyro gyroscope, OpMode OperatorMode) {
         opMode = OperatorMode;
@@ -167,6 +169,64 @@ public class MecanumDriveTrain {
         backLeft.setPower(0);
     }
 
+    //Drive by using PIDControl - Run to Position
+    public void drive(int d, Direction direction, double power, int timeout, LinearOpMode opMode) throws InterruptedException {
+        backLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        backLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        backRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        backRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        frontLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        frontLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        frontRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        frontRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        opMode.idle();
+
+        backLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        backRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        frontLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        frontRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+        int pulseNeeded = (int) Math.round((encoderPPR * d) / (wheelDiameter * Math.PI));
+        if (direction == Direction.BACKWARD)
+            pulseNeeded = pulseNeeded * -1;
+
+        backLeft.setTargetPosition(pulseNeeded);
+        backRight.setTargetPosition(pulseNeeded);
+        frontLeft.setTargetPosition(pulseNeeded);
+        frontRight.setTargetPosition(pulseNeeded);
+
+        DbgLog.msg("[Phoenix] pulseNeeded: " + pulseNeeded);
+
+        power = Math.abs(power);
+
+        backLeft.setPower(power);
+        backRight.setPower(power);
+        frontLeft.setPower(power);
+        frontRight.setPower(power);
+
+        runtime.reset();
+        while ((opMode.opModeIsActive()) && (runtime.seconds() <= timeout) && (backLeft.isBusy()) && (backRight.isBusy()) && (frontLeft.isBusy()) && (frontRight.isBusy())) {
+            opMode.telemetry.addData("running", "");
+            opMode.telemetry.update();
+        }
+
+        backLeft.setPower(0);
+        backRight.setPower(0);
+        frontLeft.setPower(0);
+        frontRight.setPower(0);
+
+        DbgLog.msg("[Phoenix] backLeft" + backLeft.getCurrentPosition());
+        DbgLog.msg("[Phoenix] backRight" + backRight.getCurrentPosition());
+        DbgLog.msg("[Phoenix] frontLeft" + frontLeft.getCurrentPosition());
+        DbgLog.msg("[Phoenix] frontRight" + frontRight.getCurrentPosition());
+
+        backLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        backRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        frontLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        frontRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+    }
+
+    //Drive by controlling the motor rotation speed using encoder
     public void drive(int d, Direction direction, int speed, LinearOpMode opMode) throws InterruptedException {
         backLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         backLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
