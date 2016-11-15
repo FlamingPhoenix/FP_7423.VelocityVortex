@@ -476,8 +476,19 @@ public class MecanumDriveTrain {
 
         return m;
     }
+    //get the maximum value among the values in the input
+    private int max(int... args) {
+        int m = 0;
 
+        for (int i = 0; i < args.length; i++) {
+            if (args[i] > m)
+                m = args[i];
+        }
 
+        return m;
+    }
+
+    //strafe by setting power
     public void strafe(int distance, double power, TurnDirection direction, LinearOpMode opMode) throws InterruptedException {
         backLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         backLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -486,9 +497,9 @@ public class MecanumDriveTrain {
 
         int pulseNeeded = (int) Math.round((encoderPPR * distance) / (wheelDiameter * Math.PI));
 
-        pulseNeeded *= .45; //the distance is around .45 the normal
+        pulseNeeded = (int) Math.round((double) pulseNeeded/0.5); //the distance is around .65 the normal
 
-        while((frontRight.getCurrentPosition() < pulseNeeded) && opMode.opModeIsActive()) {
+        while(((Math.abs(backLeft.getCurrentPosition())) < pulseNeeded) && opMode.opModeIsActive()) {
             if (direction == TurnDirection.LEFT) {
                 frontLeft.setPower(power * -1);
                 backLeft.setPower(power);
@@ -508,6 +519,52 @@ public class MecanumDriveTrain {
         backLeft.setPower(0);
     }
 
+    //strafe by using the wheel rotation speed
+    public void strafe(int distance, int speed, TurnDirection direction, LinearOpMode opMode) throws InterruptedException {
+        backLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        backLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        backRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        backRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        frontLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        frontLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        frontRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        frontRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        opMode.idle();
+        backLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        backRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        frontLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        frontRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+        backLeft.setMaxSpeed(speed);
+        backRight.setMaxSpeed(speed);
+        frontLeft.setMaxSpeed(speed);
+        frontRight.setMaxSpeed(speed);
+
+        int pulseNeeded = (int) Math.round((encoderPPR * distance) / (wheelDiameter * Math.PI));
+
+        pulseNeeded = (int) Math.round((double) pulseNeeded/0.5); //the distance is around .65 the normal
+
+        while(((Math.abs(backLeft.getCurrentPosition())) < pulseNeeded) && opMode.opModeIsActive()) {
+            if (direction == TurnDirection.LEFT) {
+                frontLeft.setPower(-1);
+                backLeft.setPower(1);
+                frontRight.setPower(1);
+                backRight.setPower(-1);
+            } else {
+                frontLeft.setPower(1);
+                backLeft.setPower(-1);
+                frontRight.setPower(-1);
+                backRight.setPower(1);
+            }
+        }
+
+        frontLeft.setPower(0);
+        frontRight.setPower(0);
+        backRight.setPower(0);
+        backLeft.setPower(0);
+    }
+
+
     public void strafe(int distance, double power, TurnDirection direction, ModernRoboticsI2cGyro gyroscope,LinearOpMode opMode) throws InterruptedException {
         int startingDirection = gyroscope.getIntegratedZValue();
         DbgLog.msg("[Phoenix] startingDirection: " + startingDirection);
@@ -519,7 +576,7 @@ public class MecanumDriveTrain {
 
         int pulseNeeded = (int) Math.round((encoderPPR * distance) / (wheelDiameter * Math.PI));
 
-        pulseNeeded /= .65; //the distance is around .45 the normal
+        pulseNeeded /= .5; //the distance is around .45 the normal
 
         while(opMode.opModeIsActive() && Math.abs(backLeft.getCurrentPosition()) < pulseNeeded) {
             int currentDirection = gyroscope.getIntegratedZValue(); //currentDirection will be updated in the while loop to track the robot's direction.
@@ -537,27 +594,27 @@ public class MecanumDriveTrain {
             if (Math.abs(changeInDirection) > 1) //direction has change more than 2 degree, let's calculate how much power we need to adjust
                 powerAdjustment = ((double) Math.abs(changeInDirection)) * adjustmentUnit;
 
-                if (direction == TurnDirection.LEFT) {
-                    if (changeInDirection > 1) {//direction has moved to the left more than 2 degree, let's adjust
-                        frontLeftPower = frontLeftPower + powerAdjustment * 4;
-                        frontRightPower = frontRightPower + powerAdjustment * 4;
-                    }
-                    else if (changeInDirection < -1) { //direction has move to the right more than 2 degree
-                        backLeftPower = backLeftPower + powerAdjustment;
-                        backRightPower = backRightPower + powerAdjustment;
-                    }
+            if (direction == TurnDirection.LEFT) {
+                if (changeInDirection > 1) {//direction has moved to the left more than 2 degree, let's adjust
+                    frontLeftPower = frontLeftPower + powerAdjustment * 4;
+                    frontRightPower = frontRightPower + powerAdjustment * 4;
+                }
+                else if (changeInDirection < -1) { //direction has move to the right more than 2 degree
+                    backLeftPower = backLeftPower + powerAdjustment;
+                    backRightPower = backRightPower + powerAdjustment;
+                }
 
-                    backLeftPower = backLeftPower * -1;  //strafing left, the power of back left is oposite of front left
-                    frontRightPower = frontRightPower * -1;  //strafing left, the power of the front Right is opposite of back right
-                } else {
-                    if (changeInDirection > 1) { //direction has moved to the left more than 2 degree, let's adjust
-                        backRightPower = backRightPower + powerAdjustment;
-                        backLeftPower = backLeftPower + powerAdjustment;
-                    }
-                    else if (changeInDirection < -1) {//direction has move to the right more than 2 degree
-                        frontRightPower = frontRightPower + powerAdjustment;
-                        frontLeftPower = frontLeftPower + powerAdjustment;
-                    }
+                backLeftPower = backLeftPower * -1;  //strafing left, the power of back left is oposite of front left
+                frontRightPower = frontRightPower * -1;  //strafing left, the power of the front Right is opposite of back right
+            } else {
+                if (changeInDirection > 1) { //direction has moved to the left more than 2 degree, let's adjust
+                    backRightPower = backRightPower + powerAdjustment;
+                    backLeftPower = backLeftPower + powerAdjustment;
+                }
+                else if (changeInDirection < -1) {//direction has move to the right more than 2 degree
+                    frontRightPower = frontRightPower + powerAdjustment;
+                    frontLeftPower = frontLeftPower + powerAdjustment;
+                }
 
                 frontLeftPower = frontLeftPower * -1;
                 backRightPower = backRightPower * -1;
@@ -585,6 +642,94 @@ public class MecanumDriveTrain {
             opMode.telemetry.update();
 
             opMode.idle();
+        }
+
+        frontLeft.setPower(0);
+        frontRight.setPower(0);
+        backRight.setPower(0);
+        backLeft.setPower(0);
+    }
+
+    //control strafing using wheel rotation speed
+    public void strafe(int distance, int speed, TurnDirection direction, ModernRoboticsI2cGyro gyroscope,LinearOpMode opMode) {
+        backLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        backLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        backRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        backRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        frontLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        frontLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        frontRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        frontRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        opMode.idle();
+        backLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        backRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        frontLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        frontRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+        int startingDirection = gyroscope.getIntegratedZValue();
+        DbgLog.msg("[Phoenix] startingDirection: " + startingDirection);
+
+        int pulseNeeded = (int) Math.round((encoderPPR * distance) / (wheelDiameter * Math.PI));
+        pulseNeeded /= .5; //the distance is around .5 the normal
+
+        while(((Math.abs(backLeft.getCurrentPosition())) < pulseNeeded) && opMode.opModeIsActive()) {
+
+            int currentDirection = gyroscope.getIntegratedZValue(); //currentDirection will be updated in the while loop to track the robot's direction.
+            int changeInDirection = currentDirection - startingDirection;  //track how much direction has changed. Positive value means going left, negative means going to the right
+
+            int frontLeftSpeed = Math.abs(speed); //we need to determine if we need to adjust the left front power to adjust for direction to the right
+            int backLeftSpeed = Math.abs(speed); //this is to increase the back left if we need to go left
+            int frontRightSpeed = Math.abs(speed); //need to increase this power if need to move the left
+            int backRightSpeed = Math.abs(speed); //need to increase this power if need to move the right
+
+            int adjustmentUnit = 14; //adjust 14 enocder ticks per second for every degree off course.
+            int speedAdjustment = 0;
+            if (Math.abs(changeInDirection) > 1) //direction has change more than 2 degree, let's calculate how much power we need to adjust
+                speedAdjustment = Math.abs(changeInDirection) * adjustmentUnit;
+
+            if (direction == TurnDirection.LEFT) {
+                if (changeInDirection > 1) {//direction has moved to the left more than 1 degree, let's adjust
+                    backLeftSpeed = backLeftSpeed + speedAdjustment;
+                    backRightSpeed = backRightSpeed + speedAdjustment;
+                }
+                else if (changeInDirection < -1) { //direction has move to the right more than 1 degree
+                    frontLeftSpeed = frontLeftSpeed + speedAdjustment;
+                    frontRightSpeed = frontRightSpeed + speedAdjustment;
+                }
+            } else {
+                if (changeInDirection > 1) { //direction has moved to the left more than 1 degree, let's adjust
+                    frontRightSpeed = frontRightSpeed + speedAdjustment;
+                    frontLeftSpeed = frontLeftSpeed + speedAdjustment;
+                }
+                else if (changeInDirection < -1) {//direction has move to the right more than 1 degree
+                    backRightSpeed = backRightSpeed + speedAdjustment;
+                    backLeftSpeed = backLeftSpeed + speedAdjustment;
+                }
+            }
+
+            int mv = max(frontLeftSpeed, backLeftSpeed, frontRightSpeed, backRightSpeed);
+            if (mv > 2400) { //The max speed of Andymark Neverest 40 is 2400 encoder ticks per second.  RPM is 129 @ 1120 ticks per rotation
+                frontLeftSpeed = frontLeftSpeed * frontLeftSpeed / mv;
+                frontRightSpeed = frontRightSpeed * frontRightSpeed / mv;
+                backLeftSpeed = backLeftSpeed * backLeftSpeed / mv;
+                backRightSpeed = backRightSpeed * backRightSpeed / mv;
+            }
+            frontLeft.setMaxSpeed(frontLeftSpeed);
+            backLeft.setMaxSpeed(backLeftSpeed);
+            frontRight.setMaxSpeed(frontRightSpeed);
+            backRight.setMaxSpeed(backRightSpeed);
+
+            if (direction == TurnDirection.LEFT) {
+                frontLeft.setPower(-1);
+                backLeft.setPower(1);
+                frontRight.setPower(1);
+                backRight.setPower(-1);
+            } else {
+                frontLeft.setPower(1);
+                backLeft.setPower(-1);
+                frontRight.setPower(-1);
+                backRight.setPower(1);
+            }
         }
 
         frontLeft.setPower(0);
