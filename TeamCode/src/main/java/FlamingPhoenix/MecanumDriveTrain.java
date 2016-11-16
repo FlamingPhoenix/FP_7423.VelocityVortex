@@ -651,7 +651,7 @@ public class MecanumDriveTrain {
     }
 
     //control strafing using wheel rotation speed
-    public void strafe(int distance, int speed, TurnDirection direction, ModernRoboticsI2cGyro gyroscope,LinearOpMode opMode) {
+    public void strafe(int distance, int speed, TurnDirection direction, ModernRoboticsI2cGyro gyroscope, LinearOpMode opMode) {
         backLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         backLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         backRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -824,6 +824,109 @@ public class MecanumDriveTrain {
             opMode.idle();
         }
 
+
+        frontLeft.setPower(0);
+        frontRight.setPower(0);
+        backRight.setPower(0);
+        backLeft.setPower(0);
+    }
+
+    public void strafe(int distance, int speed, TurnDirection direction, VuforiaTrackableDefaultListener image, LinearOpMode opMode) throws InterruptedException {
+        backLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        backLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        backRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        backRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        frontLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        frontLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        frontRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        frontRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        opMode.idle();
+        backLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        backRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        frontLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        frontRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+        double adjustmentUnit = 50;
+        DbgLog.msg("[Phoenix] adjustmentUnit: " + adjustmentUnit);
+
+        OpenGLMatrix pos = image.getPose();
+        VectorF translation;
+        double x = 0;
+        double y = distance;
+
+        while(opMode.opModeIsActive() && y >= (double) distance) {
+            pos = image.getPose();
+
+            if(pos != null) {
+                translation = pos.getTranslation();
+
+                x = translation.get(0) * -1;
+                y = translation.get(2) * -1;
+                DbgLog.msg("[Phoenix] y: " + y);
+
+                double angle = Math.toDegrees(Math.atan2(x, y));
+                DbgLog.msg("[Phoenix] angle: " + angle);
+                opMode.telemetry.addData("angle ", angle);
+
+                int frontLeftSpeed = Math.abs(speed); //we need to determine if we need to adjust the left front power to adjust for direction to the right
+                int backLeftSpeed = Math.abs(speed); //this is to increase the back left if we need to go left
+                int frontRightSpeed = Math.abs(speed); //need to increase this power if need to move the left
+                int backRightSpeed= Math.abs(speed);
+
+                int powerAdjustment = 0;
+                if (Math.abs(angle) > 1) //direction has change more than 1 degree, let's calculate how much power we need to adjust
+                    powerAdjustment = (int)((Math.abs(angle)) * adjustmentUnit);
+
+                if (direction == TurnDirection.LEFT) {
+                    if (angle > 1) {//direction has moved to the left more than 1 degree, let's adjust
+                        frontLeftSpeed = frontLeftSpeed + powerAdjustment;
+                        frontRightSpeed = frontRightSpeed + powerAdjustment;
+                    }
+                    else if (angle < -1) { //direction has move to the right more than 1 degree
+                        backLeftSpeed = backLeftSpeed + powerAdjustment;
+                        backRightSpeed = backRightSpeed + powerAdjustment;
+                    }
+                }
+                else {
+                    if (angle < -1) { //direction has moved to the left more than 2 degree, let's adjust
+                        backRightSpeed = backRightSpeed + powerAdjustment;
+                        backLeftSpeed = backLeftSpeed + powerAdjustment;
+                    }
+                    else if (angle > 1) {//direction has move to the right more than 2 degree
+                        frontRightSpeed = frontRightSpeed + powerAdjustment;
+                        frontLeftSpeed = frontLeftSpeed + powerAdjustment;
+                    }
+                }
+
+                //if any of wheel is higher than 1.0, we need to reduce the power of all wheels proportionally.
+                int mv = max(Math.abs(frontLeftSpeed), Math.abs(frontRightSpeed), Math.abs(backRightSpeed), Math.abs(backLeftSpeed));
+                if (mv > 2400) {
+                    frontLeftSpeed = frontLeftSpeed * 2400 / mv;
+                    frontRightSpeed = frontRightSpeed * 2400 / mv;
+                    backLeftSpeed = backLeftSpeed * 2400 / mv;
+                    backRightSpeed = backRightSpeed * 2400 / mv;
+                }
+
+                frontLeft.setMaxSpeed(frontLeftSpeed);
+                backLeft.setMaxSpeed(backLeftSpeed);
+                frontRight.setMaxSpeed(frontRightSpeed);
+                backRight.setMaxSpeed(backRightSpeed);
+
+                if (direction == TurnDirection.LEFT) {
+                    frontLeft.setPower(-1);
+                    backLeft.setPower(1);
+                    frontRight.setPower(1);
+                    backRight.setPower(-1);
+                } else {
+                    frontLeft.setPower(1);
+                    backLeft.setPower(-1);
+                    frontRight.setPower(-1);
+                    backRight.setPower(1);
+                }
+            }
+
+            opMode.idle();
+        }
 
         frontLeft.setPower(0);
         frontRight.setPower(0);

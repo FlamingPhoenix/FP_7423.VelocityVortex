@@ -50,35 +50,35 @@ public class Blue_Auton extends LinearOpMode {
 
         waitForStart();
 
-        wheels.drive(28, -.3, this);
-        wheels.strafe(15, .5, TurnDirection.LEFT, gyro, this);
-        wheels.drive(28, -.3, this);
+        wheels.drive(28, -720, this);
+        wheels.strafe(15, 1200, TurnDirection.LEFT, gyro, this);
+        wheels.drive(28, -.720, this);
 
-        wheels.strafe(200, .25, TurnDirection.LEFT, (VuforiaTrackableDefaultListener) tracker.get(0).getListener(), this); //gears is 3
+        wheels.strafe(200, 600, TurnDirection.LEFT, (VuforiaTrackableDefaultListener) tracker.get(0).getListener(), this); //gears is 3
         //wheels.strafe(15, .5, TurnDirection.LEFT, gyro, this);
         //wheels.driveUntilWhite(-.09, opt, this);
 
         if (color.blue() > 0) {
-            wheels.strafe(2, .5, TurnDirection.LEFT, gyro, this);
+            wheels.strafe(2, 1200, TurnDirection.LEFT, gyro, this);
         } else if (color.red() > 0) {
-            wheels.drive(6, -.2, this);
+            wheels.drive(6, -480, this);
             if (color.blue() > 0) {
-                wheels.strafe(2, .5, TurnDirection.LEFT, gyro, this);
+                wheels.strafe(2, 1200, TurnDirection.LEFT, gyro, this);
                 DbgLog.msg("[Phoenix] i see red");
             }
         }
 
-        wheels.strafe(8, .5, TurnDirection.RIGHT, gyro, this);
-        wheels.drive(48, .5, this);
+        wheels.strafe(8, 1200, TurnDirection.RIGHT, gyro, this);
+        wheels.drive(48, 1200, this);
 
-        wheels.strafe(200, .25, TurnDirection.LEFT, (VuforiaTrackableDefaultListener) tracker.get(2).getListener(), this);
+        wheels.strafe(200, 600, TurnDirection.LEFT, (VuforiaTrackableDefaultListener) tracker.get(2).getListener(), this);
 
         if (color.blue() > 0) {
-            wheels.strafe(2, .5, TurnDirection.LEFT, gyro, this);
+            wheels.strafe(2, 1200, TurnDirection.LEFT, gyro, this);
         } else if (color.red() > 0) {
-            wheels.drive(6, -.2, this);
+            wheels.drive(6, -480, this);
             if (color.blue() > 0) {
-                wheels.strafe(2, .5, TurnDirection.LEFT, gyro, this);
+                wheels.strafe(2, 1200, TurnDirection.LEFT, gyro, this);
                 DbgLog.msg("[Phoenix] i see red");
             }
         }
