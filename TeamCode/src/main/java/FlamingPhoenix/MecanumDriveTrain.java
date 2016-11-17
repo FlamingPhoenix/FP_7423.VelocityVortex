@@ -96,7 +96,7 @@ public class MecanumDriveTrain {
             x1 = gamePad.left_stick_x * 0.25f;
             y1 = gamePad.left_stick_y * 0.25f;
             x2 = gamePad.right_stick_x * 0.25f;
-        } else if ((gamePad.right_trigger > 0.5) || (gamePad.left_trigger > 0.5)) { //only one of the trigger is pressed, let's slow down by 50%
+        } else if ((gamePad.right_trigger > 0.5) || (gamePad.left_trigger > 0.5)) { //only one if the trigger is pressed, let's slow down by 50%
             x1 = gamePad.left_stick_x * 0.5f;
             y1 = gamePad.left_stick_y * 0.5f;
             x2 = gamePad.right_stick_x * 0.5f;
@@ -709,10 +709,10 @@ public class MecanumDriveTrain {
 
             int mv = max(frontLeftSpeed, backLeftSpeed, frontRightSpeed, backRightSpeed);
             if (mv > 2400) { //The max speed of Andymark Neverest 40 is 2400 encoder ticks per second.  RPM is 129 @ 1120 ticks per rotation
-                frontLeftSpeed = frontLeftSpeed * frontLeftSpeed / mv;
-                frontRightSpeed = frontRightSpeed * frontRightSpeed / mv;
-                backLeftSpeed = backLeftSpeed * backLeftSpeed / mv;
-                backRightSpeed = backRightSpeed * backRightSpeed / mv;
+                frontLeftSpeed = frontLeftSpeed * 2400/ mv;
+                frontRightSpeed = frontRightSpeed * 2400 / mv;
+                backLeftSpeed = backLeftSpeed * 2400 / mv;
+                backRightSpeed = backRightSpeed * 2400/ mv;
             }
             frontLeft.setMaxSpeed(frontLeftSpeed);
             backLeft.setMaxSpeed(backLeftSpeed);
@@ -879,22 +879,22 @@ public class MecanumDriveTrain {
 
                 if (direction == TurnDirection.LEFT) {
                     if (angle > 1) {//direction has moved to the left more than 1 degree, let's adjust
-                        frontLeftSpeed = frontLeftSpeed + powerAdjustment;
-                        frontRightSpeed = frontRightSpeed + powerAdjustment;
+                        backLeftSpeed += powerAdjustment;
+                        backRightSpeed += powerAdjustment;
                     }
                     else if (angle < -1) { //direction has move to the right more than 1 degree
-                        backLeftSpeed = backLeftSpeed + powerAdjustment;
-                        backRightSpeed = backRightSpeed + powerAdjustment;
+                        frontLeftSpeed += powerAdjustment;
+                        frontRightSpeed += powerAdjustment;
                     }
                 }
                 else {
                     if (angle < -1) { //direction has moved to the left more than 2 degree, let's adjust
-                        backRightSpeed = backRightSpeed + powerAdjustment;
-                        backLeftSpeed = backLeftSpeed + powerAdjustment;
+                        frontRightSpeed += powerAdjustment;
+                        frontLeftSpeed += powerAdjustment;
                     }
                     else if (angle > 1) {//direction has move to the right more than 2 degree
-                        frontRightSpeed = frontRightSpeed + powerAdjustment;
-                        frontLeftSpeed = frontLeftSpeed + powerAdjustment;
+                        backRightSpeed += powerAdjustment;
+                        backLeftSpeed += powerAdjustment;
                     }
                 }
 
