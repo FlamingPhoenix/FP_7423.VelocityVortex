@@ -242,18 +242,37 @@ public class MecanumDriveTrain {
         frontLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         frontRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
-        backLeft.setMaxSpeed(speed);
-        backRight.setMaxSpeed(speed);
-        frontLeft.setMaxSpeed(speed);
-        frontRight.setMaxSpeed(speed);
+        speed = Math.abs(speed); //let's make sure it is possitive value
 
         int pulseNeeded = (int) Math.round((encoderPPR * d) / (wheelDiameter * Math.PI));
         double power = 1;
         if (direction == Direction.BACKWARD)
             power = -1;
 
-        while ((Math.abs(backLeft.getCurrentPosition()) < pulseNeeded) && opMode.opModeIsActive()) {
-            opMode.telemetry.addData("Encoder: ", backLeft.getCurrentPosition());
+        int currentTicks = backLeft.getCurrentPosition();
+        while ((Math.abs(currentTicks) < pulseNeeded) && opMode.opModeIsActive()) {
+            currentTicks = backLeft.getCurrentPosition();
+            opMode.telemetry.addData("Encoder: ", currentTicks);
+
+            if ((Math.abs(currentTicks) <= 50) && (speed > 600)) { //start slow
+                backLeft.setMaxSpeed(600);
+                backRight.setMaxSpeed(600);
+                frontLeft.setMaxSpeed(600);
+                frontRight.setMaxSpeed(600);
+            } else if (((pulseNeeded - Math.abs(currentTicks)) < 250) && (speed > 800)) { //slow down
+                backLeft.setMaxSpeed(800);
+                backRight.setMaxSpeed(800);
+                frontLeft.setMaxSpeed(800);
+                frontRight.setMaxSpeed(800);
+                DbgLog.msg("[Phoenix] Almost reached; with original speed " + speed);
+
+            } else {
+                backLeft.setMaxSpeed(speed);
+                backRight.setMaxSpeed(speed);
+                frontLeft.setMaxSpeed(speed);
+                frontRight.setMaxSpeed(speed);
+            }
+
             frontLeft.setPower(power);
             frontRight.setPower(power);
             backRight.setPower(power);
@@ -428,7 +447,6 @@ public class MecanumDriveTrain {
         backLeft.setPower(0);
 
         DbgLog.msg("[Phoenix] final1currentHeading = " + Double.toString(gyro.getIntegratedZValue()));
-        Thread.sleep(1000);
         DbgLog.msg("[Phoenix] final2currentHeading = " + Double.toString(gyro.getIntegratedZValue()));
     }
 
