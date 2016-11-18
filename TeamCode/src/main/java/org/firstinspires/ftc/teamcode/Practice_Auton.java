@@ -44,7 +44,7 @@ public class Practice_Auton extends LinearOpMode {
         ColorSensor color = hardwareMap.colorSensor.get("color");
         OpticalDistanceSensor opt = hardwareMap.opticalDistanceSensor.get("opt");
         ModernRoboticsI2cGyro gyro = (ModernRoboticsI2cGyro) hardwareMap.gyroSensor.get("gyro");
-        while (gyro.isCalibrating())
+        while (gyro.isCalibrating() && this.opModeIsActive())
             Thread.sleep(50);
 
         MecanumDriveTrain wheels = new MecanumDriveTrain("frontleft", "frontright", "backleft", "backright", this);
@@ -59,7 +59,7 @@ public class Practice_Auton extends LinearOpMode {
         wheels.strafe(15, 1700, TurnDirection.LEFT, gyro, this);
         wheels.drive(34, Direction.FORWARD, 1500, this);
 
-        wheels.strafe(200, 1000, TurnDirection.LEFT, (VuforiaTrackableDefaultListener) tracker.get(3).getListener(), this); //gears is 3
+        wheels.strafe(180, 1000, TurnDirection.LEFT, (VuforiaTrackableDefaultListener) tracker.get(3).getListener(), this); //gears is 3
         //wheels.strafe(15, .5, TurnDirection.LEFT, gyro, this);
         //wheels.driveUntilWhite(-.09, opt, this);
 
@@ -74,7 +74,7 @@ public class Practice_Auton extends LinearOpMode {
             DbgLog.msg("[Phoenix - main] color blue1: " + blue);
             DbgLog.msg("[Phoenix - main] color red1: " + red);
         } else {
-            wheels.drive(6, Direction.FORWARD, 1400, this);
+            wheels.drive(5, Direction.FORWARD, 1000, this);
 
             red = color.red();
             blue = color.blue();
@@ -87,23 +87,34 @@ public class Practice_Auton extends LinearOpMode {
         }
 
         wheels.strafe(20, 1200, TurnDirection.RIGHT, gyro, this);
-        wheels.drive(56, Direction.FORWARD, 1800, this);
+        wheels.drive(50, Direction.FORWARD, 1800, this);
+        wheels.drive(6, Direction.FORWARD, 800, this);
 
-        wheels.strafe(200, 1000, TurnDirection.LEFT, (VuforiaTrackableDefaultListener) tracker.get(1).getListener(), this);
+        wheels.strafe(180, 1000, TurnDirection.LEFT, (VuforiaTrackableDefaultListener) tracker.get(1).getListener(), this);
 
-        if (color.red() > 1) {
-            wheels.strafe(5, 1700, TurnDirection.LEFT, gyro, this);
-            DbgLog.msg("[Phoenix - main] color: " + color.red());
-        } else if (color.blue() > 0) {
-            wheels.drive(6, Direction.FORWARD, 720, this);
-            if (color.red() > 1) {
-                wheels.strafe(5, 1700, TurnDirection.LEFT, gyro, this);
-                DbgLog.msg("[Phoenix] i see red");
-            }
+        red = color.red();
+        blue = color.blue();
+
+        DbgLog.msg("[Phoenix - main] color blue3: " + blue);
+        DbgLog.msg("[Phoenix - main] color red3: " + red);
+
+        if (red > 1) {
+            wheels.strafe(2, 1700, TurnDirection.LEFT, gyro, this);
+            DbgLog.msg("[Phoenix - main] color blue5: " + blue);
+            DbgLog.msg("[Phoenix - main] color red5: " + red);
+        } else {
+            wheels.drive(5, Direction.FORWARD, 1000, this);
+
+            red = color.red();
+            blue = color.blue();
+
+            DbgLog.msg("[Phoenix - main] color blue6: " + blue);
+            DbgLog.msg("[Phoenix - main] color red6: " + red);
+            wheels.strafe(2, 1700, TurnDirection.LEFT, gyro, this);
         }
 
         wheels.strafe(10, 1200, TurnDirection.RIGHT, gyro, this);
-        wheels.turnWithGyro(50, .35, TurnDirection.LEFT, true, gyro, this);
-        wheels.drive(60, Direction.BACKWARD, 1500, this);
+        wheels.turnWithGyro(40, .7, TurnDirection.LEFT, true, gyro, this);
+        wheels.drive(60, Direction.BACKWARD, 2100, this);
     }
 }

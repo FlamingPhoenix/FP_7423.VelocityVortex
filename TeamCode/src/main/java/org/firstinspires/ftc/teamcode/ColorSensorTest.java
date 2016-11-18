@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode;
 
+import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cGyro;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.ColorSensor;
@@ -13,10 +14,12 @@ import com.qualcomm.robotcore.hardware.*;
 public class ColorSensorTest extends OpMode {
 
     ColorSensor color;
+    ModernRoboticsI2cGyro gyro;
 
     @Override
     public void init() {
         color = hardwareMap.colorSensor.get("color");
+        gyro = (ModernRoboticsI2cGyro) hardwareMap.gyroSensor.get("gyro");
     }
 
     @Override
@@ -29,7 +32,7 @@ public class ColorSensorTest extends OpMode {
 
         telemetry.addData("red", red);
         telemetry.addData("blue", blue);
-        telemetry.addData("addr", addr);
+        telemetry.addData("gyro", gyro.getHeading());
 
         telemetry.update();
     }

@@ -488,36 +488,6 @@ public class MecanumDriveTrain {
         return m;
     }
 
-    //strafe by setting power
-    public void strafe(int distance, double power, TurnDirection direction, LinearOpMode opMode) throws InterruptedException {
-        backLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        backLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        opMode.idle();
-        backLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-
-        int pulseNeeded = (int) Math.round((encoderPPR * distance) / (wheelDiameter * Math.PI));
-
-        pulseNeeded = (int) Math.round((double) pulseNeeded/0.5); //the distance is around .65 the normal
-
-        while(((Math.abs(backLeft.getCurrentPosition())) < pulseNeeded) && opMode.opModeIsActive()) {
-            if (direction == TurnDirection.LEFT) {
-                frontLeft.setPower(power * -1);
-                backLeft.setPower(power);
-                frontRight.setPower(power);
-                backRight.setPower(power * -1);
-            } else {
-                frontLeft.setPower(power);
-                backLeft.setPower(power * -1);
-                frontRight.setPower(power * -1);
-                backRight.setPower(power);
-            }
-        }
-
-        frontLeft.setPower(0);
-        frontRight.setPower(0);
-        backRight.setPower(0);
-        backLeft.setPower(0);
-    }
 
     //strafe by using the wheel rotation speed
     public void strafe(int distance, int speed, TurnDirection direction, LinearOpMode opMode) throws InterruptedException {
@@ -556,92 +526,6 @@ public class MecanumDriveTrain {
                 frontRight.setPower(-1);
                 backRight.setPower(1);
             }
-        }
-
-        frontLeft.setPower(0);
-        frontRight.setPower(0);
-        backRight.setPower(0);
-        backLeft.setPower(0);
-    }
-
-
-    public void strafe(int distance, double power, TurnDirection direction, ModernRoboticsI2cGyro gyroscope,LinearOpMode opMode) throws InterruptedException {
-        int startingDirection = gyroscope.getIntegratedZValue();
-        DbgLog.msg("[Phoenix] startingDirection: " + startingDirection);
-
-        backLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        backLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        opMode.idle();
-        backLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-
-        int pulseNeeded = (int) Math.round((encoderPPR * distance) / (wheelDiameter * Math.PI));
-
-        pulseNeeded /= .5; //the distance is around .45 the normal
-
-        while(opMode.opModeIsActive() && Math.abs(backLeft.getCurrentPosition()) < pulseNeeded) {
-            int currentDirection = gyroscope.getIntegratedZValue(); //currentDirection will be updated in the while loop to track the robot's direction.
-            int changeInDirection = currentDirection - startingDirection;  //track how much direction has changed. Positive value means going left, negative means going to the right
-
-            double frontLeftPower = power; //we need to determine if we need to adjust the left front power to adjust for direction to the right
-            double backLeftPower = power; //this is to increase the back left if we need to go left
-            double frontRightPower = power; //need to increase this power if need to move the left
-            double backRightPower = power; //need to increase this power if need to move the right
-
-            double adjustmentUnit = power / 15;
-            DbgLog.msg("[Phoenix] adjustmentUnit: " + adjustmentUnit);
-
-            double powerAdjustment = 0;
-            if (Math.abs(changeInDirection) > 1) //direction has change more than 2 degree, let's calculate how much power we need to adjust
-                powerAdjustment = ((double) Math.abs(changeInDirection)) * adjustmentUnit;
-
-            if (direction == TurnDirection.LEFT) {
-                if (changeInDirection > 1) {//direction has moved to the left more than 2 degree, let's adjust
-                    frontLeftPower = frontLeftPower + powerAdjustment * 4;
-                    frontRightPower = frontRightPower + powerAdjustment * 4;
-                }
-                else if (changeInDirection < -1) { //direction has move to the right more than 2 degree
-                    backLeftPower = backLeftPower + powerAdjustment;
-                    backRightPower = backRightPower + powerAdjustment;
-                }
-
-                backLeftPower = backLeftPower * -1;  //strafing left, the power of back left is oposite of front left
-                frontRightPower = frontRightPower * -1;  //strafing left, the power of the front Right is opposite of back right
-            } else {
-                if (changeInDirection > 1) { //direction has moved to the left more than 2 degree, let's adjust
-                    backRightPower = backRightPower + powerAdjustment;
-                    backLeftPower = backLeftPower + powerAdjustment;
-                }
-                else if (changeInDirection < -1) {//direction has move to the right more than 2 degree
-                    frontRightPower = frontRightPower + powerAdjustment;
-                    frontLeftPower = frontLeftPower + powerAdjustment;
-                }
-
-                frontLeftPower = frontLeftPower * -1;
-                backRightPower = backRightPower * -1;
-            }
-
-            //if any of wheel is higher than 1.0, we need to reduce the power of all wheels proportionally.
-            double mv = max(Math.abs(frontLeftPower), Math.abs(frontRightPower), Math.abs(backRightPower), Math.abs(backLeftPower));
-            if (mv > 1) {
-                frontLeftPower = frontLeftPower * Math.abs(frontLeftPower / mv);
-                frontRightPower = frontRightPower * Math.abs(frontRightPower /mv);
-                backLeftPower = backLeftPower * Math.abs(backLeftPower /mv);
-                backRightPower = backRightPower * Math.abs(backRightPower /mv);
-            }
-
-            frontLeft.setPower(frontLeftPower);
-            backLeft.setPower(backLeftPower);
-            frontRight.setPower(frontRightPower);
-            backRight.setPower(backRightPower);
-
-            DbgLog.msg("[Phoenix] currentDirection: " + currentDirection);
-            DbgLog.msg("[Phoenix] changeInDirection: " + changeInDirection);
-
-            opMode.telemetry.addData("currentDirection ", currentDirection);
-            opMode.telemetry.addData("changeInDirection ", changeInDirection);
-            opMode.telemetry.update();
-
-            opMode.idle();
         }
 
         frontLeft.setPower(0);
@@ -738,98 +622,6 @@ public class MecanumDriveTrain {
         backLeft.setPower(0);
     }
 
-    public void strafe(int distance, double power, TurnDirection direction, VuforiaTrackableDefaultListener image, LinearOpMode opMode) throws InterruptedException {
-
-        backLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        backLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        opMode.idle();
-        backLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-
-        int pulseNeeded = (int) Math.round((encoderPPR * distance) / (wheelDiameter * Math.PI));
-
-        pulseNeeded /= .65; //the distance is around .45 the normal
-        double adjustmentUnit = power / 20;
-        DbgLog.msg("[Phoenix] adjustmentUnit: " + adjustmentUnit);
-
-        OpenGLMatrix pos = image.getPose();
-        VectorF translation;
-        double x = 0;
-        double y = distance;
-
-        while(opMode.opModeIsActive() && y >= (double) distance) {
-            pos = image.getPose();
-
-            if(pos != null) {
-                translation = pos.getTranslation();
-
-                x = translation.get(0) * -1;
-                y = translation.get(2) * -1;
-                DbgLog.msg("[Phoenix] y: " + y);
-
-                double angle = Math.toDegrees(Math.atan2(x, y));
-                DbgLog.msg("[Phoenix] angle: " + angle);
-                opMode.telemetry.addData("angle ", angle);
-
-                double frontLeftPower = power; //we need to determine if we need to adjust the left front power to adjust for direction to the right
-                double backLeftPower = power; //this is to increase the back left if we need to go left
-                double frontRightPower = power; //need to increase this power if need to move the left
-                double backRightPower = power; //need to increase this power if need to move the right
-
-                double powerAdjustment = 0;
-                if (Math.abs(angle) > 1) //direction has change more than 1 degree, let's calculate how much power we need to adjust
-                    powerAdjustment = (Math.abs(angle)) * adjustmentUnit;
-
-                if (direction == TurnDirection.LEFT) {
-                    if (angle > 1) {//direction has moved to the left more than 1 degree, let's adjust
-                        frontLeftPower = frontLeftPower + powerAdjustment * 3;
-                        frontRightPower = frontRightPower + powerAdjustment * 3;
-                    }
-                    else if (angle < -1) { //direction has move to the right more than 1 degree
-                        backLeftPower = backLeftPower + powerAdjustment;
-                        backRightPower = backRightPower + powerAdjustment;
-                    }
-
-                    backLeftPower = backLeftPower * -1;  //strafing left, the power of back left is oposite of front left
-                    frontRightPower = frontRightPower * -1;  //strafing left, the power of the front Right is opposite of back right
-                }
-                else {
-                    if (angle < -1) { //direction has moved to the left more than 2 degree, let's adjust
-                        backRightPower = backRightPower + powerAdjustment;
-                        backLeftPower = backLeftPower + powerAdjustment;
-                    }
-                    else if (angle > 1) {//direction has move to the right more than 2 degree
-                        frontRightPower = frontRightPower + powerAdjustment;
-                        frontLeftPower = frontLeftPower + powerAdjustment;
-                    }
-
-                    frontLeftPower = frontLeftPower * -1;
-                    backRightPower = backRightPower * -1;
-                }
-
-                //if any of wheel is higher than 1.0, we need to reduce the power of all wheels proportionally.
-                double mv = max(Math.abs(frontLeftPower), Math.abs(frontRightPower), Math.abs(backRightPower), Math.abs(backLeftPower));
-                if (mv > 1) {
-                    frontLeftPower = frontLeftPower * Math.abs(frontLeftPower / mv);
-                    frontRightPower = frontRightPower * Math.abs(frontRightPower / mv);
-                    backLeftPower = backLeftPower * Math.abs(backLeftPower / mv);
-                    backRightPower = backRightPower * Math.abs(backRightPower / mv);
-                }
-
-                frontLeft.setPower(frontLeftPower);
-                backLeft.setPower(backLeftPower);
-                frontRight.setPower(frontRightPower);
-                backRight.setPower(backRightPower);
-            }
-
-            opMode.idle();
-        }
-
-
-        frontLeft.setPower(0);
-        frontRight.setPower(0);
-        backRight.setPower(0);
-        backLeft.setPower(0);
-    }
 
     public void strafe(int distance, int speed, TurnDirection direction, VuforiaTrackableDefaultListener image, LinearOpMode opMode) throws InterruptedException {
         backLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -849,13 +641,12 @@ public class MecanumDriveTrain {
         double adjustmentUnit = 50;
         DbgLog.msg("[Phoenix] adjustmentUnit: " + adjustmentUnit);
 
-        OpenGLMatrix pos = image.getPose();
         VectorF translation;
         double x = 0;
         double y = distance;
 
         while(opMode.opModeIsActive() && y >= (double) distance) {
-            pos = image.getPose();
+            OpenGLMatrix pos = image.getPose();
 
             if(pos != null) {
                 translation = pos.getTranslation();
@@ -901,27 +692,37 @@ public class MecanumDriveTrain {
                 //if any of wheel is higher than 1.0, we need to reduce the power of all wheels proportionally.
                 int mv = max(Math.abs(frontLeftSpeed), Math.abs(frontRightSpeed), Math.abs(backRightSpeed), Math.abs(backLeftSpeed));
                 if (mv > 2400) {
-                    frontLeftSpeed = frontLeftSpeed * 2400 / mv;
-                    frontRightSpeed = frontRightSpeed * 2400 / mv;
-                    backLeftSpeed = backLeftSpeed * 2400 / mv;
-                    backRightSpeed = backRightSpeed * 2400 / mv;
+                    frontLeftSpeed = (int) (Math.round((double) frontLeftSpeed / (double) mv));
+                    frontRightSpeed = (int) Math.round((double) frontRightSpeed  / (double) mv);
+                    backLeftSpeed = (int) Math.round((double) backLeftSpeed / (double) mv);
+                    backRightSpeed = (int) Math.round((double) backRightSpeed / (double) mv);
+
+                    DbgLog.msg("[Phoenix] adjusted frontLeft: " + frontLeftSpeed);
+                    DbgLog.msg("[Phoenix] adjusted frontRight: " + frontRightSpeed);
+                    DbgLog.msg("[Phoenix] adjusted backLeft: " + backLeftSpeed);
+                    DbgLog.msg("[Phoenix] adjusted backRight: " + backRightSpeed);
                 }
 
-                frontLeft.setMaxSpeed(frontLeftSpeed);
-                backLeft.setMaxSpeed(backLeftSpeed);
-                frontRight.setMaxSpeed(frontRightSpeed);
-                backRight.setMaxSpeed(backRightSpeed);
+                try {
+                    frontLeft.setMaxSpeed(frontLeftSpeed);
+                    backLeft.setMaxSpeed(backLeftSpeed);
+                    frontRight.setMaxSpeed(frontRightSpeed);
+                    backRight.setMaxSpeed(backRightSpeed);
 
-                if (direction == TurnDirection.LEFT) {
-                    frontLeft.setPower(-1);
-                    backLeft.setPower(1);
-                    frontRight.setPower(1);
-                    backRight.setPower(-1);
-                } else {
-                    frontLeft.setPower(1);
-                    backLeft.setPower(-1);
-                    frontRight.setPower(-1);
-                    backRight.setPower(1);
+                    if (direction == TurnDirection.LEFT) {
+                        frontLeft.setPower(-1);
+                        backLeft.setPower(1);
+                        frontRight.setPower(1);
+                        backRight.setPower(-1);
+                    } else {
+                        frontLeft.setPower(1);
+                        backLeft.setPower(-1);
+                        frontRight.setPower(-1);
+                        backRight.setPower(1);
+                    }
+
+                } catch (Exception e) {
+                    DbgLog.msg("[Phoenix] null point exception here");
                 }
             }
 
