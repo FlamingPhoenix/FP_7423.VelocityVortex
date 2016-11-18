@@ -63,6 +63,7 @@ public class Practice_Auton extends LinearOpMode {
         //wheels.strafe(15, .5, TurnDirection.LEFT, gyro, this);
         //wheels.driveUntilWhite(-.09, opt, this);
 
+        sleep(250);
         int red = color.red();
         int blue = color.blue();
 
@@ -74,8 +75,9 @@ public class Practice_Auton extends LinearOpMode {
             DbgLog.msg("[Phoenix - main] color blue1: " + blue);
             DbgLog.msg("[Phoenix - main] color red1: " + red);
         } else {
-            wheels.drive(5, Direction.FORWARD, 1000, this);
+            wheels.drive(5, Direction.FORWARD, 800, this);
 
+            sleep(250);
             red = color.red();
             blue = color.blue();
 
@@ -92,6 +94,7 @@ public class Practice_Auton extends LinearOpMode {
 
         wheels.strafe(180, 1000, TurnDirection.LEFT, (VuforiaTrackableDefaultListener) tracker.get(1).getListener(), this);
 
+        sleep(250);
         red = color.red();
         blue = color.blue();
 
@@ -103,18 +106,22 @@ public class Practice_Auton extends LinearOpMode {
             DbgLog.msg("[Phoenix - main] color blue5: " + blue);
             DbgLog.msg("[Phoenix - main] color red5: " + red);
         } else {
-            wheels.drive(5, Direction.FORWARD, 1000, this);
+            wheels.drive(5, Direction.FORWARD, 800, this);
 
+            sleep(250);
             red = color.red();
             blue = color.blue();
 
             DbgLog.msg("[Phoenix - main] color blue6: " + blue);
             DbgLog.msg("[Phoenix - main] color red6: " + red);
-            wheels.strafe(2, 1700, TurnDirection.LEFT, gyro, this);
+
+            if (red > 1) {
+                wheels.strafe(2, 1700, TurnDirection.LEFT, gyro, this);
+            }
         }
 
         wheels.strafe(10, 1200, TurnDirection.RIGHT, gyro, this);
-        wheels.turnWithGyro(40, .7, TurnDirection.LEFT, true, gyro, this);
-        wheels.drive(60, Direction.BACKWARD, 2100, this);
+        wheels.turnWithGyro(38, .7, TurnDirection.LEFT, true, gyro, this);
+        wheels.drive(61, Direction.BACKWARD, 2200, this);
     }
 }

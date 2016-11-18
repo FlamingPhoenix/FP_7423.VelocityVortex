@@ -12,6 +12,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackableDefaultListener;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackables;
 
+import FlamingPhoenix.Direction;
 import FlamingPhoenix.MecanumDriveTrain;
 import FlamingPhoenix.TurnDirection;
 
@@ -39,7 +40,7 @@ public class Blue_Auton extends LinearOpMode {
         ColorSensor color = hardwareMap.colorSensor.get("color");
         OpticalDistanceSensor opt = hardwareMap.opticalDistanceSensor.get("opt");
         ModernRoboticsI2cGyro gyro = (ModernRoboticsI2cGyro) hardwareMap.gyroSensor.get("gyro");
-        while (gyro.isCalibrating())
+        while (gyro.isCalibrating() && this.opModeIsActive())
             Thread.sleep(50);
 
         MecanumDriveTrain wheels = new MecanumDriveTrain("frontleft", "frontright", "backleft", "backright", this);
@@ -50,38 +51,76 @@ public class Blue_Auton extends LinearOpMode {
 
         waitForStart();
 
-        wheels.drive(28, -720, this);
-        wheels.strafe(15, 1200, TurnDirection.LEFT, gyro, this);
-        wheels.drive(28, -.720, this);
+        wheels.drive(28, Direction.BACKWARD, 1500, this);
+        wheels.strafe(15, 1700, TurnDirection.LEFT, gyro, this);
+        wheels.drive(32, Direction.BACKWARD, 1500, this);
 
-        wheels.strafe(200, 600, TurnDirection.LEFT, (VuforiaTrackableDefaultListener) tracker.get(0).getListener(), this); //gears is 3
+        wheels.strafe(180, 1000, TurnDirection.LEFT, (VuforiaTrackableDefaultListener) tracker.get(0).getListener(), this); //gears is 3
         //wheels.strafe(15, .5, TurnDirection.LEFT, gyro, this);
         //wheels.driveUntilWhite(-.09, opt, this);
 
-        if (color.blue() > 0) {
-            wheels.strafe(2, 1200, TurnDirection.LEFT, gyro, this);
-        } else if (color.red() > 0) {
-            wheels.drive(6, -480, this);
-            if (color.blue() > 0) {
-                wheels.strafe(2, 1200, TurnDirection.LEFT, gyro, this);
-                DbgLog.msg("[Phoenix] i see red");
+        sleep(250);
+        int red = color.red();
+        int blue = color.blue();
+
+        int distanceInBetween = 60;
+
+        DbgLog.msg("[Phoenix - main] color blue0: " + blue);
+        DbgLog.msg("[Phoenix - main] color red0: " + red);
+
+        if (blue > 1) {
+            wheels.strafe(2, 1700, TurnDirection.LEFT, gyro, this);
+            DbgLog.msg("[Phoenix - main] color blue1: " + blue);
+            DbgLog.msg("[Phoenix - main] color red1: " + red);
+        } else {
+            wheels.drive(5, Direction.FORWARD, 800, this);
+            distanceInBetween += 5;
+
+            sleep(250);
+            red = color.red();
+            blue = color.blue();
+
+            DbgLog.msg("[Phoenix - main] color blue2: " + blue);
+            DbgLog.msg("[Phoenix - main] color red2: " + red);
+            if (blue > 1) {
+                wheels.strafe(2, 1700, TurnDirection.LEFT, gyro, this);
             }
         }
 
-        wheels.strafe(8, 1200, TurnDirection.RIGHT, gyro, this);
-        wheels.drive(48, 1200, this);
+        wheels.strafe(20, 1200, TurnDirection.RIGHT, gyro, this);
+        wheels.drive(distanceInBetween, Direction.BACKWARD, 1800, this);
 
-        wheels.strafe(200, 600, TurnDirection.LEFT, (VuforiaTrackableDefaultListener) tracker.get(2).getListener(), this);
+        wheels.strafe(180, 1000, TurnDirection.LEFT, (VuforiaTrackableDefaultListener) tracker.get(2).getListener(), this);
 
-        if (color.blue() > 0) {
-            wheels.strafe(2, 1200, TurnDirection.LEFT, gyro, this);
-        } else if (color.red() > 0) {
-            wheels.drive(6, -480, this);
-            if (color.blue() > 0) {
-                wheels.strafe(2, 1200, TurnDirection.LEFT, gyro, this);
-                DbgLog.msg("[Phoenix] i see red");
+        sleep(250);
+        red = color.red();
+        blue = color.blue();
+
+        DbgLog.msg("[Phoenix - main] color blue3: " + blue);
+        DbgLog.msg("[Phoenix - main] color red3: " + red);
+
+        if (blue > 1) {
+            wheels.strafe(2, 1700, TurnDirection.LEFT, gyro, this);
+            DbgLog.msg("[Phoenix - main] color blue5: " + blue);
+            DbgLog.msg("[Phoenix - main] color red5: " + red);
+        } else {
+            wheels.drive(5, Direction.FORWARD, 800, this);
+
+            sleep(250);
+            red = color.red();
+            blue = color.blue();
+
+            DbgLog.msg("[Phoenix - main] color blue6: " + blue);
+            DbgLog.msg("[Phoenix - main] color red6: " + red);
+
+            if (blue > 1) {
+                wheels.strafe(2, 1700, TurnDirection.LEFT, gyro, this);
             }
         }
+
+        wheels.strafe(10, 1200, TurnDirection.RIGHT, gyro, this);
+        wheels.turnWithGyro(38, .7, TurnDirection.RIGHT, true, gyro, this);
+        wheels.drive(60, Direction.FORWARD, 2100, this);
     }
 }
 
