@@ -56,12 +56,16 @@ public class Practice_Auton extends LinearOpMode {
         waitForStart();
 
         wheels.drive(28,Direction.FORWARD, 1500, this);
-        wheels.strafe(15, 1700, TurnDirection.LEFT, gyro, this);
+        wheels.strafe(15, 1500, TurnDirection.LEFT, gyro, this);
         wheels.drive(34, Direction.FORWARD, 1500, this);
 
-        wheels.strafe(180, 1000, TurnDirection.LEFT, (VuforiaTrackableDefaultListener) tracker.get(3).getListener(), this); //gears is 3
+        sleep(250);
+
+        wheels.strafe(200, 1000, TurnDirection.LEFT, (VuforiaTrackableDefaultListener) tracker.get(3).getListener(), this); //gears is 3
         //wheels.strafe(15, .5, TurnDirection.LEFT, gyro, this);
         //wheels.driveUntilWhite(-.09, opt, this);
+
+        int distanceInBetween = 59;
 
         sleep(250);
         int red = color.red();
@@ -70,12 +74,14 @@ public class Practice_Auton extends LinearOpMode {
         DbgLog.msg("[Phoenix - main] color blue0: " + blue);
         DbgLog.msg("[Phoenix - main] color red0: " + red);
 
-        if (red > 1) {
+        if (red > 1 && red < 255) {
             wheels.strafe(2, 1700, TurnDirection.LEFT, gyro, this);
             DbgLog.msg("[Phoenix - main] color blue1: " + blue);
             DbgLog.msg("[Phoenix - main] color red1: " + red);
         } else {
             wheels.drive(5, Direction.FORWARD, 800, this);
+
+            distanceInBetween -= 5;
 
             sleep(250);
             red = color.red();
@@ -88,11 +94,16 @@ public class Practice_Auton extends LinearOpMode {
             }
         }
 
-        wheels.strafe(20, 1200, TurnDirection.RIGHT, gyro, this);
-        wheels.drive(50, Direction.FORWARD, 1800, this);
-        wheels.drive(6, Direction.FORWARD, 800, this);
+        wheels.strafe(18, 1200, TurnDirection.RIGHT, gyro, this);
+        wheels.drive(distanceInBetween, Direction.FORWARD, 1800, this);
 
-        wheels.strafe(180, 1000, TurnDirection.LEFT, (VuforiaTrackableDefaultListener) tracker.get(1).getListener(), this);
+        sleep(250);
+
+        boolean sawImage = wheels.strafe(200, 1000, TurnDirection.LEFT, (VuforiaTrackableDefaultListener) tracker.get(1).getListener(), this);
+
+        if(!sawImage) {
+            wheels.strafe(16, 1000, TurnDirection.LEFT, gyro, this);
+        }
 
         sleep(250);
         red = color.red();
@@ -101,7 +112,7 @@ public class Practice_Auton extends LinearOpMode {
         DbgLog.msg("[Phoenix - main] color blue3: " + blue);
         DbgLog.msg("[Phoenix - main] color red3: " + red);
 
-        if (red > 1) {
+        if (red > 1 && red < 255) {
             wheels.strafe(2, 1700, TurnDirection.LEFT, gyro, this);
             DbgLog.msg("[Phoenix - main] color blue5: " + blue);
             DbgLog.msg("[Phoenix - main] color red5: " + red);

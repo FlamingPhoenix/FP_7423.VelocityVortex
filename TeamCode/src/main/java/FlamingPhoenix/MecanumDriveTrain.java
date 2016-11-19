@@ -145,7 +145,7 @@ public class MecanumDriveTrain {
     //
     //Autonomous methods
 
-    public void drive(int d, double power, LinearOpMode opMode) throws InterruptedException {
+    /*public void drive(int d, double power, LinearOpMode opMode) throws InterruptedException {
         backLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         backLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         opMode.idle();
@@ -167,7 +167,7 @@ public class MecanumDriveTrain {
         frontRight.setPower(0);
         backRight.setPower(0);
         backLeft.setPower(0);
-    }
+    }*/
 
     //Drive by using PIDControl - Run to Position
     public void drive(int d, Direction direction, double power, int timeout, LinearOpMode opMode) throws InterruptedException {
@@ -253,30 +253,34 @@ public class MecanumDriveTrain {
         while ((Math.abs(currentTicks) < pulseNeeded) && opMode.opModeIsActive()) {
             currentTicks = backLeft.getCurrentPosition();
             opMode.telemetry.addData("Encoder: ", currentTicks);
+            try {
+                if ((Math.abs(currentTicks) <= 50) && (speed > 600)) { //start slow
+                    backLeft.setMaxSpeed(600);
+                    backRight.setMaxSpeed(600);
+                    frontLeft.setMaxSpeed(600);
+                    frontRight.setMaxSpeed(600);
+                } else if (((pulseNeeded - Math.abs(currentTicks)) < 250) && (speed > 800)) { //slow down
+                    backLeft.setMaxSpeed(800);
+                    backRight.setMaxSpeed(800);
+                    frontLeft.setMaxSpeed(800);
+                    frontRight.setMaxSpeed(800);
+                    DbgLog.msg("[Phoenix] Almost reached; with original speed " + speed);
 
-            if ((Math.abs(currentTicks) <= 50) && (speed > 600)) { //start slow
-                backLeft.setMaxSpeed(600);
-                backRight.setMaxSpeed(600);
-                frontLeft.setMaxSpeed(600);
-                frontRight.setMaxSpeed(600);
-            } else if (((pulseNeeded - Math.abs(currentTicks)) < 250) && (speed > 800)) { //slow down
-                backLeft.setMaxSpeed(800);
-                backRight.setMaxSpeed(800);
-                frontLeft.setMaxSpeed(800);
-                frontRight.setMaxSpeed(800);
-                DbgLog.msg("[Phoenix] Almost reached; with original speed " + speed);
+                } else {
+                    backLeft.setMaxSpeed(speed);
+                    backRight.setMaxSpeed(speed);
+                    frontLeft.setMaxSpeed(speed);
+                    frontRight.setMaxSpeed(speed);
+                }
 
-            } else {
-                backLeft.setMaxSpeed(speed);
-                backRight.setMaxSpeed(speed);
-                frontLeft.setMaxSpeed(speed);
-                frontRight.setMaxSpeed(speed);
+                frontLeft.setPower(power);
+                frontRight.setPower(power);
+                backRight.setPower(power);
+                backLeft.setPower(power);
             }
-
-            frontLeft.setPower(power);
-            frontRight.setPower(power);
-            backRight.setPower(power);
-            backLeft.setPower(power);
+            catch (NullPointerException e) {
+                DbgLog.msg("[Phoenix] you got a null pointer exception");
+            }
             DbgLog.msg("[Phoenix] Back Left encoder: " + backLeft.getCurrentPosition());
             DbgLog.msg("[Phoenix] Back Right encoder: " + backRight.getCurrentPosition());
         }
@@ -641,7 +645,7 @@ public class MecanumDriveTrain {
     }
 
 
-    public void strafe(int distance, int speed, TurnDirection direction, VuforiaTrackableDefaultListener image, LinearOpMode opMode) throws InterruptedException {
+    public boolean strafe(int distance, int speed, TurnDirection direction, VuforiaTrackableDefaultListener image, LinearOpMode opMode) throws InterruptedException {
         backLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         backLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         backRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -663,10 +667,18 @@ public class MecanumDriveTrain {
         double x = 0;
         double y = distance;
 
-        while(opMode.opModeIsActive() && y >= (double) distance) {
+        int i = 0;
+
+        if(image.getPose() == null) {
+            return false;
+        }
+
+        while(opMode.opModeIsActive() && y >= (double) distance && i <= 50) {
             OpenGLMatrix pos = image.getPose();
 
             if(pos != null) {
+                DbgLog.msg("[Phoenix - main] i see the image!");
+                i = 0;
                 translation = pos.getTranslation();
 
                 x = translation.get(0) * -1;
@@ -743,7 +755,10 @@ public class MecanumDriveTrain {
                     DbgLog.msg("[Phoenix] null point exception here");
                 }
             }
-
+            else {
+                i++;
+            }
+            DbgLog.msg("[Phoenix - main] i = " + i);
             opMode.idle();
         }
 
@@ -751,6 +766,8 @@ public class MecanumDriveTrain {
         frontRight.setPower(0);
         backRight.setPower(0);
         backLeft.setPower(0);
+        DbgLog.msg("[Phoenix - main] i done = " + i);
+        return true;
     }
 
     public void driveUntilWhite(double power, OpticalDistanceSensor opt, LinearOpMode opMode) {
