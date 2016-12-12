@@ -15,6 +15,7 @@ import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.robotcore.external.matrices.OpenGLMatrix;
 import org.firstinspires.ftc.robotcore.external.matrices.VectorF;
+import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackable;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackableDefaultListener;
 
 //Chassis
@@ -291,123 +292,11 @@ public class MecanumDriveTrain {
         backLeft.setPower(0);
     }
 
-
-    public void turnUsingGyro(int degree, double power, TurnDirection direction, boolean bothWheels, ModernRoboticsI2cGyro gyro, LinearOpMode opModeInstance) throws InterruptedException {
+    public void turnWithGyro(int degree, double power, TurnDirection direction, ModernRoboticsI2cGyro gyro, LinearOpMode opMode) throws InterruptedException {
         while (gyro.isCalibrating())
             Thread.sleep(50);
 
-        int startHeading = gyro.getHeading();
-        int newHeading = startHeading + (direction == TurnDirection.RIGHT ? degree : direction == TurnDirection.RIGHT_FORWARD ? degree : degree * -1);
-        opModeInstance.telemetry.addData("startHeading: ", startHeading);
-        opModeInstance.telemetry.addData("newHeading: ", newHeading);
-
-        double speed = Math.abs(power);
-
-        int targetOffset = getOffsetToTarget(startHeading, newHeading, direction, gyro, opModeInstance);
-        DbgLog.msg("[Phoenix] targetOffset =  " + Integer.toString(targetOffset));
-        int previousOffset = targetOffset;
-        while (targetOffset > 2) {
-            int degreeChanged = Math.abs(targetOffset - previousOffset);
-            if (degreeChanged >= targetOffset)
-                speed = 0;
-            else if (targetOffset == previousOffset) {
-                if (speed == 0)
-                    speed = 0.05;
-                double speedAdjustment = speed * 1.1;
-                if (speedAdjustment <= power)
-                    speed = speedAdjustment;
-                else
-                    speed = Math.abs(power);
-            } else if (targetOffset <= 10)
-                speed = 0.005;
-
-
-            if ((direction == TurnDirection.RIGHT) || (direction == TurnDirection.RIGHT_FORWARD)) {
-                if (bothWheels) {
-                    frontRight.setPower(speed);
-                    backRight.setPower(speed);
-                    frontLeft.setPower(speed * -1);
-                    backLeft.setPower(speed * -1);
-                } else if (direction == TurnDirection.RIGHT_FORWARD) {
-                    frontRight.setPower(0);
-                    backRight.setPower(0);
-                    frontLeft.setPower(speed * -1);
-                    backLeft.setPower(speed * -1);
-                } else {
-                    frontRight.setPower(speed);
-                    backRight.setPower(speed);
-                    frontLeft.setPower(0);
-                    backLeft.setPower(0);
-                }
-            } else {
-                if (bothWheels) {
-                    frontRight.setPower(speed * -1);
-                    backRight.setPower(speed * -1);
-                    frontLeft.setPower(speed);
-                    backLeft.setPower(speed);
-                } else if (direction == TurnDirection.LEFT_FORWARD) {
-                    frontRight.setPower(speed * -1);
-                    backRight.setPower(speed * -1);
-                    frontLeft.setPower(0);
-                    backLeft.setPower(0);
-                } else {
-                    frontRight.setPower(0);
-                    backRight.setPower(0);
-                    frontLeft.setPower(speed);
-                    backLeft.setPower(speed);
-                }
-            }
-            previousOffset = targetOffset;
-            opModeInstance.idle();
-            targetOffset = getOffsetToTarget(startHeading, newHeading, direction, gyro, opModeInstance);
-            DbgLog.msg("[Phoenix] targetOffset =  " + Integer.toString(targetOffset));
-        }
-
-        frontRight.setPower(0);
-        backRight.setPower(0);
-        frontRight.setPower(0);
-        backLeft.setPower(0);
-        opModeInstance.idle();
-
-        opModeInstance.telemetry.addData("startHeading: ", startHeading);
-        opModeInstance.telemetry.addData("newHeading: ", newHeading);
-        int finalHeading = gyro.getHeading();
-        opModeInstance.telemetry.addData("Final Heading", finalHeading);
-    }
-
-    private int getOffsetToTarget(int startHeading, int newHeading, TurnDirection direction, ModernRoboticsI2cGyro gyro, OpMode OpModeInstance) {
-        int currentHeading = gyro.getHeading();
-        OpModeInstance.telemetry.addData("current Heading ", currentHeading);
-        OpModeInstance.telemetry.addData("startHeading: ", startHeading);
-        OpModeInstance.telemetry.addData("newHeading: ", newHeading);
-
-        DbgLog.msg("[Phoenix] currentHeading =  " + Integer.toString(currentHeading));
-        DbgLog.msg("[Phoenix] startHeading =  " + Integer.toString(startHeading));
-        DbgLog.msg("[Phoenix] newHeading =  " + Integer.toString(newHeading));
-
-        if ((direction == TurnDirection.RIGHT) || direction == TurnDirection.RIGHT_FORWARD) {
-            if ((currentHeading < startHeading) && ((currentHeading >= 0) && (currentHeading < 180) && (startHeading >= 180))) {
-                currentHeading += 360;
-            } else if ((Math.abs(currentHeading - startHeading) == 1) || ((currentHeading == 359) && (startHeading == 0)))
-                currentHeading = startHeading;
-
-            return newHeading - currentHeading;
-        } else {
-            if ((currentHeading > startHeading) && ((currentHeading >= 180) && (currentHeading < 360) && (startHeading >= 0) && (startHeading < 180))) {
-                currentHeading -= 360;
-            } else if ((Math.abs(currentHeading - startHeading) == 1) || ((currentHeading == 0) && (startHeading == 359))) {
-                currentHeading = startHeading;
-            }
-
-            return currentHeading - newHeading;
-        }
-    }
-
-    public void turnWithGyro(int degree, double power, TurnDirection direction, boolean allWheels, ModernRoboticsI2cGyro gyro, LinearOpMode opMode) throws InterruptedException {
-        while (gyro.isCalibrating())
-            Thread.sleep(50);
-
-        gyro.resetZAxisIntegrator();
+        //gyro.resetZAxisIntegrator();
 
         int startHeading = gyro.getIntegratedZValue();
         int targetHeading = startHeading + (direction == TurnDirection.RIGHT ? degree * -1 : degree);
@@ -509,7 +398,6 @@ public class MecanumDriveTrain {
 
         return m;
     }
-
 
     //strafe by using the wheel rotation speed
     public void strafe(int distance, int speed, TurnDirection direction, LinearOpMode opMode) throws InterruptedException {
@@ -644,21 +532,22 @@ public class MecanumDriveTrain {
         backLeft.setPower(0);
     }
 
-
-    public boolean strafe(int distance, int speed, TurnDirection direction, VuforiaTrackableDefaultListener image, LinearOpMode opMode) throws InterruptedException {
-        backLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        backLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        backRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        backRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        frontLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        frontLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        frontRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        frontRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        opMode.idle();
-        backLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        backRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        frontLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+    public boolean strafe(int distance, int speed, TurnDirection direction, VuforiaTrackable imageObject, LinearOpMode opMode) throws InterruptedException {
+            backLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            backLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            backRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            backRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            frontLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            frontLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            frontRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            frontRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            opMode.idle();
+            backLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            backRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            frontLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         frontRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+        VuforiaTrackableDefaultListener image = (VuforiaTrackableDefaultListener) imageObject.getListener();
 
         double adjustmentUnit = 50;
         DbgLog.msg("[Phoenix] adjustmentUnit: " + adjustmentUnit);
@@ -670,14 +559,22 @@ public class MecanumDriveTrain {
         int i = 0;
 
         if(image.getPose() == null) {
-            return false;
+            opMode.sleep(500);
+
+            DbgLog.msg("[Phoenix image] first try, cannot see " + imageObject.getName());
+
+            if (image.getPose() == null) {
+                DbgLog.msg("[Phoenix image] cannot see " + imageObject.getName());
+
+                return false; //Camera does not see image, return false
+            }
         }
 
         while(opMode.opModeIsActive() && y >= (double) distance && i <= 50) {
             OpenGLMatrix pos = image.getPose();
 
             if(pos != null) {
-                DbgLog.msg("[Phoenix - main] i see the image!");
+                DbgLog.msg("[Phoenix image] sees " + imageObject.getName());
                 i = 0;
                 translation = pos.getTranslation();
 
@@ -686,7 +583,7 @@ public class MecanumDriveTrain {
                 DbgLog.msg("[Phoenix] y: " + y);
 
                 double angle = Math.toDegrees(Math.atan2(x, y));
-                DbgLog.msg("[Phoenix] angle: " + angle);
+                DbgLog.msg("[Phoenix image] angle: " + angle);
                 opMode.telemetry.addData("angle ", angle);
 
                 int frontLeftSpeed = Math.abs(speed); //we need to determine if we need to adjust the left front power to adjust for direction to the right
@@ -752,13 +649,16 @@ public class MecanumDriveTrain {
                     }
 
                 } catch (Exception e) {
-                    DbgLog.msg("[Phoenix] null point exception here");
+                    DbgLog.msg("[Phoenix image] null point exception here while tracking " + imageObject.getName());
                 }
             }
             else {
                 i++;
+
+                DbgLog.msg("[Phoenix image] stop seeing " + imageObject.getName());
+                DbgLog.msg("[Phoenix image] last y= " + Double.toString(y));
             }
-            DbgLog.msg("[Phoenix - main] i = " + i);
+            DbgLog.msg("[Phoenix image] i = " + i);
             opMode.idle();
         }
 
@@ -766,7 +666,132 @@ public class MecanumDriveTrain {
         frontRight.setPower(0);
         backRight.setPower(0);
         backLeft.setPower(0);
-        DbgLog.msg("[Phoenix - main] i done = " + i);
+        DbgLog.msg("[Phoenix image] i done = " + i);
+        return true;
+    }
+
+    public boolean strafe(int distance, int speed, TurnDirection direction, VuforiaTrackable imageObject, ModernRoboticsI2cGyro gyro, LinearOpMode opMode) throws InterruptedException {
+        backLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        backLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        backRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        backRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        frontLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        frontLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        frontRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        frontRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        opMode.idle();
+        backLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        backRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        frontLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        frontRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+        VuforiaTrackableDefaultListener image = (VuforiaTrackableDefaultListener) imageObject.getListener();
+
+        int adjustmentUnit = 200;
+        DbgLog.msg("[Phoenix] adjustmentUnit: " + adjustmentUnit);
+
+        VectorF translation;
+        double x = 0;
+        double y = distance;
+
+        int i = 0;
+
+        if(image.getPose() == null) {
+            opMode.sleep(500);
+
+            DbgLog.msg("[Phoenix image] first try, cannot see " + imageObject.getName());
+
+            if (image.getPose() == null) {
+                DbgLog.msg("[Phoenix image] cannot see " + imageObject.getName());
+
+                return false; //Camera does not see image, return false
+            }
+        }
+
+        while(opMode.opModeIsActive() && y >= (double) distance && i <= 50) {
+            OpenGLMatrix pos = image.getPose();
+
+            if(pos != null) {
+                DbgLog.msg("[Phoenix image] sees " + imageObject.getName());
+                i = 0;
+                translation = pos.getTranslation();
+
+                x = translation.get(0) * -1;
+                y = translation.get(2) * -1;
+                DbgLog.msg("[Phoenix] y: " + y);
+
+                double angle = Math.toDegrees(Math.atan2(x, y));
+                DbgLog.msg("[Phoenix image] angle: " + angle);
+                opMode.telemetry.addData("angle ", angle);
+
+                int frontLeftSpeed = Math.abs(speed); //we need to determine if we need to adjust the left front power to adjust for direction to the right
+                int backLeftSpeed = Math.abs(speed); //this is to increase the back left if we need to go left
+                int frontRightSpeed = Math.abs(speed); //need to increase this power if need to move the left
+                int backRightSpeed= Math.abs(speed);
+
+                int powerAdjustment = 0;
+                if (x > 1) //direction has change more than 1 degree, let's calculate how much power we need to adjust
+                    powerAdjustment = adjustmentUnit;
+                else if (x == 0) {
+                    powerAdjustment = 0;
+                }
+                else if (x < 0) {
+                    powerAdjustment *= -1;
+                }
+
+                try {
+
+                    if (direction == TurnDirection.LEFT) {
+                        frontLeftSpeed = frontLeftSpeed * -1 + powerAdjustment;
+                        frontRightSpeed += powerAdjustment;
+                        backLeftSpeed += powerAdjustment;
+                        backRightSpeed = backRightSpeed * -1 + powerAdjustment;
+
+                        frontLeft.setMaxSpeed(Math.abs(frontLeftSpeed));
+                        backLeft.setMaxSpeed(Math.abs(backLeftSpeed));
+                        frontRight.setMaxSpeed(Math.abs(frontRightSpeed));
+                        backRight.setMaxSpeed(Math.abs(backRightSpeed));
+
+                        frontLeft.setPower(-1);
+                        backLeft.setPower(1);
+                        frontRight.setPower(1);
+                        backRight.setPower(-1);
+                    } else {
+                        frontLeftSpeed += powerAdjustment;
+                        frontRightSpeed = frontLeftSpeed * -1 + powerAdjustment;
+                        backLeftSpeed = backLeftSpeed *-1 + powerAdjustment;
+                        backRightSpeed += powerAdjustment;
+
+                        frontLeft.setMaxSpeed(Math.abs(frontLeftSpeed));
+                        backLeft.setMaxSpeed(Math.abs(backLeftSpeed));
+                        frontRight.setMaxSpeed(Math.abs(frontRightSpeed));
+                        backRight.setMaxSpeed(Math.abs(backRightSpeed));
+
+                        frontLeft.setPower(1);
+                        backLeft.setPower(-1);
+                        frontRight.setPower(-1);
+                        backRight.setPower(1);
+                    }
+
+                } catch (Exception e) {
+                    DbgLog.msg("[Phoenix image] null point exception here while tracking " + imageObject.getName());
+                }
+            }
+            else {
+                i++;
+
+                DbgLog.msg("[Phoenix image] stop seeing " + imageObject.getName());
+                DbgLog.msg("[Phoenix image] last y= " + Double.toString(y));
+            }
+            DbgLog.msg("[Phoenix image] i = " + i);
+            opMode.idle();
+        }
+
+        frontLeft.setPower(0);
+        frontRight.setPower(0);
+        backRight.setPower(0);
+        backLeft.setPower(0);
+        DbgLog.msg("[Phoenix image] i done = " + i);
         return true;
     }
 
@@ -790,5 +815,6 @@ public class MecanumDriveTrain {
         backRight.setPower(0);
         backLeft.setPower(0);
     }
+
 }
 

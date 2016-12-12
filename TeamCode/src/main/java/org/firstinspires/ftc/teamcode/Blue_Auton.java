@@ -6,6 +6,8 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.OpticalDistanceSensor;
+import com.vuforia.HINT;
+import com.vuforia.Vuforia;
 
 import org.firstinspires.ftc.robotcore.external.ClassFactory;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
@@ -47,15 +49,22 @@ public class Blue_Auton extends LinearOpMode {
 
         gyro.calibrate();
 
+        tracker.get(0).setName("Wheels");
+        tracker.get(1).setName("Tools");
+        tracker.get(2).setName("Legos");
+        tracker.get(3).setName("Gears");
+
+        Vuforia.setHint(HINT.HINT_MAX_SIMULTANEOUS_IMAGE_TARGETS, 4);
+
         tracker.activate();
 
         waitForStart();
 
         wheels.drive(28, Direction.BACKWARD, 1500, this);
         wheels.strafe(15, 1700, TurnDirection.LEFT, gyro, this);
-        wheels.drive(32, Direction.BACKWARD, 1500, this);
+        wheels.drive(25, Direction.BACKWARD, 1500, this);
 
-        wheels.strafe(180, 1000, TurnDirection.LEFT, (VuforiaTrackableDefaultListener) tracker.get(0).getListener(), this); //gears is 3
+        wheels.strafe(180, 800, TurnDirection.LEFT, tracker.get(0), this); //gears is 3
         //wheels.strafe(15, .5, TurnDirection.LEFT, gyro, this);
         //wheels.driveUntilWhite(-.09, opt, this);
 
@@ -90,7 +99,11 @@ public class Blue_Auton extends LinearOpMode {
         wheels.strafe(20, 1200, TurnDirection.RIGHT, gyro, this);
         wheels.drive(distanceInBetween, Direction.BACKWARD, 1800, this);
 
-        wheels.strafe(180, 1000, TurnDirection.LEFT, (VuforiaTrackableDefaultListener) tracker.get(2).getListener(), this);
+        boolean sawImage = wheels.strafe(170, 800, TurnDirection.LEFT, tracker.get(2), this);
+
+        if(!sawImage) {
+            wheels.strafe(17, 1000, TurnDirection.LEFT, gyro, this);
+        }
 
         sleep(250);
         red = color.red();
@@ -119,7 +132,7 @@ public class Blue_Auton extends LinearOpMode {
         }
 
         wheels.strafe(10, 1200, TurnDirection.RIGHT, gyro, this);
-        wheels.turnWithGyro(38, .7, TurnDirection.RIGHT, true, gyro, this);
+        wheels.turnWithGyro(38, .7, TurnDirection.RIGHT, gyro, this);
         wheels.drive(60, Direction.FORWARD, 2100, this);
     }
 }
