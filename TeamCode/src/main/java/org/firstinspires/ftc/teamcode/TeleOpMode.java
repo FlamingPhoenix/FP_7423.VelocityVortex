@@ -25,10 +25,10 @@ public class TeleOpMode extends OpMode {
 
     @Override
     public void init() {
-        //DriveTrain = new MecanumDriveTrain("frontleft", "frontright", "backleft", "backright", this);
+        DriveTrain = new MecanumDriveTrain("frontleft", "frontright", "backleft", "backright", this);
 
-        //shooter = hardwareMap.dcMotor.get("farriswheel");
-        //collector = hardwareMap.dcMotor.get("collector");
+        shooter = hardwareMap.dcMotor.get("farriswheel");
+        collector = hardwareMap.dcMotor.get("collector");
 
         //stopper = hardwareMap.servo.get("");
 
@@ -36,18 +36,20 @@ public class TeleOpMode extends OpMode {
 
         stopper.setPosition(.75);
 
-        //shooter.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        //shooter.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        //shooter.setMaxSpeed(1000);
+        shooter.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        shooter.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        shooter.setMaxSpeed(1000);
     }
 
     @Override
     public void loop() {
-        /*shooter.setPower(1);
+        shooter.setPower(1);
+
+        DriveTrain.Drive(gamepad1);
 
         if(gamepad2.a) {
             collector.setPower(1);
-        }*/
+        }
 
         if(gamepad2.right_trigger > .2) {
             stopper.setPosition(.25);
