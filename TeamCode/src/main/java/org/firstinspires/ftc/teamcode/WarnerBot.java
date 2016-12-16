@@ -22,7 +22,7 @@ public class WarnerBot extends OpMode {
 
     @Override
     public void loop() {
-        DriveTrain.Drive(this.gamepad1);
+        DriveTrain.Drive(this.gamepad1, 0.5f);
     }
 }
 

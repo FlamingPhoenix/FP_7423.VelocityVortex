@@ -82,11 +82,12 @@ public class MecanumDriveTrain {
         encoderPPR = EncoderPPR;
     }
 
-    /*
-     * Control or drive the robot using gamepad
-     * @param gamePad
-     */
-    public void Drive(Gamepad gamePad) {
+
+    public void Drive(Gamepad gamePad, float speedMultiplier)
+    {
+        speedMultiplier = Math.abs(speedMultiplier);
+        if (speedMultiplier > 1)
+            speedMultiplier = 1;
 
         float x1;
         float y1;
@@ -103,12 +104,20 @@ public class MecanumDriveTrain {
             x2 = gamePad.right_stick_x * 0.5f;
         }
         else {
-            x1 = gamePad.left_stick_x;
-            y1 = gamePad.left_stick_y;
-            x2 = gamePad.right_stick_x;
+            x1 = gamePad.left_stick_x * speedMultiplier;
+            y1 = gamePad.left_stick_y * speedMultiplier;
+            x2 = gamePad.right_stick_x * speedMultiplier;
         }
 
         mecanumDrive(x1, y1, x2);
+    }
+
+    /*
+     * Control or drive the robot using gamepad
+     * @param gamePad
+     */
+    public void Drive(Gamepad gamePad) {
+        Drive(gamePad, 1);
     }
 
 

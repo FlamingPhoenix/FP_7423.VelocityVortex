@@ -10,6 +10,7 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.Range;
+import com.vuforia.HINT;
 import com.vuforia.Vuforia;
 
 import org.firstinspires.ftc.robotcore.external.ClassFactory;
@@ -61,8 +62,10 @@ public class VuAuto extends LinearOpMode {
         parms.cameraMonitorFeedback = VuforiaLocalizer.Parameters.CameraMonitorFeedback.AXES;
 
         this.vuforia = ClassFactory.createVuforiaLocalizer(parms);
+        Vuforia.setHint(HINT.HINT_MAX_SIMULTANEOUS_IMAGE_TARGETS, 4);
 
         myPanda = vuforia.loadTrackablesFromAsset("FTC_2016-17");
+
         myPanda.get(0).setName("Wheels");
         myPanda.get(1).setName("Tools");
         myPanda.get(2).setName("Legos");
@@ -110,55 +113,55 @@ public class VuAuto extends LinearOpMode {
                 float blp = 0;
                 float brp = 0;
 
+                float td = 600; //Target Distance, in millimeter
 
                 //The following is change the left and right power to turn right or left to follow the object
                 if (Math.abs(d) > 10) { //only move if the target is outside of plus/minus 10 degree angle
-                    flp = 0.4f * (d/Math.abs(d));
+                    flp = 0.15f * (d/Math.abs(d));
                     blp = flp;
 
                     frp = flp * -1;
                     brp = flp * -1;
                 }
+                else {
+                    //The following is to adjust the power to keep a distance from the robot
+                    DbgLog.msg("[Phoenix] Control Distance");
 
-                //The following is to adjust the power to keep a distance from the robot
-                DbgLog.msg("[Phoenix] Control Distance");
+                    float diff = newY - td;
+                    DbgLog.msg("[Phoenix] Diff="+ Float.toString(diff));
+                    if (Math.abs(diff) > 100) {//distance has changed by more than 100 millimeter (10 centermeter)
 
-                float td = 600; //Target Distance, in millimeter
+                        float ap = diff * 0.0020f;
 
-                float diff = newY - td;
-                DbgLog.msg("[Phoenix] Diff="+ Float.toString(diff));
-                if (Math.abs(diff) > 100) {//distance has changed by more than 100 millimeter (10 centermeter)
+                        if (ap > 0.45)
+                            ap = 0.45f;
+                        else if (ap < -0.45)
+                            ap = -0.45f;
 
-                    float ap = diff * 0.0030f;
+                        flp = flp - ap; //move forward or background based on the change in distance
+                        blp = blp + ap;
+                        frp = frp + ap;
+                        brp = brp - ap;
 
-                    if (ap > 0.45)
-                        ap = 0.45f;
-                    else if (ap < -0.45)
-                        ap = -0.45f;
+                        DbgLog.msg("[Phoenix] flp-before-rationalize="+ Float.toString(flp));
+                        DbgLog.msg("[Phoenix] frp-before-rationalize="+ Float.toString(frp));
+                        DbgLog.msg("[Phoenix] blp-before-rationalize="+ Float.toString(blp));
+                        DbgLog.msg("[Phoenix] brp-before-rationalize="+ Float.toString(brp));
 
-                    flp = flp + ap; //move forward or background based on the change in distance
-                    blp = blp - ap;
-                    frp = frp - ap;
-                    brp = brp + ap;
+                        if ((Math.abs(frp) > 1) || (Math.abs(flp) > 1) || (Math.abs(brp) > 1) || (Math.abs(blp) > 1)) { //either left power or right power are greater than 1, too much power
+                            //The following is to adjust the power proportionally between left and right
+                            float lrp = (float) myMax(Math.abs(flp), Math.abs(frp), Math.abs(brp), Math.abs(blp));
 
-                    DbgLog.msg("[Phoenix] flp-before-rationalize="+ Float.toString(flp));
-                    DbgLog.msg("[Phoenix] frp-before-rationalize="+ Float.toString(frp));
-                    DbgLog.msg("[Phoenix] blp-before-rationalize="+ Float.toString(blp));
-                    DbgLog.msg("[Phoenix] brp-before-rationalize="+ Float.toString(brp));
+                            flp = flp / lrp; //adjust the space so it will not be more han 1
+                            frp = frp / lrp;
+                            blp = blp / lrp;
+                            brp = brp / lrp;
 
-                    if ((Math.abs(frp) > 1) || (Math.abs(flp) > 1) || (Math.abs(brp) > 1) || (Math.abs(blp) > 1)) { //either left power or right power are greater than 1, too much power
-                        //The following is to adjust the power proportionally between left and right
-                        float lrp = (float) myMax(Math.abs(flp), Math.abs(frp), Math.abs(brp), Math.abs(blp));
-
-                        flp = flp / lrp; //adjust the space so it will not be more han 1
-                        frp = frp / lrp;
-                        blp = blp / lrp;
-                        brp = brp / lrp;
-
-                        DbgLog.msg("[Phoenix] flp-after-rationalize="+ Float.toString(flp));
-                        DbgLog.msg("[Phoenix] frp-after-rationalize="+ Float.toString(frp));
-                        DbgLog.msg("[Phoenix] blp-after-rationalize="+ Float.toString(blp));
-                        DbgLog.msg("[Phoenix] brp-after-rationalize="+ Float.toString(brp));
+                            DbgLog.msg("[Phoenix] flp-after-rationalize="+ Float.toString(flp));
+                            DbgLog.msg("[Phoenix] frp-after-rationalize="+ Float.toString(frp));
+                            DbgLog.msg("[Phoenix] blp-after-rationalize="+ Float.toString(blp));
+                            DbgLog.msg("[Phoenix] brp-after-rationalize="+ Float.toString(brp));
+                        }
                     }
                 }
 
