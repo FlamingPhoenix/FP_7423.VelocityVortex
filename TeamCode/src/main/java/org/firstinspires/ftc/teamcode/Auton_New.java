@@ -1,9 +1,11 @@
 package org.firstinspires.ftc.teamcode;
 
+import com.qualcomm.ftccommon.DbgLog;
 import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cGyro;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.Servo;
 import com.vuforia.HINT;
 import com.vuforia.Vuforia;
 
@@ -11,9 +13,10 @@ import org.firstinspires.ftc.robotcore.external.ClassFactory;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackables;
 
+import FlamingPhoenix.Direction;
 import FlamingPhoenix.MecanumDriveTrain;
 import FlamingPhoenix.TurnDirection;
-
+import FlamingPhoenix.MyUtility;
 /**
  * Created by HwaA1 on 11/26/2016.
  */
@@ -22,6 +25,10 @@ public class Auton_New extends LinearOpMode {
 
     private VuforiaLocalizer vuforia;
     VuforiaTrackables tracker;
+
+    DcMotor shooter;
+
+    Servo stopper;
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -47,6 +54,13 @@ public class Auton_New extends LinearOpMode {
 
         MecanumDriveTrain wheels = new MecanumDriveTrain("frontleft", "frontright", "backleft", "backright", this);
 
+        shooter = hardwareMap.dcMotor.get("farriswheel");
+        stopper = hardwareMap.servo.get("stopper");
+
+        stopper.setPosition(.75);
+
+        shooter.setMaxSpeed(2400);
+
         gyro.resetZAxisIntegrator();
         gyro.calibrate();
 
@@ -56,6 +70,41 @@ public class Auton_New extends LinearOpMode {
 
         waitForStart();
 
-        wheels.strafe(200, 1000, TurnDirection.LEFT, tracker.get(2), gyro, this);
+        //shooter.setPower(.3);
+        Thread.sleep(1000);
+        //shooter.setPower(1);
+
+        wheels.strafe(8, 1200, TurnDirection.LEFT, gyro,this);
+        //stopper.setPosition(.25);
+        Thread.sleep(2000);
+        //stopper.setPosition(.75);
+
+        Thread.sleep(1000);
+
+        //shooter.setPower(.3);
+
+        wheels.strafe(10, 1200, TurnDirection.LEFT, gyro, this);
+
+        shooter.setPower(0);
+
+        wheels.drive(25, Direction.BACKWARD, 1400, this);
+        wheels.turnWithGyro(90, .45, TurnDirection.LEFT, gyro, this);
+        wheels.drive(30, Direction.FORWARD, 1400, this);
+
+        Thread.sleep(250);
+        int angle = MyUtility.getImageAngle(tracker.get(3));
+
+        DbgLog.msg("[Phoenix] angle: " + angle);
+
+        int turnAngle = Math.abs(90 - angle);
+
+        if(angle < 90)
+            wheels.turnWithGyro(turnAngle, .5, TurnDirection.RIGHT, gyro, this);
+        else if(angle > 90)
+            wheels.turnWithGyro(turnAngle, .5, TurnDirection.LEFT, gyro, this);
+        else {}
+
+        wheels.strafe(200, 1400, TurnDirection.LEFT, tracker.get(3), gyro, this);
     }
+
 }

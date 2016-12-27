@@ -23,6 +23,10 @@ public class TeleOpMode extends OpMode {
 
     boolean isInPosition = false;
 
+    double Onoroff;
+    long counter;
+    boolean stop;
+
     @Override
     public void init() {
         DriveTrain = new MecanumDriveTrain("frontleft", "frontright", "backleft", "backright", this);
@@ -38,20 +42,46 @@ public class TeleOpMode extends OpMode {
 
         shooter.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         shooter.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        shooter.setMaxSpeed(1000);
+        shooter.setMaxSpeed(2500);
+        Onoroff = .3;
+
+        counter = 0;
     }
 
     @Override
     public void loop() {
-        shooter.setPower(1);
+
+        if(gamepad2.right_bumper && gamepad2.left_bumper) {
+            Onoroff = .2;
+            stop = true;
+        }
+        else if(gamepad2.y) {
+            Onoroff = .3;
+            counter = 0;
+            stop = false;
+
+        }
+        else if((counter > 25) && (Onoroff != 0)) { //25 loops is approximately 1 seconds
+            if(stop)
+                Onoroff = 0;
+            else
+                Onoroff = 1;
+        }
+
+        shooter.setPower(Onoroff);
+
+        if(gamepad2.right_bumper) {
+            collector.setPower(1);
+        }
+        else if(gamepad2.left_bumper)
+            collector.setPower(-1);
+        else
+            collector.setPower(0);
+
 
         DriveTrain.Drive(gamepad1);
 
-        if(gamepad2.a) {
-            collector.setPower(1);
-        }
-
-        if(gamepad2.right_trigger > .2) {
+        if((gamepad2.right_trigger > .2) && !(gamepad2.right_bumper) && !stop) {
             stopper.setPosition(.25);
             this.resetStartTime();
             isInPosition = true;
@@ -62,6 +92,7 @@ public class TeleOpMode extends OpMode {
             isInPosition = false;
         }
 
+        counter++;
         this.telemetry.addData("time", this.time);
         this.telemetry.update();
     }
