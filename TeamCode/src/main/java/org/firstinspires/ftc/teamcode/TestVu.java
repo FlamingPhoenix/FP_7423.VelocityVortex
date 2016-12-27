@@ -25,7 +25,6 @@ import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackables;
  * Created by Steve on 11/24/2016.
  */
 @Autonomous(name="test Vuforia", group="test")
-@Disabled()
 public class TestVu extends LinearOpMode {
     private ElapsedTime runtime = new ElapsedTime();
     private VuforiaLocalizer vuforia;
@@ -97,10 +96,12 @@ public class TestVu extends LinearOpMode {
                 float c3z = c3.get(2);
                 float c3w = c3.get(3);
 
+
                 float c2x = c2.get(0);
                 float c2y = c2.get(1);
                 float c2z = c2.get(2);
                 float c2w = c2.get(3);
+                float zAngle = (float) Math.toDegrees(Math.atan2(c2z,c2x));
 
                 float c1x = c1.get(0);
                 float c1y = c1.get(1);
@@ -120,12 +121,11 @@ public class TestVu extends LinearOpMode {
                 DbgLog.msg("c1 x,y,z", "%5.3f %5.3f %5.3f", c1x, c1y, c1z);
                 DbgLog.msg("c0 x,y,z", "%5.3f %5.3f %5.3f", c0x, c0y, c0z);
 
-                telemetry.addData("c2 x,y,z", "%5.3f %5.3f %5.3f", c2x, c2y, c2z);
+                telemetry.addData("c3 x,y,z", "%5.3f %5.3f %5.3f %6.3f", c3x, c3y, c3z, direction);
+                telemetry.addData("c2 x,y,z", "%5.3f %5.3f %5.3f %6.3f", c2x, c2y, c2z, zAngle);
                 telemetry.addData("c1 x,y,z", "%5.3f %5.3f %5.3f", c1x, c1y, c1z);
                 telemetry.addData("c0 x,y,z", "%5.3f %5.3f %5.3f", c0x, c0y, c0z);
-                telemetry.addData("angle", "%5.3f", angle);
-                telemetry.addData("direction", "%5.3f", direction);
-                telemetry.addData("a1, a2, a3", "%2.3f %2.3f %2.3f", a1, a2, a3);
+
                 telemetry.update();
             }
             this.idle();

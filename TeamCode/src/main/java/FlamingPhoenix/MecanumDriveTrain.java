@@ -691,6 +691,138 @@ public class MecanumDriveTrain {
         return true;
     }
 
+    //Use power to control the robot by following Vuforia object
+    public boolean strafe(int distance, double power, TurnDirection direction, VuforiaTrackable imageObject, LinearOpMode opMode) throws InterruptedException {
+        VuforiaTrackableDefaultListener image = (VuforiaTrackableDefaultListener) imageObject.getListener();
+
+        double xAdjustmentUnit = 0.05;
+        double angleAdjustmentUnit = 0.1;
+        double angleAdjustment = 0;
+        int angleDifference = 0;
+
+        DbgLog.msg("[Phoenix:strafe] adjustmentUnit: " + xAdjustmentUnit);
+
+        VectorF translation;
+        double x = 0;
+        double y = distance;
+
+        int i = 0;
+
+        if(image.getPose() == null) {
+            opMode.sleep(500);
+
+            DbgLog.msg("[Phoenix:strafe] image first try, cannot see " + imageObject.getName());
+
+            if (image.getPose() == null) {
+                DbgLog.msg("[Phoenix:strafe] image cannot see " + imageObject.getName());
+
+                return false; //Camera does not see image, return false
+            }
+        }
+
+        while(opMode.opModeIsActive() && y >= (double) distance && i <= 50) {
+            OpenGLMatrix pos = image.getPose();
+
+            if(pos != null) {
+                DbgLog.msg("[Phoenix:strafe] sees image " + imageObject.getName());
+                i = 0;
+                translation = pos.getTranslation();
+
+                x = translation.get(0) * -1;
+                y = translation.get(2) * -1;
+
+                double angle = Math.toDegrees(Math.atan2(x, y));
+                DbgLog.msg("[Phoenix:strafe] image angle: " + angle);
+                opMode.telemetry.addData("angle ", angle);
+
+                double frontLeftSpeed = Math.abs(power); //we need to determine if we need to adjust the left front power to adjust for direction to the right
+                double backLeftSpeed = Math.abs(power); //this is to increase the back left if we need to go left
+                double frontRightSpeed = Math.abs(power); //need to increase this power if need to move the left
+                double backRightSpeed= Math.abs(power);
+
+                double xPowerAdjustment = 0;
+
+                if (x > 15) //distance is more than 15 mm, lets adjust the power proportionally
+                    xPowerAdjustment = xAdjustmentUnit * x;
+                else if (x < -15)
+                    xPowerAdjustment = -1 * xAdjustmentUnit * x;
+                else
+                    xPowerAdjustment = 0;
+
+                DbgLog.msg("[Phoenix:Strafe] x=%7.2f powerAdjustment=%5d", x, xPowerAdjustment);
+
+
+                //Adjust the power to turn the robot so it would be perpendecular to the image
+                int zAngle = MyUtility.getImageAngle(imageObject);
+                if (Math.abs(90 - zAngle) > 1)  //The robot is no longer parallel to beacon
+                {
+                    if ((Math.abs(90 - zAngle) > (angleDifference + 2)) && ((angleDifference / (90 - zAngle)) == 1))
+                        angleAdjustmentUnit = angleAdjustmentUnit * 2;
+                    else if (((angleDifference / (90 - zAngle)) == -1))
+                        angleAdjustmentUnit = angleAdjustmentUnit / 2;
+
+                    angleDifference = Math.abs(90 - zAngle);
+                    angleAdjustment = angleAdjustment * angleDifference;
+                }
+                else
+                    angleAdjustment = 0;
+
+                try {
+                    if (direction == TurnDirection.LEFT) {
+                        frontLeftSpeed = frontLeftSpeed * -1 + xPowerAdjustment;
+                        frontRightSpeed += xPowerAdjustment;
+                        backLeftSpeed += xPowerAdjustment;
+                        backRightSpeed = backRightSpeed * -1 + xPowerAdjustment;
+
+                        if (zAngle < 90)  //need to turn left by giving more power to the front wheels
+                        {
+                            frontLeftSpeed += angleAdjustment;
+                            frontRightSpeed += angleAdjustment;
+                        }
+                        else if (zAngle > 90)  //need to turn right by giving more power to the back wheels
+                        {
+                            backLeftSpeed += angleAdjustment;
+                            backRightSpeed += angleAdjustment;
+                        }
+
+                        frontLeft.setPower(-1 * frontLeftSpeed);
+                        backLeft.setPower(1 * backLeftSpeed);
+                        frontRight.setPower(1 * frontRightSpeed);
+                        backRight.setPower(-1 * backRightSpeed);
+                    } else {
+                        frontLeftSpeed += xPowerAdjustment;
+                        frontRightSpeed = frontLeftSpeed * -1 + xPowerAdjustment;
+                        backLeftSpeed = backLeftSpeed *-1 + xPowerAdjustment;
+                        backRightSpeed += xPowerAdjustment;
+
+                        frontLeft.setPower(1 * frontLeftSpeed);
+                        backLeft.setPower(-1 * backLeftSpeed);
+                        frontRight.setPower(-1 * frontRightSpeed);
+                        backRight.setPower(1 * backRightSpeed);
+                    }
+
+                } catch (Exception e) {
+                    DbgLog.msg("[Phoenix:strafe] image null point exception here while tracking " + imageObject.getName());
+                }
+            }
+            else {
+                i++;
+
+                DbgLog.msg("[Phoenix:strafe] image stop seeing " + imageObject.getName());
+                DbgLog.msg("[Phoenix:strafe] image last y= " + Double.toString(y));
+            }
+            DbgLog.msg("[Phoenix:strafe] i = " + i);
+            opMode.idle();
+        }
+
+        frontLeft.setPower(0);
+        frontRight.setPower(0);
+        backRight.setPower(0);
+        backLeft.setPower(0);
+        DbgLog.msg("[Phoenix:strafe] i done = " + i);
+        return true;
+    }
+
     public boolean strafe(int distance, int speed, TurnDirection direction, VuforiaTrackable imageObject, ModernRoboticsI2cGyro gyro, LinearOpMode opMode) throws InterruptedException {
         backLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         backLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
