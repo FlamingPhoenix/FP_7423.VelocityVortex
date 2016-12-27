@@ -29,7 +29,7 @@ import FlamingPhoenix.TurnDirection;
  */
 
 @Autonomous(name = "Red_Auton", group = "Practice")
-public class Practice_Auton extends LinearOpMode {
+public class Red_Auton extends LinearOpMode {
 
     private VuforiaLocalizer vuforia;
     VuforiaTrackables tracker;
