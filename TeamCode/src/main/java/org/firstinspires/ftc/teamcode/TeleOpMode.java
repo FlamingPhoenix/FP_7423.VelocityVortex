@@ -24,7 +24,7 @@ public class TeleOpMode extends OpMode {
     boolean isInPosition = false;
 
     double Onoroff;
-    long counter;
+    int counter;
     boolean stop;
 
     @Override
@@ -42,8 +42,8 @@ public class TeleOpMode extends OpMode {
 
         shooter.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         shooter.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        shooter.setMaxSpeed(2500);
-        Onoroff = .3;
+        shooter.setMaxSpeed(960);
+        Onoroff = 0;
 
         counter = 0;
     }
@@ -61,7 +61,7 @@ public class TeleOpMode extends OpMode {
             stop = false;
 
         }
-        else if((counter > 25) && (Onoroff != 0)) { //25 loops is approximately 1 seconds
+        else if((counter > 10) && (Onoroff != 0)) { //25 loops is approximately 1 seconds
             if(stop)
                 Onoroff = 0;
             else
@@ -93,6 +93,9 @@ public class TeleOpMode extends OpMode {
         }
 
         counter++;
+
+        if(counter >= 100)
+            counter = 100;
         this.telemetry.addData("time", this.time);
         this.telemetry.update();
     }

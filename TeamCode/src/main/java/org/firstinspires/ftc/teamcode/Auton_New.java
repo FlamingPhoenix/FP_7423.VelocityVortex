@@ -59,7 +59,7 @@ public class Auton_New extends LinearOpMode {
 
         stopper.setPosition(.75);
 
-        shooter.setMaxSpeed(2400);
+        shooter.setMaxSpeed(400);
 
         gyro.resetZAxisIntegrator();
         gyro.calibrate();
@@ -70,25 +70,35 @@ public class Auton_New extends LinearOpMode {
 
         waitForStart();
 
-        //shooter.setPower(.3);
-        Thread.sleep(1000);
-        //shooter.setPower(1);
+
+        shooter.setPower(.3);
+        Thread.sleep(500);
+        shooter.setPower(1);
 
         wheels.strafe(8, 1200, TurnDirection.LEFT, gyro,this);
-        //stopper.setPosition(.25);
+        stopper.setPosition(.25);
         Thread.sleep(2000);
-        //stopper.setPosition(.75);
+        stopper.setPosition(.75);
 
         Thread.sleep(1000);
 
-        //shooter.setPower(.3);
+        shooter.setPower(.3);
 
         wheels.strafe(10, 1200, TurnDirection.LEFT, gyro, this);
 
         shooter.setPower(0);
 
         wheels.drive(25, Direction.BACKWARD, 1400, this);
-        wheels.turnWithGyro(90, .45, TurnDirection.LEFT, gyro, this);
+
+        int heading = gyro.getIntegratedZValue();
+        if(heading < 0)  {
+            int degreesNeeded = Math.abs(heading);
+            wheels.turnWithGyro(degreesNeeded, .6, TurnDirection.RIGHT, gyro, this);
+        } else if(heading > 0) {
+            int degreesNeeded = Math.abs(heading);
+            wheels.turnWithGyro(degreesNeeded, .6, TurnDirection.LEFT, gyro, this);
+        }
+
         wheels.drive(30, Direction.FORWARD, 1400, this);
 
         Thread.sleep(250);
@@ -105,6 +115,9 @@ public class Auton_New extends LinearOpMode {
         else {}
 
         wheels.strafe(200, 1400, TurnDirection.LEFT, tracker.get(3), gyro, this);
+
+
+        wheels.strafe(200, .5, TurnDirection.LEFT, tracker.get(3), this);
     }
 
 }

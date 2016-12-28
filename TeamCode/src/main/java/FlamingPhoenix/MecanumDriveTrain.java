@@ -695,10 +695,11 @@ public class MecanumDriveTrain {
     public boolean strafe(int distance, double power, TurnDirection direction, VuforiaTrackable imageObject, LinearOpMode opMode) throws InterruptedException {
         VuforiaTrackableDefaultListener image = (VuforiaTrackableDefaultListener) imageObject.getListener();
 
-        double xAdjustmentUnit = 0.05;
-        double angleAdjustmentUnit = 0.1;
+        double xAdjustmentUnit = 0.003;
+        double angleAdjustmentUnit = 0.05;
         double angleAdjustment = 0;
-        int angleDifference = 0;
+        double angleDifference = 0;
+
 
         DbgLog.msg("[Phoenix:strafe] adjustmentUnit: " + xAdjustmentUnit);
 
@@ -743,46 +744,58 @@ public class MecanumDriveTrain {
                 double xPowerAdjustment = 0;
 
                 if (x > 15) //distance is more than 15 mm, lets adjust the power proportionally
-                    xPowerAdjustment = xAdjustmentUnit * x;
+                    xPowerAdjustment = xAdjustmentUnit * Math.abs(x);
                 else if (x < -15)
-                    xPowerAdjustment = -1 * xAdjustmentUnit * x;
+                    xPowerAdjustment = -1 *  xAdjustmentUnit * Math.abs(x);
                 else
                     xPowerAdjustment = 0;
 
-                DbgLog.msg("[Phoenix:Strafe] x=%7.2f powerAdjustment=%5d", x, xPowerAdjustment);
-
+                DbgLog.msg("[Phoenix:Strafe] x=%7.2f powerAdjustment=%5.2f", x, xPowerAdjustment);
 
                 //Adjust the power to turn the robot so it would be perpendecular to the image
-                int zAngle = MyUtility.getImageAngle(imageObject);
+                double zAngle = (double) MyUtility.getImageAngle(imageObject);
                 if (Math.abs(90 - zAngle) > 1)  //The robot is no longer parallel to beacon
                 {
-                    if ((Math.abs(90 - zAngle) > (angleDifference + 2)) && ((angleDifference / (90 - zAngle)) == 1))
-                        angleAdjustmentUnit = angleAdjustmentUnit * 2;
-                    else if (((angleDifference / (90 - zAngle)) == -1))
-                        angleAdjustmentUnit = angleAdjustmentUnit / 2;
+                    if ((angleDifference > 0 && (90-zAngle) <0) || (angleDifference < 0 && (90-zAngle) >0))
+                        angleAdjustmentUnit = angleAdjustmentUnit / 2.0;
+                    else if (Math.abs(90 - zAngle) > (Math.abs(angleDifference) + 4))
+                        angleAdjustmentUnit = angleAdjustmentUnit * 2.0;
 
-                    angleDifference = Math.abs(90 - zAngle);
-                    angleAdjustment = angleAdjustment * angleDifference;
+                    angleDifference = 90 - zAngle;
+                    angleAdjustment = Math.abs(angleDifference) * angleAdjustmentUnit;
                 }
                 else
                     angleAdjustment = 0;
 
+                if(angleAdjustment > .4)
+                    angleAdjustment = .4;
+
+                DbgLog.msg("[Phoenix:Strafe] zAngle=%5.2f  angleAdjustment=%5.2f angleDifference=%5.2f angleAdjustmentUnit=%7.5f", zAngle, angleAdjustment, angleDifference, angleAdjustmentUnit);
+
                 try {
                     if (direction == TurnDirection.LEFT) {
-                        frontLeftSpeed = frontLeftSpeed * -1 + xPowerAdjustment;
+                        frontLeftSpeed = frontLeftSpeed + (-1 * xPowerAdjustment);
                         frontRightSpeed += xPowerAdjustment;
                         backLeftSpeed += xPowerAdjustment;
-                        backRightSpeed = backRightSpeed * -1 + xPowerAdjustment;
+                        backRightSpeed = backRightSpeed + (-1 * xPowerAdjustment);
 
-                        if (zAngle < 90)  //need to turn left by giving more power to the front wheels
+                        if (zAngle < 90)  //need to turn right by giving more power to the back wheels
+                        {
+                            backLeftSpeed += angleAdjustment;
+                            backRightSpeed += angleAdjustment;
+                        }
+                        else if (zAngle > 90)  //need to turn left by giving more power to the front wheels
                         {
                             frontLeftSpeed += angleAdjustment;
                             frontRightSpeed += angleAdjustment;
                         }
-                        else if (zAngle > 90)  //need to turn right by giving more power to the back wheels
-                        {
-                            backLeftSpeed += angleAdjustment;
-                            backRightSpeed += angleAdjustment;
+
+                        if (max(frontLeftSpeed, frontRightSpeed, backLeftSpeed, backRightSpeed) > 1) {
+                            double mv = max(frontLeftSpeed, frontRightSpeed, backLeftSpeed, backRightSpeed);
+                            frontLeftSpeed = frontLeftSpeed * (frontLeftSpeed /mv);
+                            frontRightSpeed = frontRightSpeed * (frontRightSpeed /mv);
+                            backLeftSpeed =backLeftSpeed * (backLeftSpeed/mv);
+                            backRightSpeed =backRightSpeed * (backRightSpeed/mv);
                         }
 
                         frontLeft.setPower(-1 * frontLeftSpeed);
