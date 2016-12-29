@@ -96,7 +96,7 @@ public class RedFar extends LinearOpMode {
 
         wheels.strafe(60, 1300, TurnDirection.LEFT, gyro, this);
 
-        wheels.turnWithGyro(180, .3, TurnDirection.LEFT, gyro, this);
+        wheels.turnWithGyro(150, .3, TurnDirection.LEFT, gyro, this);
 
         wheels.drive(65, Direction.FORWARD, 1300, this);
     }
