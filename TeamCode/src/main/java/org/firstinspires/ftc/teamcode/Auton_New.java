@@ -4,7 +4,9 @@ import com.qualcomm.ftccommon.DbgLog;
 import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cGyro;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.GyroSensor;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.vuforia.HINT;
 import com.vuforia.Vuforia;
@@ -30,6 +32,8 @@ public class Auton_New extends LinearOpMode {
 
     Servo stopper;
 
+    ColorSensor color;
+
     @Override
     public void runOpMode() throws InterruptedException {
         VuforiaLocalizer.Parameters parms = new VuforiaLocalizer.Parameters(R.id.cameraMonitorViewId);
@@ -49,6 +53,9 @@ public class Auton_New extends LinearOpMode {
 
         gyro.resetZAxisIntegrator();
 
+        color = hardwareMap.colorSensor.get("color");
+        color.enableLed(true);
+
         while (gyro.isCalibrating() && this.opModeIsActive())
             Thread.sleep(50);
 
@@ -59,7 +66,10 @@ public class Auton_New extends LinearOpMode {
 
         stopper.setPosition(.75);
 
-        shooter.setMaxSpeed(400);
+        shooter.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        this.idle();
+        shooter.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        shooter.setMaxSpeed(960);
 
         gyro.resetZAxisIntegrator();
         gyro.calibrate();
@@ -70,36 +80,30 @@ public class Auton_New extends LinearOpMode {
 
         waitForStart();
 
-
         shooter.setPower(.3);
-        Thread.sleep(500);
+        Thread.sleep(100);
+        shooter.setMaxSpeed(960);
         shooter.setPower(1);
 
-        wheels.strafe(8, 1200, TurnDirection.LEFT, gyro,this);
+        wheels.strafe(5, 1500, TurnDirection.LEFT, this);
+        Thread.sleep(500);
+
         stopper.setPosition(.25);
-        Thread.sleep(2000);
+        Thread.sleep(1500);
         stopper.setPosition(.75);
-
-        Thread.sleep(1000);
-
-        shooter.setPower(.3);
 
         wheels.strafe(10, 1200, TurnDirection.LEFT, gyro, this);
 
         shooter.setPower(0);
 
-        wheels.drive(25, Direction.BACKWARD, 1400, this);
+        wheels.drive(30, Direction.BACKWARD, 1400, this);
 
-        int heading = gyro.getIntegratedZValue();
-        if(heading < 0)  {
-            int degreesNeeded = Math.abs(heading);
-            wheels.turnWithGyro(degreesNeeded, .6, TurnDirection.RIGHT, gyro, this);
-        } else if(heading > 0) {
-            int degreesNeeded = Math.abs(heading);
-            wheels.turnWithGyro(degreesNeeded, .6, TurnDirection.LEFT, gyro, this);
-        }
+        int degreesNeeded = Math.abs(90 - gyro.getIntegratedZValue());
+        wheels.turnWithGyro(degreesNeeded, .35, TurnDirection.LEFT, gyro, this);
 
-        wheels.drive(30, Direction.FORWARD, 1400, this);
+        wheels.driveUntilImage(40, .15, Direction.FORWARD, tracker.get(3), this);
+
+        Thread.sleep(10000);
 
         Thread.sleep(250);
         int angle = MyUtility.getImageAngle(tracker.get(3));
@@ -114,10 +118,10 @@ public class Auton_New extends LinearOpMode {
             wheels.turnWithGyro(turnAngle, .5, TurnDirection.LEFT, gyro, this);
         else {}
 
-        wheels.strafe(200, 1400, TurnDirection.LEFT, tracker.get(3), gyro, this);
+        wheels.resetMotorSpeed();
+        wheels.strafe(200, .35, TurnDirection.LEFT, tracker.get(3), this);
 
-
-        wheels.strafe(200, .5, TurnDirection.LEFT, tracker.get(3), this);
+        DbgLog.msg("[Phoenix:color] blue: " + color.blue() + "; red: " + color.red());
     }
 
 }

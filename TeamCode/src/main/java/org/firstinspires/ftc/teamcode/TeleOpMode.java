@@ -1,7 +1,10 @@
 package org.firstinspires.ftc.teamcode;
 
+import android.graphics.Color;
+
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
 
@@ -27,9 +30,13 @@ public class TeleOpMode extends OpMode {
     int counter;
     boolean stop;
 
+    ColorSensor color;
+
     @Override
     public void init() {
         DriveTrain = new MecanumDriveTrain("frontleft", "frontright", "backleft", "backright", this);
+
+        color = hardwareMap.colorSensor.get("color");
 
         shooter = hardwareMap.dcMotor.get("farriswheel");
         collector = hardwareMap.dcMotor.get("collector");
@@ -97,6 +104,7 @@ public class TeleOpMode extends OpMode {
         if(counter >= 100)
             counter = 100;
         this.telemetry.addData("time", this.time);
+        this.telemetry.addData("colorblue", color.blue());
         this.telemetry.update();
     }
 }

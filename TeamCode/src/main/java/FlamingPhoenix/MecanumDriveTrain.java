@@ -182,6 +182,13 @@ public class MecanumDriveTrain {
         backLeft.setPower(0);
     }*/
 
+    public void resetMotorSpeed() {
+        backLeft.setMaxSpeed(2400);
+        backRight.setMaxSpeed(2400);
+        frontLeft.setMaxSpeed(2400);
+        frontRight.setMaxSpeed(2400);
+    }
+
     //Drive by using PIDControl - Run to Position
     public void drive(int d, Direction direction, double power, int timeout, LinearOpMode opMode) throws InterruptedException {
         backLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -305,8 +312,10 @@ public class MecanumDriveTrain {
     }
 
     public void turnWithGyro(int degree, double power, TurnDirection direction, ModernRoboticsI2cGyro gyro, LinearOpMode opMode) throws InterruptedException {
-        while (gyro.isCalibrating())
-            Thread.sleep(50);
+        backLeft.setMaxSpeed(2400);
+        backRight.setMaxSpeed(2400);
+        frontLeft.setMaxSpeed(2400);
+        frontRight.setMaxSpeed(2400);
 
         int startHeading = gyro.getIntegratedZValue();
         int targetHeading = startHeading + (direction == TurnDirection.RIGHT ? degree * -1 : degree);
@@ -566,7 +575,7 @@ public class MecanumDriveTrain {
             backLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             backRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             frontLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        frontRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            frontRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
         VuforiaTrackableDefaultListener image = (VuforiaTrackableDefaultListener) imageObject.getListener();
 
@@ -695,7 +704,7 @@ public class MecanumDriveTrain {
     public boolean strafe(int distance, double power, TurnDirection direction, VuforiaTrackable imageObject, LinearOpMode opMode) throws InterruptedException {
         VuforiaTrackableDefaultListener image = (VuforiaTrackableDefaultListener) imageObject.getListener();
 
-        double xAdjustmentUnit = 0.003;
+        double xAdjustmentUnit = 0.001;
         double angleAdjustmentUnit = 0.05;
         double angleAdjustment = 0;
         double angleDifference = 0;
@@ -979,6 +988,42 @@ public class MecanumDriveTrain {
         frontRight.setPower(0);
         backRight.setPower(0);
         backLeft.setPower(0);
+    }
+
+    public void driveUntilImage(int distance, double power, Direction d, VuforiaTrackable imageObject, LinearOpMode opMode) {
+        backLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        backLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        backRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        backRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        frontLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        frontLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        frontRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        frontRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        opMode.idle();
+        backLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        backRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        frontLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        frontRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
+        int pulseNeeded = (int) Math.round((encoderPPR * distance) / (wheelDiameter * Math.PI));
+
+        VuforiaTrackableDefaultListener image = (VuforiaTrackableDefaultListener) imageObject.getListener();
+
+         power = (d == Direction.BACKWARD ? power * -1 : power * 1);
+
+        while(image.getPose() == null && backRight.getCurrentPosition() < pulseNeeded && opMode.opModeIsActive()) {
+            backLeft.setPower(power);
+            backRight.setPower(power);
+            frontLeft.setPower(power);
+            frontRight.setPower(power);
+        }
+
+        DbgLog.msg("I see the image");
+        backLeft.setPower(0);
+        backRight.setPower(0);
+        frontLeft.setPower(0);
+        frontRight.setPower(0);
+
     }
 
 }
