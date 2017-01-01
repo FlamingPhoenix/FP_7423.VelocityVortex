@@ -22,7 +22,7 @@ public class MyMotor implements DcMotor {
     private RunMode myMode;
     private int encoderSpeed;
 
-    void MyMotor(DcMotor originalMotor) {
+    public MyMotor(DcMotor originalMotor) {
         this.motor = originalMotor;
         this.motor.setMode(RunMode.STOP_AND_RESET_ENCODER);
         this.motor.setMode(RunMode.RUN_WITHOUT_ENCODER);
@@ -96,8 +96,14 @@ public class MyMotor implements DcMotor {
 
     @Override
     public void setMode(RunMode mode) {
-        if (mode == RunMode.STOP_AND_RESET_ENCODER)
-            this.motor.setMode(mode);
+        if (this.motor != null) {
+            if (mode == RunMode.STOP_AND_RESET_ENCODER)
+                this.motor.setMode(mode);
+            else if ((mode == RunMode.RUN_WITHOUT_ENCODER) || (mode == RunMode.RUN_USING_ENCODER))
+                this.motor.setMode(RunMode.RUN_WITHOUT_ENCODER);
+            else
+                this.motor.setMode(mode);
+        }
 
         myMode = mode;
     }
@@ -121,8 +127,10 @@ public class MyMotor implements DcMotor {
     public void setPower(double power) {
         if ((myMode == RunMode.RUN_WITHOUT_ENCODER) || (myMode == RunMode.RUN_TO_POSITION))
             motor.setPower(power);
-        else if (myMode == RunMode.STOP_AND_RESET_ENCODER)
+        else if ((myMode == RunMode.STOP_AND_RESET_ENCODER) || (power == 0)) {
             motor.setPower(0);
+            currentPower = 0;
+        }
         else {
             int targetSpeed = (encoderSpeed * (int) Math.round(power * 1000)) / 1000;
             DbgLog.msg("[Phoenix:MyMotor.setPower] targetSpeed=%d", targetSpeed);
@@ -137,39 +145,54 @@ public class MyMotor implements DcMotor {
                 benchMarkEncoderTick = this.motor.getCurrentPosition();
             }
 
-            double powerIncrement= 0.001;
-            if (power > 0)
-                powerIncrement = -0.001;
+            double powerIncrement= 0.01;
+            if (power < 0)
+                powerIncrement = -0.01;
 
+            try {
+                if (targetSpeed <= 500)
+                    currentPower = 0.1;
+                if (targetSpeed > 500 && targetSpeed < 900)
+                    currentPower = 0.3;
+                else if (targetSpeed >= 900)
+                    currentPower = 0.5;
 
-            int speed = 0;
-            while (speed < (targetSpeed - 50))
-            {
-                double motorPower = currentPower + powerIncrement;
-                if (motorPower > 1)
-                    motorPower = 1;
-                else if (motorPower < -1)
-                    motorPower = -1;
+                this.motor.setPower(currentPower);
+                Thread.sleep(1000);
 
-                this.motor.setPower(motorPower);
-                currentPower = motorPower;
+                benchMarkTime = System.currentTimeMillis();
+                benchMarkEncoderTick = this.motor.getCurrentPosition();
 
-                if (Math.abs(currentPower) == 1)
-                    return;  //already reached maximum power;
+                int speed = 0;
+                while (speed < (targetSpeed - 50))
+                {
+                    double motorPower = currentPower + powerIncrement;
+                    if (motorPower > 1)
+                        motorPower = 1;
+                    else if (motorPower < -1)
+                        motorPower = -1;
 
-                try {
-                    Thread.sleep(5);
-                } catch (InterruptedException ex) {
-                    Thread.currentThread().interrupt();
+                    this.motor.setPower(motorPower);
+                    currentPower = motorPower;
+
+                    if (Math.abs(currentPower) == 1)
+                        return;  //already reached maximum power;
+
+                    Thread.sleep(100);
+                    int currentTick = this.motor.getCurrentPosition();
+                    speed = Math.round(Math.abs((((long) (currentTick- benchMarkEncoderTick)) * 1000) / (System.currentTimeMillis() - benchMarkTime)));
+                    DbgLog.msg("[Phoenix.MyMotor.setPower] Speed = %d, power = %8.5f, curentTicket=%d", speed, currentPower, currentTick);
                 }
-                speed = Math.round(Math.abs((((long) ((this.motor.getCurrentPosition() - benchMarkEncoderTick))) * 1000) / (System.currentTimeMillis() - benchMarkTime)));
+            } catch (InterruptedException ex) {
+                Thread.currentThread().interrupt();
             }
+
         }
     }
 
     @Override
     public double getPower() {
-        return motor.getPower();
+        return currentPower;
     }
 
     @Override

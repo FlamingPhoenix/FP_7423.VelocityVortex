@@ -1,5 +1,7 @@
 package FlamingPhoenix;
 
+import com.qualcomm.ftccommon.DbgLog;
+
 import org.firstinspires.ftc.robotcore.external.matrices.OpenGLMatrix;
 import org.firstinspires.ftc.robotcore.external.matrices.VectorF;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackable;
@@ -21,11 +23,12 @@ public class MyUtility {
             float c2x = c2.get(0);
             float c2z = c2.get(2);
             float zAngle = (float) Math.toDegrees(Math.atan2(c2z, c2x));
+            DbgLog.msg("[Phoenix.MyUtility.getImageAngle] zAngle is at %5.2f degree: ", zAngle);
 
             return (int) zAngle;
         }
 
-        return -1;
+        return -999;
     }
 
     public static float getImageXPosition(VuforiaTrackable imageObject)
@@ -38,6 +41,6 @@ public class MyUtility {
             return c2.get(0);
         }
 
-        return 0;
+        return -9999;
     }
 }
