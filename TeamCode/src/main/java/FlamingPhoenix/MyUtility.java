@@ -27,4 +27,17 @@ public class MyUtility {
 
         return -1;
     }
+
+    public static float getImageXPosition(VuforiaTrackable imageObject)
+    {
+        VuforiaTrackableDefaultListener image = (VuforiaTrackableDefaultListener) imageObject.getListener();
+        OpenGLMatrix pos = image.getPose();
+
+        if (pos != null) {
+            VectorF c2 = pos.getTranslation();
+            return c2.get(0);
+        }
+
+        return 0;
+    }
 }

@@ -6,6 +6,7 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.OpticalDistanceSensor;
 import com.qualcomm.robotcore.hardware.Servo;
 
 import FlamingPhoenix.MecanumDriveTrain;
@@ -32,11 +33,14 @@ public class TeleOpMode extends OpMode {
 
     ColorSensor color;
 
+    OpticalDistanceSensor opt;
+
     @Override
     public void init() {
         DriveTrain = new MecanumDriveTrain("frontleft", "frontright", "backleft", "backright", this);
 
         color = hardwareMap.colorSensor.get("color");
+        opt = hardwareMap.opticalDistanceSensor.get("opt");
 
         shooter = hardwareMap.dcMotor.get("farriswheel");
         collector = hardwareMap.dcMotor.get("collector");
@@ -105,6 +109,7 @@ public class TeleOpMode extends OpMode {
             counter = 100;
         this.telemetry.addData("time", this.time);
         this.telemetry.addData("colorblue", color.blue());
+        this.telemetry.addData("opt", opt.getLightDetected());
         this.telemetry.update();
     }
 }
