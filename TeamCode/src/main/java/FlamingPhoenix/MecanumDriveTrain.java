@@ -1108,19 +1108,6 @@ public class MecanumDriveTrain {
                     else
                         v = new VectorF(0, 0, 0, 0);
                 }
-            } else {
-                while(v.get(0) > 0) {
-                    backLeft.setPower(power);
-                    backRight.setPower(power);
-                    frontLeft.setPower(power);
-                    frontRight.setPower(power);
-                    pos=image.getPose();
-
-                    if (pos != null)
-                        v = pos.getTranslation();
-                    else
-                        v = new VectorF(0, 0, 0, 0);
-                }
             }
         }
 
