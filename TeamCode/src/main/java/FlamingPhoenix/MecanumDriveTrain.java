@@ -225,7 +225,7 @@ public class MecanumDriveTrain {
         DbgLog.msg("[Phoenix.Drive] pulseNeeded: %d, starting tick = %d ",pulseNeeded, currentEncoderTick);
         while ((opMode.opModeIsActive()) && (runtime.seconds() <= timeout) && (Math.abs(currentEncoderTick) < Math.abs(pulseNeeded))) {
             currentEncoderTick = backRight.getCurrentPosition();
-            if ((Math.abs(pulseNeeded) > 100) && (Math.abs(pulseNeeded) - Math.abs(currentEncoderTick)) <= 100) {
+            if ((Math.abs(pulseNeeded) > 200) && (Math.abs(pulseNeeded) - Math.abs(currentEncoderTick)) <= 200) {
                 if (direction == Direction.FORWARD) {
                     backLeft.setPower(0.1);
                     backRight.setPower(0.1);

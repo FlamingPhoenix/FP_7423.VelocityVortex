@@ -4,6 +4,7 @@ import android.database.sqlite.SQLiteBindOrColumnIndexOutOfRangeException;
 
 import com.qualcomm.ftccommon.DbgLog;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
@@ -30,6 +31,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
  */
 
 @Autonomous(name="Try Tracking", group="Trial")
+@Disabled()
 public class VuAuto extends LinearOpMode {
 
     private ElapsedTime runtime = new ElapsedTime();

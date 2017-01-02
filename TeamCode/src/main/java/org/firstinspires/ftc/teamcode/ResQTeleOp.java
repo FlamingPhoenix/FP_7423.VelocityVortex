@@ -4,6 +4,8 @@ import FlamingPhoenix.ServoArm;
 import FlamingPhoenix.StealthDriveTrain;
 import FlamingPhoenix.TapeMeasure;
 import FlamingPhoenix.Winch;
+
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.ColorSensor;
@@ -25,6 +27,7 @@ import com.qualcomm.robotcore.util.Range;
  * Created by Steve on 10/11/2015.
  */
 @TeleOp(name="ResQTeleOp", group="Old Program")
+@Disabled()
 public class ResQTeleOp extends OpMode {
     private DcMotor leftMotor;
     private DcMotor rightMotor;

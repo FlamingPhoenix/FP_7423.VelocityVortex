@@ -118,7 +118,7 @@ public class Red_Auton extends LinearOpMode {
         telemetry.update();
 
         if(!sawImage) {
-            wheels.strafe(16, 1000, TurnDirection.LEFT, gyro, this);
+            wheels.strafe(16, 0.7, TurnDirection.LEFT, this);
         }
 
         sleep(250);
