@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode;
 
+import com.qualcomm.ftccommon.DbgLog;
 import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cGyro;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
@@ -16,55 +17,39 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackables;
 
+import FlamingPhoenix.Direction;
 import FlamingPhoenix.MecanumDriveTrain;
 import FlamingPhoenix.MyMotor;
+import FlamingPhoenix.MyUtility;
+import FlamingPhoenix.TurnDirection;
 
 /**
  * Created by Steve on 1/1/2017.
  */
 
 @Autonomous(name = "Tester", group = "none")
-@Disabled()
 public class Tester extends LinearOpMode {
+
 
     private VuforiaLocalizer vuforia;
     VuforiaTrackables tracker;
 
-    MyMotor shooter;
+    DcMotor shooter;
+    DcMotor collecter;
+
     Servo stopper;
+
     ColorSensor color;
+
     OpticalDistanceSensor opt;
 
     @Override
     public void runOpMode() throws InterruptedException {
-        initialize();
-        shooter = new MyMotor(hardwareMap.dcMotor.get("farriswheel"));
-        shooter.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        this.idle();
-        shooter.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        shooter.setMaxSpeed(900);
-
-        waitForStart();
-
-        shooter.setPower(1);
-        this.telemetry.addData("reached speed", "curentPower=%8.5f", shooter.getPower());
-        this.telemetry.update();
-
-        stopper.setPosition(.25);
-        Thread.sleep(250);
-        stopper.setPosition(.75);
-        Thread.sleep(500);
-        stopper.setPosition(0.25);
-        Thread.sleep(1000);
-        stopper.setPosition(.75);
-        shooter.setPower(0);
-
-        Thread.sleep(2000);
-    }
-
-    //Initialize to set up robot
-    private void initialize() throws InterruptedException {
+        shooter = hardwareMap.dcMotor.get("farriswheel");
         stopper = hardwareMap.servo.get("stopper");
+
+        collecter = hardwareMap.dcMotor.get("collector");
+
         stopper.setPosition(.75);
 
         color = hardwareMap.colorSensor.get("color");
@@ -94,6 +79,10 @@ public class Tester extends LinearOpMode {
 
         MecanumDriveTrain wheels = new MecanumDriveTrain("frontleft", "frontright", "backleft", "backright", this);
 
+        //shooter.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        //this.idle();
+        shooter.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        //shooter.setMaxSpeed(960);
 
         gyro.resetZAxisIntegrator();
         gyro.calibrate();
@@ -101,5 +90,18 @@ public class Tester extends LinearOpMode {
         while(gyro.isCalibrating()) {
             Thread.sleep(50);
         }
+
+        waitForStart();
+
+        float imageX;
+
+        while(this.opModeIsActive() && true) {
+            imageX = MyUtility.getImageXPosition(tracker.get(0));
+            telemetry.addData("imageX", imageX);
+            telemetry.update();
+            DbgLog.msg("[Phoenix] imageX: " + imageX);
+        }
+
+
     }
 }

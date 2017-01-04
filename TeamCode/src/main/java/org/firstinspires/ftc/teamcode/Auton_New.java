@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode;
 import com.qualcomm.ftccommon.DbgLog;
 import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cGyro;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -23,6 +24,8 @@ import FlamingPhoenix.MyUtility;
 /**
  * Created by HwaA1 on 11/26/2016.
  */
+
+@Disabled
 @Autonomous(name = "Turn_Test", group = "none")
 public class Auton_New extends LinearOpMode {
 

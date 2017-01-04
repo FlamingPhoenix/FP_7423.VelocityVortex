@@ -83,8 +83,7 @@ public class MecanumDriveTrain {
     }
 
 
-    public void Drive(Gamepad gamePad, float speedMultiplier)
-    {
+    public void Drive(Gamepad gamePad, float speedMultiplier) {
         speedMultiplier = Math.abs(speedMultiplier);
         if (speedMultiplier > 1)
             speedMultiplier = 1;
@@ -1094,19 +1093,36 @@ public class MecanumDriveTrain {
             float imageXPosition = v.get(0);
 
             DbgLog.msg("[Phoenix:driveuntilimage] imageXPosition= %7.2f ", imageXPosition);
+            if(d == Direction.FORWARD) {
+                if (v.get(0) < 0) {
+                    while (v.get(0) < 0) {
+                        backLeft.setPower(power);
+                        backRight.setPower(power);
+                        frontLeft.setPower(power);
+                        frontRight.setPower(power);
 
-            if(v.get(0) < 0) {
-                while(v.get(0) < 0) {
-                    backLeft.setPower(power);
-                    backRight.setPower(power);
-                    frontLeft.setPower(power);
-                    frontRight.setPower(power);
+                        pos = image.getPose();
+                        if (pos != null)
+                            v = pos.getTranslation();
+                        else
+                            v = new VectorF(0, 0, 0, 0);
+                    }
+                }
+            }
+            else {
+                if (v.get(0) > 0) {
+                    while (v.get(0) > 0) {
+                        backLeft.setPower(power);
+                        backRight.setPower(power);
+                        frontLeft.setPower(power);
+                        frontRight.setPower(power);
 
-                    pos=image.getPose();
-                    if (pos != null)
-                        v = pos.getTranslation();
-                    else
-                        v = new VectorF(0, 0, 0, 0);
+                        pos = image.getPose();
+                        if (pos != null)
+                            v = pos.getTranslation();
+                        else
+                            v = new VectorF(0, 0, 0, 0);
+                    }
                 }
             }
         }
