@@ -91,8 +91,10 @@ public class Blue_Auton extends LinearOpMode {
         waitForStart();
 
         shooter.setPower(.6);
+        collecter.setPower(.5);
 
         wheels.strafe(6, 0.7, TurnDirection.LEFT, this);
+        collecter.setPower(0);
         Thread.sleep(1000);
 
         stopper.setPosition(.20);
@@ -111,13 +113,13 @@ public class Blue_Auton extends LinearOpMode {
         this.sleep(200);
 
         int angleBefore= gyro.getIntegratedZValue();
-        int degreesNeeded = Math.abs(87 - angleBefore * -1);
+        int degreesNeeded = Math.abs(86 - angleBefore * -1);
         wheels.turnWithGyro(degreesNeeded, .25, TurnDirection.RIGHT, gyro, this);
         int angleAfter = gyro.getIntegratedZValue();
 
         DbgLog.msg("[Phoenix] angleBefore= %d, degreeNeeded= %d, angleAfter= %d", angleBefore, degreesNeeded, angleAfter);
 
-        wheels.drive(13, Direction.BACKWARD, 0.3, 5, this);
+        wheels.drive(16, Direction.BACKWARD, 0.3, 5, this);
 
         wheels.driveUntilImage(20, .1, Direction.BACKWARD, tracker.get(0), this);
 
@@ -199,11 +201,11 @@ public class Blue_Auton extends LinearOpMode {
         }
 
         if(color.blue() <= 1) {
-            DbgLog.msg("[Phoenix] Can't see red, move back 5 inches");
+            DbgLog.msg("[Phoenix] Can't see blue, move back 5 inches");
             wheels.drive(5, Direction.BACKWARD, 0.2, 5, this);
         }
 
-        if (color.blue() > 1) { //sees the red side
+        if (color.blue() > 1) { //sees the blue side
             wheels.strafe(6, .6, TurnDirection.LEFT, this);
             Thread.sleep(500);
             wheels.strafe(12, .8, TurnDirection.RIGHT, this);
@@ -310,11 +312,11 @@ public class Blue_Auton extends LinearOpMode {
         }
 
         if(color.blue() <= 1) {
-            DbgLog.msg("[Phoenix] Can't see red, move back 5 inches");
+            DbgLog.msg("[Phoenix] Can't see blue, move back 5 inches");
             wheels.drive(5, Direction.BACKWARD, 0.2, 5, this);
         }
 
-        if (color.blue() > 1) { //sees the red side
+        if (color.blue() > 1) { //sees the blue side
             wheels.strafe(6, .8, TurnDirection.LEFT, this);
             Thread.sleep(500);
             wheels.strafe(12, .8, TurnDirection.RIGHT, this);

@@ -44,10 +44,13 @@ public class Red_Auton extends LinearOpMode {
 
     OpticalDistanceSensor opt;
 
+    DcMotor collecter;
+
     @Override
     public void runOpMode() throws InterruptedException {
         shooter = hardwareMap.dcMotor.get("farriswheel");
         stopper = hardwareMap.servo.get("stopper");
+        collecter = hardwareMap.dcMotor.get("collector");
 
         stopper.setPosition(.75);
 
@@ -93,8 +96,10 @@ public class Red_Auton extends LinearOpMode {
         waitForStart();
 
         shooter.setPower(.6);
+        collecter.setPower(.5);
 
         wheels.strafe(6, 0.7, TurnDirection.LEFT, this);
+        collecter.setPower(0);
         Thread.sleep(1000);
 
         stopper.setPosition(.20);
@@ -112,7 +117,7 @@ public class Red_Auton extends LinearOpMode {
         wheels.drive(35, Direction.BACKWARD, 0.5, 5, this);
         this.sleep(200);
 
-        int angleBefore= gyro.getIntegratedZValue();
+        int angleBefore = gyro.getIntegratedZValue();
         int degreesNeeded = Math.abs(87 - angleBefore);
         wheels.turnWithGyro(degreesNeeded, .25, TurnDirection.LEFT, gyro, this);
         int angleAfter = gyro.getIntegratedZValue();
@@ -326,6 +331,6 @@ public class Red_Auton extends LinearOpMode {
         }
 
         wheels.turnWithGyro(40, .5, TurnDirection.LEFT, gyro, this);
-        wheels.drive(52, Direction.BACKWARD, .8, 6, this);
+        wheels.drive(55, Direction.BACKWARD, .8, 6, this);
     }
 }

@@ -31,16 +31,9 @@ public class TeleOpMode extends OpMode {
     int counter;
     boolean stop;
 
-    ColorSensor color;
-
-    OpticalDistanceSensor opt;
-
     @Override
     public void init() {
         DriveTrain = new MecanumDriveTrain("frontleft", "frontright", "backleft", "backright", this);
-
-        color = hardwareMap.colorSensor.get("color");
-        opt = hardwareMap.opticalDistanceSensor.get("opt");
 
         shooter = hardwareMap.dcMotor.get("farriswheel");
         collector = hardwareMap.dcMotor.get("collector");
@@ -64,9 +57,11 @@ public class TeleOpMode extends OpMode {
 
         if(gamepad2.right_bumper && gamepad2.left_bumper) {
             Onoroff = .2;
+            shooter.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             stop = true;
         }
         else if(gamepad2.y) {
+            shooter.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             Onoroff = .3;
             counter = 0;
             stop = false;
@@ -108,8 +103,6 @@ public class TeleOpMode extends OpMode {
         if(counter >= 100)
             counter = 100;
         this.telemetry.addData("time", this.time);
-        this.telemetry.addData("colorblue", color.blue());
-        this.telemetry.addData("opt", opt.getLightDetected());
         this.telemetry.update();
     }
 }
