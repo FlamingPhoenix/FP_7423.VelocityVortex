@@ -45,8 +45,8 @@ public class TeleOpMode extends OpMode {
         stopper.setPosition(.75);
 
         shooter.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        shooter.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        shooter.setMaxSpeed(960);
+        shooter.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        //shooter.setMaxSpeed(960);
         Onoroff = 0;
 
         counter = 0;
@@ -56,13 +56,13 @@ public class TeleOpMode extends OpMode {
     public void loop() {
 
         if(gamepad2.right_bumper && gamepad2.left_bumper) {
-            Onoroff = .2;
+            Onoroff = .1;
             shooter.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             stop = true;
         }
         else if(gamepad2.y) {
-            shooter.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            Onoroff = .3;
+            shooter.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+            Onoroff = .1;
             counter = 0;
             stop = false;
 
@@ -71,7 +71,7 @@ public class TeleOpMode extends OpMode {
             if(stop)
                 Onoroff = 0;
             else
-                Onoroff = 1;
+                Onoroff = .43;
         }
 
         shooter.setPower(Onoroff);

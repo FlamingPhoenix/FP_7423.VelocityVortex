@@ -412,17 +412,7 @@ public class MecanumDriveTrain {
 
         return m;
     }
-    //get the maximum value among the values in the input
-    private double max(double... args) {
-        double m = 0;
 
-        for (int i = 0; i < args.length; i++) {
-            if (args[i] > m)
-                m = args[i];
-        }
-
-        return m;
-    }
     //get the maximum value among the values in the input
     private int max(int... args) {
         int m = 0;

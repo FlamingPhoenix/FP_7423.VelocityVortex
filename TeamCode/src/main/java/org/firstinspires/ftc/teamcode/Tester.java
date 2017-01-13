@@ -27,6 +27,7 @@ import FlamingPhoenix.TurnDirection;
  * Created by Steve on 1/1/2017.
  */
 
+@Disabled
 @Autonomous(name = "Tester", group = "none")
 public class Tester extends LinearOpMode {
 

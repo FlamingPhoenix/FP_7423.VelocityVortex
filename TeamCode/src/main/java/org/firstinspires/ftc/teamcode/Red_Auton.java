@@ -95,7 +95,7 @@ public class Red_Auton extends LinearOpMode {
 
         waitForStart();
 
-        shooter.setPower(.6);
+        shooter.setPower(.5);
         collecter.setPower(.5);
 
         wheels.strafe(6, 0.7, TurnDirection.LEFT, this);
