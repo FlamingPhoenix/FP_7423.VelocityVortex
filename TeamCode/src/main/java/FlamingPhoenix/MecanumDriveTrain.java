@@ -83,8 +83,7 @@ public class MecanumDriveTrain {
     }
 
 
-    public void Drive(Gamepad gamePad, float speedMultiplier)
-    {
+    public void Drive(Gamepad gamePad, float speedMultiplier) {
         speedMultiplier = Math.abs(speedMultiplier);
         if (speedMultiplier > 1)
             speedMultiplier = 1;
@@ -201,23 +200,19 @@ public class MecanumDriveTrain {
         frontRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         opMode.idle();
 
-        backLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        backRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        frontLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        frontRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        backLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        backRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        frontLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        frontRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        opMode.idle();
 
         int pulseNeeded = (int) Math.round((encoderPPR * d) / (wheelDiameter * Math.PI));
-        if (direction == Direction.BACKWARD)
+        if (direction == Direction.BACKWARD) {
             pulseNeeded = pulseNeeded * -1;
-
-        backLeft.setTargetPosition(pulseNeeded);
-        backRight.setTargetPosition(pulseNeeded);
-        frontLeft.setTargetPosition(pulseNeeded);
-        frontRight.setTargetPosition(pulseNeeded);
-
-        DbgLog.msg("[Phoenix] pulseNeeded: " + pulseNeeded);
-
-        power = Math.abs(power);
+            power = Math.abs(power) * -1;
+        }
+        else
+            power = Math.abs(power);
 
         backLeft.setPower(power);
         backRight.setPower(power);
@@ -225,9 +220,23 @@ public class MecanumDriveTrain {
         frontRight.setPower(power);
 
         runtime.reset();
-        while ((opMode.opModeIsActive()) && (runtime.seconds() <= timeout) && (backLeft.isBusy()) && (backRight.isBusy()) && (frontLeft.isBusy()) && (frontRight.isBusy())) {
-            opMode.telemetry.addData("running", "");
-            opMode.telemetry.update();
+        int currentEncoderTick = backRight.getCurrentPosition();
+        DbgLog.msg("[Phoenix.Drive] pulseNeeded: %d, starting tick = %d ",pulseNeeded, currentEncoderTick);
+        while ((opMode.opModeIsActive()) && (runtime.seconds() <= timeout) && (Math.abs(currentEncoderTick) < Math.abs(pulseNeeded))) {
+            currentEncoderTick = backRight.getCurrentPosition();
+            if ((Math.abs(pulseNeeded) > 200) && (Math.abs(pulseNeeded) - Math.abs(currentEncoderTick)) <= 200) {
+                if (direction == Direction.FORWARD) {
+                    backLeft.setPower(0.1);
+                    backRight.setPower(0.1);
+                    frontLeft.setPower(0.1);
+                    frontRight.setPower(0.1);
+                } else {
+                    backLeft.setPower(-0.1);
+                    backRight.setPower(-0.1);
+                    frontLeft.setPower(-0.1);
+                    frontRight.setPower(-0.1);
+                }
+            }
         }
 
         backLeft.setPower(0);
@@ -235,18 +244,15 @@ public class MecanumDriveTrain {
         frontLeft.setPower(0);
         frontRight.setPower(0);
 
-        DbgLog.msg("[Phoenix] backLeft" + backLeft.getCurrentPosition());
-        DbgLog.msg("[Phoenix] backRight" + backRight.getCurrentPosition());
-        DbgLog.msg("[Phoenix] frontLeft" + frontLeft.getCurrentPosition());
-        DbgLog.msg("[Phoenix] frontRight" + frontRight.getCurrentPosition());
+        DbgLog.msg("[Phoenix.Drive] backLeft" + backLeft.getCurrentPosition());
+        DbgLog.msg("[Phoenix.Drive] backRight" + backRight.getCurrentPosition());
+        DbgLog.msg("[Phoenix.Drive] frontLeft" + frontLeft.getCurrentPosition());
+        DbgLog.msg("[Phoenix.Drive] frontRight" + frontRight.getCurrentPosition());
 
-        backLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        backRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        frontLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        frontRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
     }
 
     //Drive by controlling the motor rotation speed using encoder
+    @Deprecated()
     public void drive(int d, Direction direction, int speed, LinearOpMode opMode) throws InterruptedException {
         backLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         backLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -262,7 +268,7 @@ public class MecanumDriveTrain {
         frontLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         frontRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
-        speed = Math.abs(speed); //let's make sure it is possitive value
+        speed = Math.abs(speed); //let's make sure it is positive value
 
         int pulseNeeded = (int) Math.round((encoderPPR * d) / (wheelDiameter * Math.PI));
         double power = 1;
@@ -271,9 +277,10 @@ public class MecanumDriveTrain {
 
         int currentTicks = backLeft.getCurrentPosition();
         while ((Math.abs(currentTicks) < pulseNeeded) && opMode.opModeIsActive()) {
-            currentTicks = backLeft.getCurrentPosition();
-            opMode.telemetry.addData("Encoder: ", currentTicks);
             try {
+                currentTicks = backLeft.getCurrentPosition();
+                opMode.telemetry.addData("Encoder: ", currentTicks);
+
                 if ((Math.abs(currentTicks) <= 400) && (speed > 600)) { //start slow
                     backLeft.setMaxSpeed(600);
                     backRight.setMaxSpeed(600);
@@ -284,7 +291,7 @@ public class MecanumDriveTrain {
                     backRight.setMaxSpeed(600);
                     frontLeft.setMaxSpeed(600);
                     frontRight.setMaxSpeed(600);
-                    DbgLog.msg("[Phoenix] Almost reached; with original speed " + speed);
+                    DbgLog.msg("[Phoenix:Drive] Almost reached; with original speed " + speed);
 
                 } else {
                     backLeft.setMaxSpeed(speed);
@@ -299,16 +306,16 @@ public class MecanumDriveTrain {
                 backLeft.setPower(power);
             }
             catch (NullPointerException e) {
-                DbgLog.msg("[Phoenix] you got a null pointer exception");
+                DbgLog.msg("[Phoenix:Drive] you got a null pointer exception");
             }
-            DbgLog.msg("[Phoenix] Back Left encoder: " + backLeft.getCurrentPosition());
-            DbgLog.msg("[Phoenix] Back Right encoder: " + backRight.getCurrentPosition());
         }
 
         frontLeft.setPower(0);
         frontRight.setPower(0);
         backRight.setPower(0);
         backLeft.setPower(0);
+
+        DbgLog.msg("[Phoenix:Drive] Reached destination");
     }
 
     public void turnWithGyro(int degree, double power, TurnDirection direction, ModernRoboticsI2cGyro gyro, LinearOpMode opMode) throws InterruptedException {
@@ -333,8 +340,8 @@ public class MecanumDriveTrain {
                     break;
 
                 if (Math.abs(currentHeading - targetHeading) < 20) {
-                    speed = 0.1;
-                    DbgLog.msg("[Phoenix:Turn] cut the speed to = " + speed);
+                    speed = 0.20;
+                    //DbgLog.msg("[Phoenix:Turn] cut the speed to = " + speed);
                 }
 
                 frontRight.setPower(speed * -1);
@@ -343,16 +350,17 @@ public class MecanumDriveTrain {
                 backLeft.setPower(speed);
                 currentHeading = gyro.getIntegratedZValue();
 
-                DbgLog.msg("[Phoenix:Turn] currentHeading = " + currentHeading);
+                //DbgLog.msg("[Phoenix:Turn] currentHeading = " + currentHeading);
             }
         } else {
+            DbgLog.msg("[Phoenix:Turn] Turning Left, speed = %6.3f ", speed);
             while((currentHeading < targetHeading) && (opMode.opModeIsActive())){
                 if((Math.abs(targetHeading - currentHeading) < 10) && degree > 10)
                     break;
 
                 if (Math.abs(currentHeading - targetHeading) < 20) {
-                    speed = 0.1;
-                    DbgLog.msg("[Phoenix:Turn] cut the speed to = " + speed);
+                    speed = 0.20;
+                    //DbgLog.msg("[Phoenix:Turn] cut the speed to = " + speed);
                 }
 
                 frontRight.setPower(speed);
@@ -360,8 +368,6 @@ public class MecanumDriveTrain {
                 frontLeft.setPower(speed * -1);
                 backLeft.setPower(speed * -1);
                 currentHeading = gyro.getIntegratedZValue();
-
-                DbgLog.msg("[Phoenix:Turn] currentHeading = " + currentHeading);
             }
         }
 
@@ -406,17 +412,7 @@ public class MecanumDriveTrain {
 
         return m;
     }
-    //get the maximum value among the values in the input
-    private double max(double... args) {
-        double m = 0;
 
-        for (int i = 0; i < args.length; i++) {
-            if (args[i] > m)
-                m = args[i];
-        }
-
-        return m;
-    }
     //get the maximum value among the values in the input
     private int max(int... args) {
         int m = 0;
@@ -430,6 +426,7 @@ public class MecanumDriveTrain {
     }
 
     //strafe by using the wheel rotation speed
+    @Deprecated()
     public void strafe(int distance, int speed, TurnDirection direction, LinearOpMode opMode) throws InterruptedException {
         backLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         backLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -474,7 +471,43 @@ public class MecanumDriveTrain {
         backLeft.setPower(0);
     }
 
+    public void strafe(int distance, double power, TurnDirection direction, LinearOpMode opMode) throws InterruptedException {
+        backLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        backRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        frontLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        frontRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        opMode.idle();
+        backLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        backRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        frontLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        frontRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
+        int pulseNeeded = (int) Math.round((encoderPPR * distance) / (wheelDiameter * Math.PI));
+
+        pulseNeeded = (int) Math.round((double) pulseNeeded/0.5); //the distance is around .5 the normal
+
+        while(((Math.abs(backLeft.getCurrentPosition())) < pulseNeeded) && opMode.opModeIsActive()) {
+            if (direction == TurnDirection.LEFT) {
+                frontLeft.setPower(-power);
+                backLeft.setPower(power);
+                frontRight.setPower(power);
+                backRight.setPower(-power);
+            } else {
+                frontLeft.setPower(power);
+                backLeft.setPower(-power);
+                frontRight.setPower(-power);
+                backRight.setPower(power);
+            }
+        }
+
+        frontLeft.setPower(0);
+        frontRight.setPower(0);
+        backRight.setPower(0);
+        backLeft.setPower(0);
+    }
+
     //control strafing using wheel rotation speed //the one dad was talking about on Christmas
+    @Deprecated()
     public void strafe(int distance, int speed, TurnDirection direction, ModernRoboticsI2cGyro gyroscope, LinearOpMode opMode) {
         backLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         backLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -701,11 +734,25 @@ public class MecanumDriveTrain {
     }
 
     //Use power to control the robot by following Vuforia object
-    public boolean strafe(int distance, double power, TurnDirection direction, VuforiaTrackable imageObject, LinearOpMode opMode) throws InterruptedException {
+    public double strafe(int distance, double power, TurnDirection direction, VuforiaTrackable imageObject, LinearOpMode opMode) throws InterruptedException {
+        backLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        backLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        backRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        backRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        frontLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        frontLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        frontRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        frontRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        opMode.idle();
+        backLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        backRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        frontLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        frontRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
         VuforiaTrackableDefaultListener image = (VuforiaTrackableDefaultListener) imageObject.getListener();
 
-        double xAdjustmentUnit = 0.001;
-        double angleAdjustmentUnit = 0.05;
+        double xAdjustmentUnit = 0.0005;
+        double angleAdjustmentUnit = 0.06;
         double angleAdjustment = 0;
         double angleDifference = 0;
 
@@ -726,7 +773,7 @@ public class MecanumDriveTrain {
             if (image.getPose() == null) {
                 DbgLog.msg("[Phoenix:strafe] image cannot see " + imageObject.getName());
 
-                return false; //Camera does not see image, return false
+                return -9999; //Camera does not see image, return false
             }
         }
 
@@ -752,10 +799,10 @@ public class MecanumDriveTrain {
 
                 double xPowerAdjustment = 0;
 
-                if (x > 15) //distance is more than 15 mm, lets adjust the power proportionally
+                if (x > 15) //distance is more than 15 mm, lets adjust the power proportionally, Robot is Right side of the image
                     xPowerAdjustment = xAdjustmentUnit * Math.abs(x);
                 else if (x < -15)
-                    xPowerAdjustment = -1 *  xAdjustmentUnit * Math.abs(x);
+                    xPowerAdjustment = -30 * xAdjustmentUnit * Math.abs(x);
                 else
                     xPowerAdjustment = 0;
 
@@ -776,27 +823,30 @@ public class MecanumDriveTrain {
                 else
                     angleAdjustment = 0;
 
-                if(angleAdjustment > .4)
-                    angleAdjustment = .4;
+                if(angleAdjustment > .35)
+                    angleAdjustment = .35;
 
                 DbgLog.msg("[Phoenix:Strafe] zAngle=%5.2f  angleAdjustment=%5.2f angleDifference=%5.2f angleAdjustmentUnit=%7.5f", zAngle, angleAdjustment, angleDifference, angleAdjustmentUnit);
 
                 try {
                     if (direction == TurnDirection.LEFT) {
-                        frontLeftSpeed = frontLeftSpeed + (-1 * xPowerAdjustment);
-                        frontRightSpeed += xPowerAdjustment;
-                        backLeftSpeed += xPowerAdjustment;
-                        backRightSpeed = backRightSpeed + (-1 * xPowerAdjustment);
 
-                        if (zAngle < 90)  //need to turn right by giving more power to the back wheels
+                        /*
+                        if (zAngle < 85)  //need to turn right by giving more power to the back wheels
                         {
                             backLeftSpeed += angleAdjustment;
                             backRightSpeed += angleAdjustment;
                         }
-                        else if (zAngle > 90)  //need to turn left by giving more power to the front wheels
+                        else if (zAngle > 95)  //need to turn left by giving more power to the front wheels
                         {
                             frontLeftSpeed += angleAdjustment;
                             frontRightSpeed += angleAdjustment;
+                        }
+                        else {
+                            frontLeftSpeed = frontLeftSpeed + (-1 * xPowerAdjustment);
+                            frontRightSpeed += xPowerAdjustment;
+                            backLeftSpeed += xPowerAdjustment;
+                            backRightSpeed = backRightSpeed + (-1 * xPowerAdjustment);
                         }
 
                         if (max(frontLeftSpeed, frontRightSpeed, backLeftSpeed, backRightSpeed) > 1) {
@@ -806,6 +856,9 @@ public class MecanumDriveTrain {
                             backLeftSpeed =backLeftSpeed * (backLeftSpeed/mv);
                             backRightSpeed =backRightSpeed * (backRightSpeed/mv);
                         }
+                        */
+
+                        DbgLog.msg("[Phoenix:Strafe] frontLeft=%7.4f backLeft=%7.4f frontRight=%7.4f backRight=%7.4f", frontLeftSpeed, backLeftSpeed, frontRightSpeed, backRightSpeed);
 
                         frontLeft.setPower(-1 * frontLeftSpeed);
                         backLeft.setPower(1 * backLeftSpeed);
@@ -824,7 +877,7 @@ public class MecanumDriveTrain {
                     }
 
                 } catch (Exception e) {
-                    DbgLog.msg("[Phoenix:strafe] image null point exception here while tracking " + imageObject.getName());
+                    DbgLog.msg("[Phoenix:strafe] image null point exception here while tracking %s, message=%s", imageObject.getName(), e.getMessage());
                 }
             }
             else {
@@ -833,7 +886,6 @@ public class MecanumDriveTrain {
                 DbgLog.msg("[Phoenix:strafe] image stop seeing " + imageObject.getName());
                 DbgLog.msg("[Phoenix:strafe] image last y= " + Double.toString(y));
             }
-            DbgLog.msg("[Phoenix:strafe] i = " + i);
             opMode.idle();
         }
 
@@ -842,7 +894,7 @@ public class MecanumDriveTrain {
         backRight.setPower(0);
         backLeft.setPower(0);
         DbgLog.msg("[Phoenix:strafe] i done = " + i);
-        return true;
+        return (x * -1); //return last x position;
     }
 
     public boolean strafe(int distance, int speed, TurnDirection direction, VuforiaTrackable imageObject, ModernRoboticsI2cGyro gyro, LinearOpMode opMode) throws InterruptedException {
@@ -973,8 +1025,9 @@ public class MecanumDriveTrain {
         opt.enableLed(true);
 
         double sensorValue = opt.getLightDetected();
+        DbgLog.msg("[Phoenix] opt val: " + sensorValue);
 
-        while(sensorValue <= 0 && opMode.opModeIsActive()) {
+        while(sensorValue <= .1 && opMode.opModeIsActive()) {
             frontLeft.setPower(power);
             frontRight.setPower(power);
             backRight.setPower(power);
@@ -1005,18 +1058,66 @@ public class MecanumDriveTrain {
         frontLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         frontRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
+        DbgLog.msg("[Phoenix:driveuntilimage] Starting");
+
         int pulseNeeded = (int) Math.round((encoderPPR * distance) / (wheelDiameter * Math.PI));
 
         VuforiaTrackableDefaultListener image = (VuforiaTrackableDefaultListener) imageObject.getListener();
 
-         power = (d == Direction.BACKWARD ? power * -1 : power * 1);
+        power = (d == Direction.BACKWARD ? power * -1 : power * 1);
 
-        while(image.getPose() == null && backRight.getCurrentPosition() < pulseNeeded && opMode.opModeIsActive()) {
+        DbgLog.msg("[Phoenix:driveuntilimage] pulseNeeded: " + pulseNeeded + ". backRight encoder value: " + backRight.getCurrentPosition());
+
+        OpenGLMatrix pos = image.getPose();
+        while (pos == null  && backRight.getCurrentPosition() < pulseNeeded && opMode.opModeIsActive()) {
             backLeft.setPower(power);
             backRight.setPower(power);
             frontLeft.setPower(power);
             frontRight.setPower(power);
+            opMode.idle();
+            pos =image.getPose();
         }
+
+        if (pos != null) {
+            VectorF v = pos.getTranslation();
+            float imageXPosition = v.get(0);
+
+            DbgLog.msg("[Phoenix:driveuntilimage] imageXPosition= %7.2f ", imageXPosition);
+            if(d == Direction.FORWARD) {
+                if (v.get(0) < 0) {
+                    while (v.get(0) < 0) {
+                        backLeft.setPower(power);
+                        backRight.setPower(power);
+                        frontLeft.setPower(power);
+                        frontRight.setPower(power);
+
+                        pos = image.getPose();
+                        if (pos != null)
+                            v = pos.getTranslation();
+                        else
+                            v = new VectorF(0, 0, 0, 0);
+                    }
+                }
+            }
+            else {
+                if (v.get(0) > 0) {
+                    while (v.get(0) > 0) {
+                        backLeft.setPower(power);
+                        backRight.setPower(power);
+                        frontLeft.setPower(power);
+                        frontRight.setPower(power);
+
+                        pos = image.getPose();
+                        if (pos != null)
+                            v = pos.getTranslation();
+                        else
+                            v = new VectorF(0, 0, 0, 0);
+                    }
+                }
+            }
+        }
+
+        DbgLog.msg("[Phoenix:driveuntilimage] backRight final encoder value: " + backRight.getCurrentPosition());
 
         DbgLog.msg("I see the image");
         backLeft.setPower(0);

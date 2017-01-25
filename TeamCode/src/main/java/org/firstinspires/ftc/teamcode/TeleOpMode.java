@@ -6,6 +6,7 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.OpticalDistanceSensor;
 import com.qualcomm.robotcore.hardware.Servo;
 
 import FlamingPhoenix.MecanumDriveTrain;
@@ -30,13 +31,9 @@ public class TeleOpMode extends OpMode {
     int counter;
     boolean stop;
 
-    ColorSensor color;
-
     @Override
     public void init() {
         DriveTrain = new MecanumDriveTrain("frontleft", "frontright", "backleft", "backright", this);
-
-        color = hardwareMap.colorSensor.get("color");
 
         shooter = hardwareMap.dcMotor.get("farriswheel");
         collector = hardwareMap.dcMotor.get("collector");
@@ -48,8 +45,8 @@ public class TeleOpMode extends OpMode {
         stopper.setPosition(.75);
 
         shooter.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        shooter.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        shooter.setMaxSpeed(960);
+        shooter.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        //shooter.setMaxSpeed(960);
         Onoroff = 0;
 
         counter = 0;
@@ -59,11 +56,13 @@ public class TeleOpMode extends OpMode {
     public void loop() {
 
         if(gamepad2.right_bumper && gamepad2.left_bumper) {
-            Onoroff = .2;
+            Onoroff = .1;
+            shooter.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             stop = true;
         }
         else if(gamepad2.y) {
-            Onoroff = .3;
+            shooter.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+            Onoroff = .1;
             counter = 0;
             stop = false;
 
@@ -72,7 +71,7 @@ public class TeleOpMode extends OpMode {
             if(stop)
                 Onoroff = 0;
             else
-                Onoroff = 1;
+                Onoroff = .43;
         }
 
         shooter.setPower(Onoroff);
@@ -104,7 +103,6 @@ public class TeleOpMode extends OpMode {
         if(counter >= 100)
             counter = 100;
         this.telemetry.addData("time", this.time);
-        this.telemetry.addData("colorblue", color.blue());
         this.telemetry.update();
     }
 }

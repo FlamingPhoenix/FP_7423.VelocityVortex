@@ -25,6 +25,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackables;
  * Created by Steve on 11/24/2016.
  */
 @Autonomous(name="test Vuforia", group="test")
+@Disabled()
 public class TestVu extends LinearOpMode {
     private ElapsedTime runtime = new ElapsedTime();
     private VuforiaLocalizer vuforia;
