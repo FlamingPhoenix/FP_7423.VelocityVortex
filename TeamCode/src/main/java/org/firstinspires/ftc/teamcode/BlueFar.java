@@ -1,6 +1,8 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cGyro;
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -20,6 +22,8 @@ import FlamingPhoenix.TurnDirection;
  * Created by brandon on 1/26/2017.
  */
 
+// @Disabled //
+@Autonomous(name = "BlueAuto-2", group = "")
 public class BlueFar extends LinearOpMode{
     private DcMotor frontLeft;
     private DcMotor frontRight;
