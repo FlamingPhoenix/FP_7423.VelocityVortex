@@ -1,6 +1,5 @@
 package org.firstinspires.ftc.teamcode;
 
-import com.qualcomm.ftccommon.DbgLog;
 import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cGyro;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.ColorSensor;
@@ -15,14 +14,13 @@ import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackables;
 
 import FlamingPhoenix.Direction;
 import FlamingPhoenix.MecanumDriveTrain;
-import FlamingPhoenix.MyUtility;
 import FlamingPhoenix.TurnDirection;
 
 /**
- * Created by brandon on 12/29/2016.
+ * Created by brandon on 1/26/2017.
  */
 
-public class RedFar extends LinearOpMode {
+public class BlueFar extends LinearOpMode{
     private DcMotor frontLeft;
     private DcMotor frontRight;
     private DcMotor backLeft;
@@ -74,7 +72,7 @@ public class RedFar extends LinearOpMode {
         shooter.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         this.idle();
         shooter.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-              shooter.setMaxSpeed(960);
+        shooter.setMaxSpeed(960);
 
         gyro.resetZAxisIntegrator();
         gyro.calibrate();
@@ -99,11 +97,8 @@ public class RedFar extends LinearOpMode {
         shooter.setMaxSpeed(960);
         shooter.setPower(1);
 
-        wheels.turnWithGyro(150, .3, TurnDirection.LEFT, gyro, this);
+        wheels.turnWithGyro(45, .3, TurnDirection.LEFT, gyro, this);
 
         wheels.drive(65, Direction.FORWARD, 0.6, 9, this);
-    } 
-
+    }
 }
-
-
