@@ -121,7 +121,7 @@ public class Blue_Auton extends LinearOpMode {
 
         wheels.drive(17, Direction.BACKWARD, 0.3, 5, this);
 
-        wheels.driveUntilImage(5, .1, Direction.BACKWARD, tracker.get(0), this);
+        wheels.driveUntilImage(10, .1, Direction.BACKWARD, tracker.get(0), this);
 
         int angle = MyUtility.getImageAngle(tracker.get(0));
         DbgLog.msg("[Phoenix] angle2: " + angle);
@@ -238,9 +238,9 @@ public class Blue_Auton extends LinearOpMode {
             DbgLog.msg("[Phoenix] Leaving first beacon, performed Reached beacon turningAngle= %d, heading= %d endHeading=%d", turningAngle, heading, endHeading);
         }
 
-        wheels.drive(44 + didWeGoBack, Direction.BACKWARD, 0.4, 4, this);
+        wheels.drive(54 - didWeGoBack, Direction.BACKWARD, 0.4, 4, this);
 
-        wheels.driveUntilImage(5, 0.1, Direction.BACKWARD, tracker.get(2), this);
+        wheels.driveUntilImage(10, 0.1, Direction.BACKWARD, tracker.get(2), this);
 
         angle = MyUtility.getImageAngle(tracker.get(2));
         DbgLog.msg("[Phoenix] 2nd beeacon angle: " + angle);
