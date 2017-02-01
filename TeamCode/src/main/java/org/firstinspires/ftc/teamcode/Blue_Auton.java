@@ -90,11 +90,9 @@ public class Blue_Auton extends LinearOpMode {
 
         waitForStart();
 
-        shooter.setPower(.5);
-        collecter.setPower(.5);
+        shooter.setPower(.95);
 
         wheels.strafe(6, 0.7, TurnDirection.LEFT, this);
-        collecter.setPower(0);
         Thread.sleep(1000);
 
         stopper.setPosition(.20);
@@ -103,25 +101,27 @@ public class Blue_Auton extends LinearOpMode {
         Thread.sleep(600);
         stopper.setPosition(0.20);
         Thread.sleep(500);
+        collecter.setPower(.5);
         stopper.setPosition(.75);
 
         wheels.strafe(14, 0.8, TurnDirection.LEFT, this);
 
+        collecter.setPower(0);
         shooter.setPower(0);
 
         wheels.drive(20, Direction.FORWARD, 0.5, 5, this);
         this.sleep(200);
 
         int angleBefore= gyro.getIntegratedZValue();
-        int degreesNeeded = Math.abs(86 - angleBefore * -1);
+        int degreesNeeded = Math.abs(87 - angleBefore * -1);
         wheels.turnWithGyro(degreesNeeded, .25, TurnDirection.RIGHT, gyro, this);
         int angleAfter = gyro.getIntegratedZValue();
 
         DbgLog.msg("[Phoenix] angleBefore= %d, degreeNeeded= %d, angleAfter= %d", angleBefore, degreesNeeded, angleAfter);
 
-        wheels.drive(16, Direction.BACKWARD, 0.3, 5, this);
+        wheels.drive(17, Direction.BACKWARD, 0.3, 5, this);
 
-        wheels.driveUntilImage(20, .1, Direction.BACKWARD, tracker.get(0), this);
+        wheels.driveUntilImage(5, .1, Direction.BACKWARD, tracker.get(0), this);
 
         int angle = MyUtility.getImageAngle(tracker.get(0));
         DbgLog.msg("[Phoenix] angle2: " + angle);
@@ -200,13 +200,16 @@ public class Blue_Auton extends LinearOpMode {
             wheels.drive((int) adjustmentDistance, adjustDirection, 0.3, 2, this);
         }
 
+        int didWeGoBack = 0;
+
         if(color.blue() <= 1) {
             DbgLog.msg("[Phoenix] Can't see blue, move back 5 inches");
-            wheels.drive(5, Direction.BACKWARD, 0.2, 5, this);
+            wheels.drive(7, Direction.BACKWARD, 0.3, 5, this);
+            didWeGoBack  = 5;
         }
 
         if (color.blue() > 1) { //sees the blue side
-            wheels.strafe(6, .6, TurnDirection.LEFT, this);
+            wheels.strafe(3, .6, TurnDirection.LEFT, this);
             Thread.sleep(500);
             wheels.strafe(12, .8, TurnDirection.RIGHT, this);
         }
@@ -235,7 +238,7 @@ public class Blue_Auton extends LinearOpMode {
             DbgLog.msg("[Phoenix] Leaving first beacon, performed Reached beacon turningAngle= %d, heading= %d endHeading=%d", turningAngle, heading, endHeading);
         }
 
-        wheels.drive(44, Direction.BACKWARD, 0.4, 4, this);
+        wheels.drive(44 + didWeGoBack, Direction.BACKWARD, 0.4, 4, this);
 
         wheels.driveUntilImage(5, 0.1, Direction.BACKWARD, tracker.get(2), this);
 
@@ -313,11 +316,11 @@ public class Blue_Auton extends LinearOpMode {
 
         if(color.blue() <= 1) {
             DbgLog.msg("[Phoenix] Can't see blue, move back 5 inches");
-            wheels.drive(5, Direction.BACKWARD, 0.2, 5, this);
+            wheels.drive(6, Direction.BACKWARD, 0.3, 5, this);
         }
 
         if (color.blue() > 1) { //sees the blue side
-            wheels.strafe(6, .8, TurnDirection.LEFT, this);
+            wheels.strafe(3, .8, TurnDirection.LEFT, this);
             Thread.sleep(500);
             wheels.strafe(12, .8, TurnDirection.RIGHT, this);
         }

@@ -1085,7 +1085,7 @@ public class MecanumDriveTrain {
             DbgLog.msg("[Phoenix:driveuntilimage] imageXPosition= %7.2f ", imageXPosition);
             if(d == Direction.FORWARD) {
                 if (v.get(0) < 0) {
-                    while (v.get(0) < 0) {
+                    while (v.get(0) < 0  && backRight.getCurrentPosition() < pulseNeeded) {
                         backLeft.setPower(power);
                         backRight.setPower(power);
                         frontLeft.setPower(power);
@@ -1101,7 +1101,7 @@ public class MecanumDriveTrain {
             }
             else {
                 if (v.get(0) > 0) {
-                    while (v.get(0) > 0) {
+                    while (v.get(0) > 0 && backRight.getCurrentPosition() < pulseNeeded) {
                         backLeft.setPower(power);
                         backRight.setPower(power);
                         frontLeft.setPower(power);

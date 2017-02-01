@@ -95,12 +95,11 @@ public class Red_Auton extends LinearOpMode {
 
         waitForStart();
 
-        shooter.setPower(.5);
+        shooter.setPower(1);
         collecter.setPower(.5);
 
         wheels.strafe(6, 0.7, TurnDirection.LEFT, this);
         collecter.setPower(0);
-        Thread.sleep(1000);
 
         stopper.setPosition(.20);
         Thread.sleep(250);
@@ -124,7 +123,7 @@ public class Red_Auton extends LinearOpMode {
 
         DbgLog.msg("[Phoenix] angleBefore= %d, degreeNeeded= %d, angleAfter= %d", angleBefore, degreesNeeded, angleAfter);
 
-        wheels.drive(9, Direction.FORWARD, 0.3, 5, this);
+        wheels.drive(10, Direction.FORWARD, 0.3, 5, this);
 
         wheels.driveUntilImage(20, .1, Direction.FORWARD, tracker.get(3), this);
 
@@ -205,13 +204,16 @@ public class Red_Auton extends LinearOpMode {
             wheels.drive((int) adjustmentDistance, adjustDirection, 0.3, 2, this);
         }
 
+        int didWeGoBack = 0;
+
         if(color.red() <= 1) {
             DbgLog.msg("[Phoenix] Can't see red, move back 5 inches");
-            wheels.drive(5, Direction.BACKWARD, 0.2, 5, this);
+            wheels.drive(7, Direction.BACKWARD, 0.3, 5, this);
+            didWeGoBack = 5;
         }
 
         if (color.red() > 1) { //sees the red side
-            wheels.strafe(6, .6, TurnDirection.LEFT, this);
+            wheels.strafe(3, .6, TurnDirection.LEFT, this);
             Thread.sleep(500);
             wheels.strafe(12, .8, TurnDirection.RIGHT, this);
         }
@@ -240,7 +242,7 @@ public class Red_Auton extends LinearOpMode {
             DbgLog.msg("[Phoenix] Leaving first beacon, performed Reached beacon turningAngle= %d, heading= %d endHeading=%d", turningAngle, heading, endHeading);
         }
 
-        wheels.drive(44, Direction.FORWARD, 0.4, 4, this);
+        wheels.drive(44 + didWeGoBack, Direction.FORWARD, 0.4, 4, this);
 
         wheels.driveUntilImage(5, 0.1, Direction.FORWARD, tracker.get(1), this);
 
@@ -317,12 +319,12 @@ public class Red_Auton extends LinearOpMode {
         }
 
         if(color.red() <= 1) {
-            DbgLog.msg("[Phoenix] Can't see red, move back 5 inches");
-            wheels.drive(5, Direction.BACKWARD, 0.2, 5, this);
+            DbgLog.msg("[Phoenix] Can't see red, move back 7 inches");
+            wheels.drive(7, Direction.BACKWARD, 0.3, 5, this);
         }
 
         if (color.red() > 1) { //sees the red side
-            wheels.strafe(6, .8, TurnDirection.LEFT, this);
+            wheels.strafe(3, .8, TurnDirection.LEFT, this);
             Thread.sleep(500);
             wheels.strafe(12, .8, TurnDirection.RIGHT, this);
         }
