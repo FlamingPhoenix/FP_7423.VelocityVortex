@@ -26,12 +26,7 @@ import FlamingPhoenix.TurnDirection;
 // @Disabled //
 @Autonomous(name = "RedAuto-2", group = "")
 public class RedFar extends LinearOpMode {
-    private DcMotor frontLeft;
-    private DcMotor frontRight;
-    private DcMotor backLeft;
-    private DcMotor backRight;
-
-    ModernRoboticsI2cGyro gyro = (ModernRoboticsI2cGyro) hardwareMap.gyroSensor.get("gyro");
+    ModernRoboticsI2cGyro gyro;
 
     private VuforiaLocalizer vuforia;
     VuforiaTrackables tracker;
@@ -57,7 +52,7 @@ public class RedFar extends LinearOpMode {
 
         Vuforia.setHint(HINT.HINT_MAX_SIMULTANEOUS_IMAGE_TARGETS, 4);
 
-        ModernRoboticsI2cGyro gyro = (ModernRoboticsI2cGyro) hardwareMap.gyroSensor.get("gyro");
+        gyro = (ModernRoboticsI2cGyro) hardwareMap.gyroSensor.get("gyro");
 
         gyro.resetZAxisIntegrator();
 
@@ -76,7 +71,7 @@ public class RedFar extends LinearOpMode {
 
         shooter.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         this.idle();
-        shooter.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        shooter.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
               shooter.setMaxSpeed(960);
 
         gyro.resetZAxisIntegrator();
@@ -92,19 +87,25 @@ public class RedFar extends LinearOpMode {
 
         wheels.strafe(15, 0.6, TurnDirection.LEFT, this);
 
-        shooter.setPower(.3);
-        Thread.sleep(100);
-        shooter.setMaxSpeed(960);
         shooter.setPower(1);
 
-        shooter.setPower(.3);
-        Thread.sleep(100);
-        shooter.setMaxSpeed(960);
-        shooter.setPower(1);
+        Thread.sleep(350);
 
-        wheels.turnWithGyro(150, .3, TurnDirection.LEFT, gyro, this);
+        stopper.setPosition(.20);
+        Thread.sleep(250);
+        stopper.setPosition(.75);
+        Thread.sleep(750);
+        stopper.setPosition(0.20);
+        Thread.sleep(500);
+        stopper.setPosition(.75);
 
-        wheels.drive(65, Direction.FORWARD, 0.6, 9, this);
+        Thread.sleep(300);
+
+        shooter.setPower(0);
+
+        wheels.turnWithGyro(37, .3, TurnDirection.RIGHT, gyro, this);
+
+        wheels.drive(98, Direction.BACKWARD, 0.9, 10, this);
     } 
 
 }

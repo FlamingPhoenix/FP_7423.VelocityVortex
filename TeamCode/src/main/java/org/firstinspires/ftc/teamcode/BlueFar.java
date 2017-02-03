@@ -25,10 +25,6 @@ import FlamingPhoenix.TurnDirection;
 // @Disabled //
 @Autonomous(name = "BlueAuto-2", group = "")
 public class BlueFar extends LinearOpMode{
-    private DcMotor frontLeft;
-    private DcMotor frontRight;
-    private DcMotor backLeft;
-    private DcMotor backRight;
 
     ModernRoboticsI2cGyro gyro = (ModernRoboticsI2cGyro) hardwareMap.gyroSensor.get("gyro");
 
@@ -75,8 +71,7 @@ public class BlueFar extends LinearOpMode{
 
         shooter.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         this.idle();
-        shooter.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        shooter.setMaxSpeed(960);
+        shooter.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         gyro.resetZAxisIntegrator();
         gyro.calibrate();
