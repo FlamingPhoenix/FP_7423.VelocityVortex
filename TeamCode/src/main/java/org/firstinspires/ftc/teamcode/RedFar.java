@@ -89,7 +89,7 @@ public class RedFar extends LinearOpMode {
 
         shooter.setPower(1);
 
-        Thread.sleep(350);
+        Thread.sleep(500);
 
         stopper.setPosition(.20);
         Thread.sleep(250);
