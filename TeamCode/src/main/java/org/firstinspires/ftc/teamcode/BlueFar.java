@@ -86,18 +86,20 @@ public class BlueFar extends LinearOpMode{
 
         wheels.strafe(15, 0.6, TurnDirection.LEFT, this);
 
-        shooter.setPower(.3);
-        Thread.sleep(100);
-        shooter.setMaxSpeed(960);
         shooter.setPower(1);
 
-        shooter.setPower(.3);
-        Thread.sleep(100);
-        shooter.setMaxSpeed(960);
-        shooter.setPower(1);
+        Thread.sleep(500);
 
-        wheels.turnWithGyro(45, .3, TurnDirection.LEFT, gyro, this);
+        stopper.setPosition(.20);
+        Thread.sleep(250);
+        stopper.setPosition(.75);
+        Thread.sleep(750);
+        stopper.setPosition(0.20);
+        Thread.sleep(500);
+        stopper.setPosition(.75);
 
-        wheels.drive(65, Direction.FORWARD, 0.6, 9, this);
+        wheels.turnWithGyro(37, .3, TurnDirection.LEFT, gyro, this);
+
+        wheels.drive(98, Direction.FORWARD, 0.9, 10, this);
     }
 }
