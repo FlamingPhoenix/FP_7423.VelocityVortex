@@ -205,7 +205,7 @@ public class Blue_Auton extends LinearOpMode {
 
             if (color.blue() <= 1) {
                 DbgLog.msg("[Phoenix] Can't see blue, move back 5 inches");
-                wheels.drive(7, Direction.BACKWARD, 0.3, 5, this);
+                wheels.drive(8, Direction.BACKWARD, 0.3, 5, this);
                 didWeGoBack = 5;
             }
 
@@ -234,8 +234,8 @@ public class Blue_Auton extends LinearOpMode {
         else
             DbgLog.msg("[Phoenix] Leaving first beacon, Reached beacon turn RIGHT, turningAngle= %d, heading= %d endHeading=%d", turningAngle, heading, endHeading);
 
-        if (Math.abs(turningAngle) > 2){
-            wheels.turnWithGyro(Math.abs(turningAngle), .3, d, gyro, this);
+        if (Math.abs(turningAngle) > 5){
+            wheels.turnWithGyro(Math.abs(turningAngle), .25, d, gyro, this);
             DbgLog.msg("[Phoenix] Leaving first beacon, performed Reached beacon turningAngle= %d, heading= %d endHeading=%d", turningAngle, heading, endHeading);
         }
 
@@ -276,8 +276,8 @@ public class Blue_Auton extends LinearOpMode {
         else
             DbgLog.msg("[Phoenix] At 2nd beacon, Reached beacon turn RIGHT, turningAngle= %d, heading= %d endHeading=%d", turningAngle, heading, endHeading);
 
-        if (Math.abs(turningAngle) > 2){
-            wheels.turnWithGyro(Math.abs(turningAngle), .3, d, gyro, this);
+        if (Math.abs(turningAngle) > 5){
+            wheels.turnWithGyro(Math.abs(turningAngle), .25, d, gyro, this);
             DbgLog.msg("[Phoenix] At beacon, performed Reached beacon turningAngle= %d, heading= %d endHeading=%d", turningAngle, heading, endHeading);
         }
 
