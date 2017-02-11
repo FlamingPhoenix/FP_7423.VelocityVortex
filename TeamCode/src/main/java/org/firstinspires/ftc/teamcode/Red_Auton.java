@@ -235,8 +235,8 @@ public class Red_Auton extends LinearOpMode {
         else
             DbgLog.msg("[Phoenix] Leaving first beacon, Reached beacon turn RIGHT, turningAngle= %d, heading= %d endHeading=%d", turningAngle, heading, endHeading);
 
-        if (Math.abs(turningAngle) > 2){
-            wheels.turnWithGyro(Math.abs(turningAngle), .3, d, gyro, this);
+        if (Math.abs(turningAngle) > 5){
+            wheels.turnWithGyro(Math.abs(turningAngle), .25, d, gyro, this);
             DbgLog.msg("[Phoenix] Leaving first beacon, performed Reached beacon turningAngle= %d, heading= %d endHeading=%d", turningAngle, heading, endHeading);
         }
 

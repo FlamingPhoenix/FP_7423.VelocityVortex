@@ -26,7 +26,7 @@ import FlamingPhoenix.TurnDirection;
 @Autonomous(name = "BlueAuto-2", group = "")
 public class BlueFar extends LinearOpMode{
 
-    ModernRoboticsI2cGyro gyro = (ModernRoboticsI2cGyro) hardwareMap.gyroSensor.get("gyro");
+    ModernRoboticsI2cGyro gyro;
 
     private VuforiaLocalizer vuforia;
     VuforiaTrackables tracker;
@@ -39,20 +39,7 @@ public class BlueFar extends LinearOpMode{
 
     @Override
     public void runOpMode() throws InterruptedException {
-        VuforiaLocalizer.Parameters parms = new VuforiaLocalizer.Parameters(R.id.cameraMonitorViewId);
-        parms.cameraDirection = VuforiaLocalizer.CameraDirection.BACK;
-        parms.vuforiaLicenseKey = "AbYPrgD/////AAAAGbvKMH3NcEVFmPLgunQe4K0d1ZQi+afRLxricyooCq+sgY9Yh1j+bBrd0CdDCcoieA6trLCKBzymC515+Ps/FECtXv3+CTW6fg3/3+nvKZ6QA18h/cNZHg5HYHmghlcCgVUmSzOLRvdOpbS4S+0Y/sWGXwFK0PbuGPSN82w8XPDBoRYSWjAf8GXeitmNSlm9n4swrMoYNpMDuWCDjSm1kWnoErjFA9NuNoFzAgO+C/rYzoYjTJRk40ETVcAsahzatRlP7PJCvNNXiBhE6iVR+x7lFlTZ841xifOIOPkfVc54olC5XYe4A5ZmQ6WFD03W5HHdQrnmKPmkgcr1yqXAJ3rLTK8FZK3KVgbxz3Eeqps0";
-        parms.cameraMonitorFeedback = VuforiaLocalizer.Parameters.CameraMonitorFeedback.AXES;
-
-        this.vuforia = ClassFactory.createVuforiaLocalizer(parms);
-
-        tracker = vuforia.loadTrackablesFromAsset("FTC_2016-17");
-
-        tracker.activate();
-
-        Vuforia.setHint(HINT.HINT_MAX_SIMULTANEOUS_IMAGE_TARGETS, 4);
-
-        ModernRoboticsI2cGyro gyro = (ModernRoboticsI2cGyro) hardwareMap.gyroSensor.get("gyro");
+        gyro = (ModernRoboticsI2cGyro) hardwareMap.gyroSensor.get("gyro");
 
         gyro.resetZAxisIntegrator();
 
@@ -72,6 +59,7 @@ public class BlueFar extends LinearOpMode{
         shooter.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         this.idle();
         shooter.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        shooter.setMaxSpeed(960);
 
         gyro.resetZAxisIntegrator();
         gyro.calibrate();
@@ -102,8 +90,8 @@ public class BlueFar extends LinearOpMode{
 
         shooter.setPower(0);
 
-        wheels.turnWithGyro(37, .3, TurnDirection.LEFT, gyro, this);
+        wheels.turnWithGyro(50, .3, TurnDirection.LEFT, gyro, this);
 
-        wheels.drive(98, Direction.FORWARD, 0.9, 10, this);
+        wheels.drive(83, Direction.FORWARD, 0.9, 10, this);
     }
 }
