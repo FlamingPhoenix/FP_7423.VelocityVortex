@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cGyro;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
@@ -11,6 +12,7 @@ import FlamingPhoenix.MecanumDriveTrain;
  */
 
 @TeleOp (name = "Warner", group = "Teleop")
+@Disabled
 public class WarnerBot extends OpMode {
     MecanumDriveTrain DriveTrain;
     ModernRoboticsI2cGyro gyro;

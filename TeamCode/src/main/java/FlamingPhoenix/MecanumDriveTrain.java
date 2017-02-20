@@ -119,7 +119,7 @@ public class MecanumDriveTrain {
      * @param gamePad
      */
     public void Drive(Gamepad gamePad) {
-        Drive(gamePad, .7f);
+        Drive(gamePad, 1f);
     }
 
 
@@ -189,7 +189,7 @@ public class MecanumDriveTrain {
     }
 
     //Drive by using PIDControl - Run to Position
-    public void drive(int d, Direction direction, double power, int timeout, LinearOpMode opMode) throws InterruptedException {
+    public void drive(double d, Direction direction, double power, int timeout, LinearOpMode opMode) throws InterruptedException {
         backLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         backLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         backRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -206,7 +206,7 @@ public class MecanumDriveTrain {
         frontRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         opMode.idle();
 
-        int pulseNeeded = (int) Math.round((encoderPPR * d) / (wheelDiameter * Math.PI));
+        int pulseNeeded = (int) Math.round(((double) encoderPPR * d) / (wheelDiameter * Math.PI));
         if (direction == Direction.BACKWARD) {
             pulseNeeded = pulseNeeded * -1;
             power = Math.abs(power) * -1;
@@ -253,7 +253,7 @@ public class MecanumDriveTrain {
 
     //Drive by controlling the motor rotation speed using encoder
     @Deprecated()
-    public void drive(int d, Direction direction, int speed, LinearOpMode opMode) throws InterruptedException {
+    public void drive(double d, Direction direction, int speed, LinearOpMode opMode) throws InterruptedException {
         backLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         backLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         backRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -270,7 +270,7 @@ public class MecanumDriveTrain {
 
         speed = Math.abs(speed); //let's make sure it is positive value
 
-        int pulseNeeded = (int) Math.round((encoderPPR * d) / (wheelDiameter * Math.PI));
+        int pulseNeeded = (int) (Math.round(((double) encoderPPR * d) / (wheelDiameter * Math.PI)));
         double power = 1;
         if (direction == Direction.BACKWARD)
             power = -1;

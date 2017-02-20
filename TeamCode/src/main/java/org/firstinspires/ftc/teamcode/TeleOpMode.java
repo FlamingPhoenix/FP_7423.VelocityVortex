@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode;
 
 import android.graphics.Color;
 
+import com.qualcomm.ftccommon.DbgLog;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.ColorSensor;
@@ -24,6 +25,7 @@ public class TeleOpMode extends OpMode {
     DcMotor collector;
 
     Servo stopper;
+    Servo pusher;
 
     boolean isInPosition = false;
 
@@ -31,12 +33,18 @@ public class TeleOpMode extends OpMode {
     int counter;
     boolean stop;
 
+    int previousCount;
+    long prevTime;
+
     @Override
     public void init() {
         DriveTrain = new MecanumDriveTrain("frontleft", "frontright", "backleft", "backright", this);
 
         shooter = hardwareMap.dcMotor.get("farriswheel");
         collector = hardwareMap.dcMotor.get("collector");
+
+        pusher = hardwareMap.servo.get("pusher");
+        pusher.setPosition(.5);
 
         //stopper = hardwareMap.servo.get("");
 
@@ -46,10 +54,13 @@ public class TeleOpMode extends OpMode {
 
         shooter.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         shooter.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        shooter.setMaxSpeed(3000);
+        shooter.setMaxSpeed(2650);
         Onoroff = 0;
 
         counter = 0;
+
+        previousCount = shooter.getCurrentPosition();
+        prevTime = System.currentTimeMillis();
     }
 
     @Override
@@ -84,6 +95,16 @@ public class TeleOpMode extends OpMode {
         else
             collector.setPower(0);
 
+        if(gamepad1.a) {
+            pusher.setPosition(1);
+        }
+        else if(gamepad1.y) {
+            pusher.setPosition(0);
+        }
+        else {
+            pusher.setPosition(.5);
+        }
+
 
         DriveTrain.Drive(gamepad1);
 
@@ -102,7 +123,21 @@ public class TeleOpMode extends OpMode {
 
         if(counter >= 100)
             counter = 100;
-        this.telemetry.addData("time", this.time);
-        this.telemetry.update();
+
+        long currentTime = System.currentTimeMillis();
+        long timeDifference = currentTime - prevTime;
+        double speed = 0;
+        int newCount = shooter.getCurrentPosition();
+        if(timeDifference > 1000) {
+            speed = ((newCount - previousCount) * 1000 / timeDifference);
+
+
+            previousCount = newCount;
+            prevTime = currentTime;
+
+            this.telemetry.addData("speed", speed);
+            this.telemetry.update();
+        }
+
     }
 }
