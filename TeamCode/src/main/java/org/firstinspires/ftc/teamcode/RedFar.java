@@ -72,7 +72,9 @@ public class RedFar extends LinearOpMode {
 
         Thread.sleep(10000);
 
-        wheels.strafe(15, 0.6, TurnDirection.LEFT, this);
+        wheels.drive(5, Direction.FORWARD, 0.4, 5, this);
+
+        wheels.turnWithGyro(50, .3, TurnDirection.RIGHT, gyro, this);
 
         shooter.setPower(1);
 

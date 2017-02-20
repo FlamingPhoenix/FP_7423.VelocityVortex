@@ -72,7 +72,9 @@ public class BlueFar extends LinearOpMode{
 
         Thread.sleep(10000);
 
-        wheels.strafe(15, 0.6, TurnDirection.LEFT, this);
+        wheels.drive(5, Direction.FORWARD, 0.4, 5, this);
+
+        wheels.turnWithGyro(140, .3, TurnDirection.RIGHT, gyro, this);
 
         shooter.setPower(1);
 
@@ -90,7 +92,7 @@ public class BlueFar extends LinearOpMode{
 
         shooter.setPower(0);
 
-        wheels.turnWithGyro(50, .3, TurnDirection.LEFT, gyro, this);
+        wheels.turnWithGyro(47, .3, TurnDirection.LEFT, gyro, this);
 
         wheels.drive(83, Direction.FORWARD, 0.9, 10, this);
     }
