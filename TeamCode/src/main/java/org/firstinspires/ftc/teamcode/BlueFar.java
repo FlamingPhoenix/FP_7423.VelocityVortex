@@ -37,6 +37,8 @@ public class BlueFar extends LinearOpMode{
 
     ColorSensor color;
 
+    Servo pusher;
+
     @Override
     public void runOpMode() throws InterruptedException {
         gyro = (ModernRoboticsI2cGyro) hardwareMap.gyroSensor.get("gyro");
@@ -44,7 +46,11 @@ public class BlueFar extends LinearOpMode{
         gyro.resetZAxisIntegrator();
 
         color = hardwareMap.colorSensor.get("color");
-        color.enableLed(true);
+        color.enableLed(false);
+
+        pusher = hardwareMap.servo.get("pusher");
+
+        pusher.setPosition(.5);
 
         while (gyro.isCalibrating() && this.opModeIsActive())
             Thread.sleep(50);
@@ -70,20 +76,32 @@ public class BlueFar extends LinearOpMode{
 
         waitForStart();
 
-        Thread.sleep(10000);
+        wheels.drive(2, Direction.FORWARD, 0.4, 5, this);
 
-        wheels.drive(5, Direction.FORWARD, 0.4, 5, this);
+        this.sleep(500);
 
-        wheels.turnWithGyro(140, .3, TurnDirection.RIGHT, gyro, this);
+        wheels.turnWithGyro(132, .35, TurnDirection.RIGHT, gyro, this);
+
+        this.sleep(500);
+
+        wheels.strafe(14, .8, TurnDirection.LEFT, this);
+
+        shooter.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        this.idle();
+        shooter.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        this.idle();
+        this.idle();
+
+        shooter.setMaxSpeed(2650);
 
         shooter.setPower(1);
 
-        Thread.sleep(500);
+        this.sleep(1500);
 
         stopper.setPosition(.20);
         Thread.sleep(250);
         stopper.setPosition(.75);
-        Thread.sleep(750);
+        Thread.sleep(1050);
         stopper.setPosition(0.20);
         Thread.sleep(500);
         stopper.setPosition(.75);
@@ -92,8 +110,12 @@ public class BlueFar extends LinearOpMode{
 
         shooter.setPower(0);
 
-        wheels.turnWithGyro(47, .3, TurnDirection.LEFT, gyro, this);
+        Thread.sleep(5000);
 
-        wheels.drive(83, Direction.FORWARD, 0.9, 10, this);
+        wheels.turnWithGyro(45, .3, TurnDirection.LEFT, gyro, this);
+
+        Thread.sleep(8000);
+
+        wheels.drive(95, Direction.FORWARD, 0.9, 10, this);
     }
 }
