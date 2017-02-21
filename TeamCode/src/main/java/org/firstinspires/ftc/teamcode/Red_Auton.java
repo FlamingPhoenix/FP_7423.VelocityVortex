@@ -126,9 +126,9 @@ public class Red_Auton extends LinearOpMode {
 
         DbgLog.msg("[Phoenix] angleBefore= %d, degreeNeeded= %d, angleAfter= %d", angleBefore, degreesNeeded, angleAfter);
 
-        wheels.drive(12, Direction.FORWARD, 0.3, 5, this);
+        wheels.drive(14, Direction.FORWARD, 0.3, 5, this);
 
-        wheels.driveUntilImage(15, .1, Direction.FORWARD, tracker.get(3), this);
+        wheels.driveUntilImage(15, .15, Direction.FORWARD, tracker.get(3), this);
 
         int angle = MyUtility.getImageAngle(tracker.get(3));
         DbgLog.msg("[Phoenix] angle2: " + angle);
@@ -155,7 +155,7 @@ public class Red_Auton extends LinearOpMode {
         DbgLog.msg("[Phoenix:heading] heading: %d. adjAngle: %d, angle: %d, previousHeading %d", heading, adjAngle, angle, nowsHeading);
 
         wheels.resetMotorSpeed();
-        double lastX = wheels.strafe(180, 0.8, TurnDirection.LEFT, tracker.get(3), this);
+        double lastX = wheels.strafe(170, 0.8, TurnDirection.LEFT, tracker.get(3), this);
         DbgLog.msg("[Phoenix:mainrun] lastX = " + lastX);
         float imageX;
 
@@ -222,9 +222,9 @@ public class Red_Auton extends LinearOpMode {
             }
 
             if (color.red() > 1) { //sees the red side
-                pushBeacon(Direction.FORWARD, .8);
+                pushBeacon(Direction.FORWARD, 1.5);
                 Thread.sleep(200);
-                pushBeacon(Direction.BACKWARD, .8);
+                pushBeacon(Direction.BACKWARD, 1);
 
                 wheels.strafe(12, .8, TurnDirection.RIGHT, this);
 
@@ -255,7 +255,7 @@ public class Red_Auton extends LinearOpMode {
 
         wheels.drive(49 + didWeGoBack, Direction.FORWARD, 0.4, 4, this);
 
-        wheels.driveUntilImage(15, 0.1, Direction.FORWARD, tracker.get(1), this);
+        wheels.driveUntilImage(15, 0.15, Direction.FORWARD, tracker.get(1), this);
 
         angle = MyUtility.getImageAngle(tracker.get(1));
         DbgLog.msg("[Phoenix] 2nd beeacon angle: " + angle);
@@ -275,7 +275,7 @@ public class Red_Auton extends LinearOpMode {
 
         heading = gyro.getIntegratedZValue();
         wheels.resetMotorSpeed();
-        lastX = wheels.strafe(180, 0.8, TurnDirection.LEFT, tracker.get(1), this);
+        lastX = wheels.strafe(170, 0.8, TurnDirection.LEFT, tracker.get(1), this);
 
         endHeading = gyro.getIntegratedZValue();
         turningAngle = heading - endHeading;
@@ -335,9 +335,9 @@ public class Red_Auton extends LinearOpMode {
         }
 
         if (color.red() > 1) { //sees the red side
-            pushBeacon(Direction.FORWARD, .8);
+            pushBeacon(Direction.FORWARD, 1);
             Thread.sleep(200);
-            pushBeacon(Direction.BACKWARD, .8);
+            pushBeacon(Direction.BACKWARD, 1.5);
 
             wheels.strafe(6, .8, TurnDirection.RIGHT, this);
         }
