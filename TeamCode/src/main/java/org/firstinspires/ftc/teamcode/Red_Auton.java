@@ -202,8 +202,8 @@ public class Red_Auton extends LinearOpMode {
             }
 
             adjustmentDistance = Math.abs(((imageX * 100.0f)) / 254.0f) / 10.0f;
-            //if (adjustDirection == Direction.FORWARD)
-            //    adjustmentDistance = adjustmentDistance; //need to move forward a bit more to handle the strafing problem
+            if (adjustDirection == Direction.FORWARD)
+                adjustmentDistance = adjustmentDistance + 1.0f; //need to move forward a bit more to handle the strafing problem
 
             if (adjustDirection == Direction.BACKWARD)
                 DbgLog.msg("[Phoenix: Beacon Distance Adjustment] Beacon X position adjustment backward %7.3f and image X %7.3f", adjustmentDistance, imageX);
