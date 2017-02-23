@@ -83,7 +83,7 @@ public class Red_Auton extends LinearOpMode {
         shooter.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         this.idle();
         shooter.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        shooter.setMaxSpeed(2600);
+        shooter.setMaxSpeed(2450);
 
         while(gyro.isCalibrating()) {
             Thread.sleep(50);
@@ -103,7 +103,7 @@ public class Red_Auton extends LinearOpMode {
         stopper.setPosition(.20); //Shoot
         Thread.sleep(250);
         stopper.setPosition(.75); //Stop shooting
-        Thread.sleep(800);
+        Thread.sleep(900);
         stopper.setPosition(0.20); //Shoot
         Thread.sleep(500);
         stopper.setPosition(.75); //Stop shooting
@@ -239,7 +239,7 @@ public class Red_Auton extends LinearOpMode {
                 wheels.strafe(12, .8, TurnDirection.RIGHT, this);
                 pusher.setPosition(.5);
             } else {
-                wheels.strafe(10, .8, TurnDirection.RIGHT, this);
+                wheels.strafe(12, .8, TurnDirection.RIGHT, this);
                 pusher.setPosition(.5);
             }
         }
