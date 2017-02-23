@@ -83,7 +83,7 @@ public class Red_Auton extends LinearOpMode {
         shooter.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         this.idle();
         shooter.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        shooter.setMaxSpeed(2650);
+        shooter.setMaxSpeed(2600);
 
         while(gyro.isCalibrating()) {
             Thread.sleep(50);
@@ -100,13 +100,13 @@ public class Red_Auton extends LinearOpMode {
 
         Thread.sleep(600);
 
-        stopper.setPosition(.20);
+        stopper.setPosition(.20); //Shoot
         Thread.sleep(250);
-        stopper.setPosition(.75);
+        stopper.setPosition(.75); //Stop shooting
         Thread.sleep(800);
-        stopper.setPosition(0.20);
+        stopper.setPosition(0.20); //Shoot
         Thread.sleep(500);
-        stopper.setPosition(.75);
+        stopper.setPosition(.75); //Stop shooting
 
         wheels.strafe(14, 0.7, TurnDirection.LEFT, this);
 
@@ -116,22 +116,23 @@ public class Red_Auton extends LinearOpMode {
         shooter.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         this.idle();
 
-        wheels.drive(35, Direction.BACKWARD, 0.35, 5, this);
+        wheels.drive(35, Direction.BACKWARD, 0.4, 6, this);
         this.sleep(200);
 
         int angleBefore = gyro.getIntegratedZValue();
-        int degreesNeeded = Math.abs(87 - angleBefore);
+        int degreesNeeded = Math.abs(88 - angleBefore);
         wheels.turnWithGyro(degreesNeeded, .25, TurnDirection.LEFT, gyro, this);
         int angleAfter = gyro.getIntegratedZValue();
 
         DbgLog.msg("[Phoenix] angleBefore= %d, degreeNeeded= %d, angleAfter= %d", angleBefore, degreesNeeded, angleAfter);
 
-        wheels.drive(14, Direction.FORWARD, 0.3, 5, this);
+        wheels.drive(15, Direction.FORWARD, 0.3, 5, this);
 
         wheels.driveUntilImage(15, .15, Direction.FORWARD, tracker.get(3), this);
 
+        //Get the first image angle
         int angle = MyUtility.getImageAngle(tracker.get(3));
-        DbgLog.msg("[Phoenix] angle2: " + angle);
+
         int adjAngle = 0;
         int heading = gyro.getIntegratedZValue();
         int nowsHeading = gyro.getIntegratedZValue();
@@ -143,20 +144,20 @@ public class Red_Auton extends LinearOpMode {
             heading = gyro.getIntegratedZValue() - adjAngle;
 
             if(angle < 85) {
-                DbgLog.msg("[Phoenix] Adjust to turn RIGHT by %d degree based on image angle of %d", turnAngle, angle);
-                wheels.turnWithGyro(turnAngle, .5, TurnDirection.RIGHT, gyro, this);
+                DbgLog.msg("[Phoenix:AdjustHeading] Adjust to turn RIGHT by %d degree based on image angle of %d", turnAngle, angle);
+                wheels.turnWithGyro(turnAngle, .25, TurnDirection.RIGHT, gyro, this);
             }
             else if(angle > 95) {
-                DbgLog.msg("[Phoenix] Adjust to turn left by %d degree based on image angle of %d", turnAngle, angle);
-                wheels.turnWithGyro(turnAngle, .5, TurnDirection.LEFT, gyro, this);
+                DbgLog.msg("[Phoenix:AdjustHeading] Adjust to turn left by %d degree based on image angle of %d", turnAngle, angle);
+                wheels.turnWithGyro(turnAngle, .25, TurnDirection.LEFT, gyro, this);
             }
         }
 
-        DbgLog.msg("[Phoenix:heading] heading: %d. adjAngle: %d, angle: %d, previousHeading %d", heading, adjAngle, angle, nowsHeading);
+        DbgLog.msg("[Phoenix:CalculateHeading] newNeededGyroHeading: %d. adjAngle: %d, imageAngle: %d, previousHeading %d", heading, adjAngle, angle, nowsHeading);
 
         wheels.resetMotorSpeed();
         double lastX = wheels.strafe(180, 0.8, TurnDirection.LEFT, tracker.get(3), this);
-        DbgLog.msg("[Phoenix:mainrun] lastX = " + lastX);
+        DbgLog.msg("[Phoenix:ApproachImage 1] lastX After Strafe = " + lastX);
         float imageX;
 
         int endHeading = gyro.getIntegratedZValue();
@@ -175,20 +176,20 @@ public class Red_Auton extends LinearOpMode {
                 d = TurnDirection.LEFT;
 
             if (d == TurnDirection.LEFT)
-                DbgLog.msg("[Phoenix:Beacon Adjustment] At beacon, Reached beacon turn LEFT, turningAngle= %d, heading= %d endHeading=%d", turningAngle, heading, endHeading);
+                DbgLog.msg("[Phoenix:Beacon Adjustment 1] At beacon, Reached beacon turn LEFT, turningAngle= %d, heading= %d endHeading=%d", turningAngle, heading, endHeading);
             else
-                DbgLog.msg("[Phoenix: Beacon Adjustment] At beacon, Reached beacon turn RIGHT, turningAngle= %d, heading= %d endHeading=%d", turningAngle, heading, endHeading);
+                DbgLog.msg("[Phoenix:Beacon Adjustment 1] At beacon, Reached beacon turn RIGHT, turningAngle= %d, heading= %d endHeading=%d", turningAngle, heading, endHeading);
 
-            if (Math.abs(turningAngle) > 2) {
-                wheels.turnWithGyro(Math.abs(turningAngle), .3, d, gyro, this);
-                DbgLog.msg("[Phoenix: Beacon Adjustment] At beacon, performed Reached beacon turningAngle= %d, heading= %d endHeading=%d", turningAngle, heading, endHeading);
+            if (Math.abs(turningAngle) > 5) { //The robot is not parallel to the beacon, need to adjust
+                wheels.turnWithGyro(Math.abs(turningAngle), .25, d, gyro, this);
+                DbgLog.msg("[Phoenix:Beacon Adjustment 1] At beacon, performed Reached beacon turningAngle= %d, heading= %d endHeading=%d", turningAngle, heading, endHeading);
             }
 
             imageX = MyUtility.getImageXPosition(tracker.get(3));
-            DbgLog.msg("[Phoenix] imageX=%9.3f", imageX);
+            DbgLog.msg("[Phoenix:ApproachImage 1] imageX=%9.3f", imageX);
             if ((imageX == -9999) && (lastX != -9999)) { //can't see image and we got the X during strafing
                 imageX = (float) lastX;
-                DbgLog.msg("[Phoenix] Can't see image, use last known imageX=%9.3f", imageX);
+                DbgLog.msg("[Phoenix:ApproachImage 1] Can't see image, use last known imageX=%9.3f", imageX);
             } else if (imageX == -9999) {
                 imageX = 0;
             }
@@ -223,8 +224,8 @@ public class Red_Auton extends LinearOpMode {
 
             if (color.red() > 1) { //sees the red side
                 pusher.setPosition(0);
-                Thread.sleep(800);
-                wheels.strafe(3, .8, TurnDirection.LEFT, this);
+                Thread.sleep(1000);
+                wheels.strafe(1, .8, TurnDirection.LEFT, this);
                 Thread.sleep(200);
 
                 pusher.setPosition(1);
@@ -234,11 +235,12 @@ public class Red_Auton extends LinearOpMode {
                 pusher.setPosition(.5);
             } else {
                 wheels.strafe(10, .8, TurnDirection.RIGHT, this);
+                pusher.setPosition(.5);
             }
         }
         //First beacon (Gears) is complete
 
-        //Now go for 2nc Beacon, Adjust the angle first
+        //Not yet, before go for 2nc Beacon, Adjust the angle first
         endHeading = gyro.getIntegratedZValue();
         turningAngle = heading - endHeading;
 
@@ -257,6 +259,7 @@ public class Red_Auton extends LinearOpMode {
             DbgLog.msg("[Phoenix: Beacon Adjustment 2] Leaving first beacon, performed Reached beacon turningAngle= %d, heading= %d endHeading=%d", turningAngle, heading, endHeading);
         }
 
+        //Now, got to 2nd beacon/image
         wheels.drive(49 + didWeGoBack, Direction.FORWARD, 0.4, 4, this);
 
         wheels.driveUntilImage(15, 0.15, Direction.FORWARD, tracker.get(1), this);
@@ -269,11 +272,11 @@ public class Red_Auton extends LinearOpMode {
 
             if(angle < 85) {
                 DbgLog.msg("[Phoenix] Adjust to turn RIGHT by %d degree based on 2nd image angle of %d", turnAngle, angle);
-                wheels.turnWithGyro(turnAngle, .5, TurnDirection.RIGHT, gyro, this);
+                wheels.turnWithGyro(turnAngle, .25, TurnDirection.RIGHT, gyro, this);
             }
             else if(angle > 95) {
                 DbgLog.msg("[Phoenix] Adjust to turn left by %d degree based on 2nd image angle of %d", turnAngle, angle);
-                wheels.turnWithGyro(turnAngle, .5, TurnDirection.LEFT, gyro, this);
+                wheels.turnWithGyro(turnAngle, .25, TurnDirection.LEFT, gyro, this);
             }
         }
 
@@ -294,8 +297,8 @@ public class Red_Auton extends LinearOpMode {
         else
             DbgLog.msg("[Phoenix] At 2nd beacon, Reached beacon turn RIGHT, turningAngle= %d, heading= %d endHeading=%d", turningAngle, heading, endHeading);
 
-        if (Math.abs(turningAngle) > 2){
-            wheels.turnWithGyro(Math.abs(turningAngle), .3, d, gyro, this);
+        if (Math.abs(turningAngle) > 5){ //robot is not parallel by more than 5 degree, adjust
+            wheels.turnWithGyro(Math.abs(turningAngle), .25, d, gyro, this);
             DbgLog.msg("[Phoenix] At beacon, performed Reached beacon turningAngle= %d, heading= %d endHeading=%d", turningAngle, heading, endHeading);
         }
 
@@ -324,33 +327,54 @@ public class Red_Auton extends LinearOpMode {
             adjustmentDistance = adjustmentDistance + 1; //need to move forward a bit more to handle the strafing problem
 
         if (adjustDirection == Direction.BACKWARD)
-            DbgLog.msg("[Phoenix: Beacon Distance Adjustment 2] 2nd Beacon X position adjustment backward %7.3f and image X %7.3f", adjustmentDistance, imageX);
+            DbgLog.msg("[Phoenix:Beacon Distance Adjustment 2] 2nd Beacon X position adjustment backward %7.3f and image X %7.3f", adjustmentDistance, imageX);
         else
-            DbgLog.msg("[Phoenix: Beacon Distance Adjustment 2] 2nd Beacon X position adjustment forward %7.3f and imageX %7.3f", adjustmentDistance, imageX);
+            DbgLog.msg("[Phoenix:Beacon Distance Adjustment 2] 2nd Beacon X position adjustment forward %7.3f and imageX %7.3f", adjustmentDistance, imageX);
 
         if(adjustmentDistance >= 1) {
-            DbgLog.msg("[Phoenix: Beacon Distance Adjustment 2] Performed 2nd Beacon X position adjustment %7.3f", adjustmentDistance);
+            DbgLog.msg("[Phoenix:Beacon Distance Adjustment 2] Performed 2nd Beacon X position adjustment %7.3f", adjustmentDistance);
             wheels.drive((int) adjustmentDistance, adjustDirection, 0.25, 5, this);
         }
 
         if(color.red() <= 1) {
-            DbgLog.msg("[Phoenix] Can't see red, move back 6 inches");
+            DbgLog.msg("[Phoenix:Beacon Distance Adjustment 2] Can't see red, move back 6 inches");
             wheels.drive(7, Direction.BACKWARD, 0.25, 5, this);
         }
 
         if (color.red() > 1) { //sees the red side
             pusher.setPosition(0);
-            Thread.sleep(800);
-            wheels.strafe(3, .8, TurnDirection.LEFT, this);
+            Thread.sleep(1000);
+            wheels.strafe(2, .8, TurnDirection.LEFT, this);
             Thread.sleep(200);
 
-            wheels.strafe(8, .8, TurnDirection.RIGHT, this);
+            pusher.setPosition(1);
+            wheels.strafe(10, .8, TurnDirection.RIGHT, this);
         }
         else {
             wheels.strafe(8, .8, TurnDirection.RIGHT, this);
         }
 
+        //Adjust before going for the center vortex
+        endHeading = gyro.getIntegratedZValue();
+        turningAngle = heading - endHeading;
+
+        if(turningAngle < 0)
+            d = TurnDirection.RIGHT;
+        else
+            d = TurnDirection.LEFT;
+
+        if (d == TurnDirection.LEFT)
+            DbgLog.msg("[Phoenix:Adjust before going for center Vortex] Leaving first beacon, Reached beacon turn LEFT, turningAngle= %d, heading= %d endHeading=%d", turningAngle, heading, endHeading);
+        else
+            DbgLog.msg("[PhoenixPhoenix:Adjust before going for center Vortex] Leaving first beacon, Reached beacon turn RIGHT, turningAngle= %d, heading= %d endHeading=%d", turningAngle, heading, endHeading);
+
+        if (Math.abs(turningAngle) > 5){
+            wheels.turnWithGyro(Math.abs(turningAngle), .25, d, gyro, this);
+            DbgLog.msg("[PhoenixPhoenix:Adjust before going for center Vortex] Leaving first beacon, performed Reached beacon turningAngle= %d, heading= %d endHeading=%d", turningAngle, heading, endHeading);
+        }
+        //Go for center vortex
         wheels.turnWithGyro(40, .5, TurnDirection.LEFT, gyro, this);
+        pusher.setPosition(0.5);
         wheels.drive(55, Direction.BACKWARD, .8, 6, this);
     }
 

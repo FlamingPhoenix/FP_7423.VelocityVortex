@@ -205,6 +205,7 @@ public class MecanumDriveTrain {
         frontLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         frontRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         opMode.idle();
+        opMode.idle();
 
         int pulseNeeded = (int) Math.round(((double) encoderPPR * d) / (wheelDiameter * Math.PI));
         if (direction == Direction.BACKWARD) {
