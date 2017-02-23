@@ -216,13 +216,18 @@ public class Red_Auton extends LinearOpMode {
                 wheels.drive((int) adjustmentDistance, adjustDirection, 0.25, 3, this);
             }
 
+            boolean pushAnyway = false;  //if see blue on one side, then, the other side got to be red
             if (color.red() <= 1) {
                 DbgLog.msg("[Phoenix] Can't see red, move back 5 inches");
+
+                if (color.blue() > 1) //if see blue on one side, then, the other side got to be red
+                    pushAnyway = true;
+
                 wheels.drive(7, Direction.BACKWARD, 0.25, 5, this);
                 didWeGoBack = 5;
             }
 
-            if (color.red() > 1) { //sees the red side
+            if ((color.red() > 1) || pushAnyway)  { //sees the red side or the other side is blue
                 pusher.setPosition(0);
                 Thread.sleep(1000);
                 wheels.strafe(1, .8, TurnDirection.LEFT, this);
@@ -336,19 +341,24 @@ public class Red_Auton extends LinearOpMode {
             wheels.drive((int) adjustmentDistance, adjustDirection, 0.25, 5, this);
         }
 
+        boolean pushAnyway = false;  //if see blue on one side, then, the other side got to be red
         if(color.red() <= 1) {
             DbgLog.msg("[Phoenix:Beacon Distance Adjustment 2] Can't see red, move back 6 inches");
+
+            if (color.blue() > 1)
+                pushAnyway = true; //if see blue on one side, then, the other side got to be red
+
             wheels.drive(7, Direction.BACKWARD, 0.25, 5, this);
         }
 
-        if (color.red() > 1) { //sees the red side
+        if ((color.red() > 1) || pushAnyway) { //sees the red side or the other side is blue
             pusher.setPosition(0);
             Thread.sleep(1000);
-            wheels.strafe(2, .8, TurnDirection.LEFT, this);
+            wheels.strafe(2, .8, 2, TurnDirection.LEFT, this);
             Thread.sleep(200);
 
             pusher.setPosition(1);
-            wheels.strafe(10, .8, TurnDirection.RIGHT, this);
+            wheels.strafe(10, .8, 5, TurnDirection.RIGHT, this);
         }
         else {
             wheels.strafe(8, .8, TurnDirection.RIGHT, this);
