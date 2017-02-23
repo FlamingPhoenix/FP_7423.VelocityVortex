@@ -155,7 +155,7 @@ public class Red_Auton extends LinearOpMode {
         DbgLog.msg("[Phoenix:heading] heading: %d. adjAngle: %d, angle: %d, previousHeading %d", heading, adjAngle, angle, nowsHeading);
 
         wheels.resetMotorSpeed();
-        double lastX = wheels.strafe(170, 0.8, TurnDirection.LEFT, tracker.get(3), this);
+        double lastX = wheels.strafe(180, 0.8, TurnDirection.LEFT, tracker.get(3), this);
         DbgLog.msg("[Phoenix:mainrun] lastX = " + lastX);
         float imageX;
 
@@ -212,22 +212,26 @@ public class Red_Auton extends LinearOpMode {
 
             if (adjustmentDistance >= 1) {
                 DbgLog.msg("[Phoenix: Beacon Distance Adjustment] Performed Beacon X position adjustment %7.3f", adjustmentDistance);
-                wheels.drive((int) adjustmentDistance, adjustDirection, 0.25, 2, this);
+                wheels.drive((int) adjustmentDistance, adjustDirection, 0.25, 3, this);
             }
 
             if (color.red() <= 1) {
                 DbgLog.msg("[Phoenix] Can't see red, move back 5 inches");
-                wheels.drive(6, Direction.BACKWARD, 0.3, 5, this);
+                wheels.drive(7, Direction.BACKWARD, 0.25, 5, this);
                 didWeGoBack = 5;
             }
 
             if (color.red() > 1) { //sees the red side
-                pushBeacon(Direction.FORWARD, 1.5);
+                pusher.setPosition(0);
+                Thread.sleep(800);
+                wheels.strafe(3, .8, TurnDirection.LEFT, this);
                 Thread.sleep(200);
-                pushBeacon(Direction.BACKWARD, 1);
+
+                pusher.setPosition(1);
+                Thread.sleep(500);
 
                 wheels.strafe(12, .8, TurnDirection.RIGHT, this);
-
+                pusher.setPosition(.5);
             } else {
                 wheels.strafe(10, .8, TurnDirection.RIGHT, this);
             }
@@ -275,7 +279,7 @@ public class Red_Auton extends LinearOpMode {
 
         heading = gyro.getIntegratedZValue();
         wheels.resetMotorSpeed();
-        lastX = wheels.strafe(170, 0.8, TurnDirection.LEFT, tracker.get(1), this);
+        lastX = wheels.strafe(180, 0.8, TurnDirection.LEFT, tracker.get(1), this);
 
         endHeading = gyro.getIntegratedZValue();
         turningAngle = heading - endHeading;
@@ -316,8 +320,8 @@ public class Red_Auton extends LinearOpMode {
         }
 
         adjustmentDistance = Math.abs(( (imageX * 100.0f))/ 254.0f) / 10.0f ;
-        //if (adjustDirection == Direction.FORWARD)
-        //    adjustmentDistance = adjustmentDistance; //need to move forward a bit more to handle the strafing problem
+        if (adjustDirection == Direction.FORWARD)
+            adjustmentDistance = adjustmentDistance + 1; //need to move forward a bit more to handle the strafing problem
 
         if (adjustDirection == Direction.BACKWARD)
             DbgLog.msg("[Phoenix: Beacon Distance Adjustment 2] 2nd Beacon X position adjustment backward %7.3f and image X %7.3f", adjustmentDistance, imageX);
@@ -326,20 +330,21 @@ public class Red_Auton extends LinearOpMode {
 
         if(adjustmentDistance >= 1) {
             DbgLog.msg("[Phoenix: Beacon Distance Adjustment 2] Performed 2nd Beacon X position adjustment %7.3f", adjustmentDistance);
-            wheels.drive((int) adjustmentDistance, adjustDirection, 0.25, 2, this);
+            wheels.drive((int) adjustmentDistance, adjustDirection, 0.25, 5, this);
         }
 
         if(color.red() <= 1) {
-            DbgLog.msg("[Phoenix] Can't see red, move back 7 inches");
-            wheels.drive(6, Direction.BACKWARD, 0.3, 5, this);
+            DbgLog.msg("[Phoenix] Can't see red, move back 6 inches");
+            wheels.drive(7, Direction.BACKWARD, 0.25, 5, this);
         }
 
         if (color.red() > 1) { //sees the red side
-            pushBeacon(Direction.FORWARD, 1);
+            pusher.setPosition(0);
+            Thread.sleep(800);
+            wheels.strafe(3, .8, TurnDirection.LEFT, this);
             Thread.sleep(200);
-            pushBeacon(Direction.BACKWARD, 1.5);
 
-            wheels.strafe(6, .8, TurnDirection.RIGHT, this);
+            wheels.strafe(8, .8, TurnDirection.RIGHT, this);
         }
         else {
             wheels.strafe(8, .8, TurnDirection.RIGHT, this);
