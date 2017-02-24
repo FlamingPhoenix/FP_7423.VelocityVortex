@@ -32,6 +32,7 @@ public class BlueFar extends LinearOpMode{
     VuforiaTrackables tracker;
 
     DcMotor shooter;
+    DcMotor collecter;
 
     Servo stopper;
 
@@ -51,6 +52,8 @@ public class BlueFar extends LinearOpMode{
         pusher = hardwareMap.servo.get("pusher");
 
         pusher.setPosition(.5);
+
+        collecter = hardwareMap.dcMotor.get("collector");
 
         while (gyro.isCalibrating() && this.opModeIsActive())
             Thread.sleep(50);
@@ -110,7 +113,13 @@ public class BlueFar extends LinearOpMode{
 
         shooter.setPower(0);
 
-        Thread.sleep(5000);
+        Thread.sleep(1000);
+
+        collecter.setPower(.5);
+        sleep(80);
+        collecter.setPower(0);
+
+        Thread.sleep(4000);
 
         wheels.turnWithGyro(45, .3, TurnDirection.LEFT, gyro, this);
 

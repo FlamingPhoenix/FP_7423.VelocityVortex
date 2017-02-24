@@ -32,6 +32,7 @@ public class RedFar extends LinearOpMode {
     VuforiaTrackables tracker;
 
     DcMotor shooter;
+    DcMotor collecter;
 
     Servo stopper;
 
@@ -49,6 +50,8 @@ public class RedFar extends LinearOpMode {
         color.enableLed(false);
 
         pusher = hardwareMap.servo.get("pusher");
+
+        collecter = hardwareMap.dcMotor.get("collector");
 
         pusher.setPosition(.5);
 
@@ -80,11 +83,11 @@ public class RedFar extends LinearOpMode {
 
         this.sleep(500);
 
-        wheels.turnWithGyro(48, .35, TurnDirection.RIGHT, gyro, this);
+        wheels.turnWithGyro(52, .35, TurnDirection.RIGHT, gyro, this);
 
         this.sleep(500);
 
-        wheels.strafe(12, .8, TurnDirection.LEFT, this);
+        wheels.strafe(16, .8, TurnDirection.LEFT, this);
 
         shooter.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         this.idle();
@@ -110,9 +113,15 @@ public class RedFar extends LinearOpMode {
 
         shooter.setPower(0);
 
-        Thread.sleep(5000);
+        Thread.sleep(1000);
 
-        wheels.turnWithGyro(32, .3, TurnDirection.RIGHT, gyro, this);
+        collecter.setPower(.5);
+        sleep(80);
+        collecter.setPower(0);
+
+        Thread.sleep(4000);
+
+        wheels.turnWithGyro(34, .3, TurnDirection.RIGHT, gyro, this);
 
         Thread.sleep(8000);
 
