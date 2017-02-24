@@ -336,17 +336,17 @@ public class Blue_Auton extends LinearOpMode {
             wheels.drive((int) adjustmentDistance, adjustDirection, 0.25, 2, this);
         }
 
-        boolean pushAnyway = false;  //if see blue on one side, then, the other side got to be red
-        if(color.red() <= 1) {
+        boolean pushAnyway = false;  //if see red on one side, then, the other side got to be blue
+        if(color.blue() <= 1) {
             DbgLog.msg("[Phoenix:Beacon Distance Adjustment 2] Can't see red, move back 6 inches");
 
-            if (color.blue() > 1)
-                pushAnyway = true; //if see blue on one side, then, the other side got to be red
+            if (color.red() > 1)
+                pushAnyway = true; //if see red on one side, then, the other side got to be blue
 
             wheels.drive(7, Direction.BACKWARD, 0.25, 5, this);
         }
 
-        if ((color.red() > 1) || pushAnyway) { //sees the red side or the other side is blue
+        if ((color.blue() > 1) || pushAnyway) { //sees the blue side or the other side is red
             pusher.setPosition(0);
             Thread.sleep(1000);
             wheels.strafe(2, .8, 2, TurnDirection.LEFT, this);
