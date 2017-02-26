@@ -25,8 +25,8 @@ import FlamingPhoenix.TurnDirection;
  * Created by HwaA1 on 11/12/2016.
  */
 
-@Autonomous(name = "Blue_Auton", group = "Autonomous")
-@Disabled
+@Autonomous(name = "Blue_Auton_Old", group = "Autonomous")
+
 public class Blue_Auton_Backup extends LinearOpMode {
 
     private VuforiaLocalizer vuforia;
@@ -36,6 +36,7 @@ public class Blue_Auton_Backup extends LinearOpMode {
     DcMotor collecter;
 
     Servo stopper;
+    Servo pusher;
 
     ColorSensor color;
 
@@ -48,6 +49,9 @@ public class Blue_Auton_Backup extends LinearOpMode {
 
         collecter = hardwareMap.dcMotor.get("collector");
 
+        pusher = hardwareMap.servo.get("pusher");
+
+        pusher.setPosition(.5);
         stopper.setPosition(.75);
 
         color = hardwareMap.colorSensor.get("color");
@@ -77,10 +81,10 @@ public class Blue_Auton_Backup extends LinearOpMode {
 
         MecanumDriveTrain wheels = new MecanumDriveTrain("frontleft", "frontright", "backleft", "backright", this);
 
-        //shooter.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        //this.idle();
-        shooter.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        //shooter.setMaxSpeed(960);
+        shooter.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        this.idle();
+        shooter.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        shooter.setMaxSpeed(2550);
 
         gyro.resetZAxisIntegrator();
         gyro.calibrate();
@@ -91,7 +95,7 @@ public class Blue_Auton_Backup extends LinearOpMode {
 
         waitForStart();
 
-        shooter.setPower(.95);
+        shooter.setPower(1);
 
         wheels.strafe(6, 0.7, TurnDirection.LEFT, this);
         Thread.sleep(1000);
@@ -105,7 +109,7 @@ public class Blue_Auton_Backup extends LinearOpMode {
         collecter.setPower(.5);
         stopper.setPosition(.75);
 
-        wheels.strafe(14, 0.8, TurnDirection.LEFT, this);
+        wheels.strafe(14, 0.5, TurnDirection.LEFT, this);
 
         collecter.setPower(0);
         shooter.setPower(0);
@@ -115,7 +119,7 @@ public class Blue_Auton_Backup extends LinearOpMode {
 
         int angleBefore= gyro.getIntegratedZValue();
         int degreesNeeded = Math.abs(-88 - angleBefore);
-        wheels.turnWithGyro(degreesNeeded, .25, TurnDirection.RIGHT, gyro, this);
+        wheels.turnWithGyro(degreesNeeded, .2, TurnDirection.RIGHT, gyro, this);
         int angleAfter = gyro.getIntegratedZValue();
 
         DbgLog.msg("[Phoenix] angleBefore= %d, degreeNeeded= %d, angleAfter= %d", angleBefore, degreesNeeded, angleAfter);
@@ -142,7 +146,7 @@ public class Blue_Auton_Backup extends LinearOpMode {
 
         int heading = gyro.getIntegratedZValue();
         wheels.resetMotorSpeed();
-        double lastX = wheels.strafe(180, 0.8, TurnDirection.LEFT, tracker.get(0), this);
+        double lastX = wheels.strafe(180, 0.5, TurnDirection.LEFT, tracker.get(0), this);
         float imageX;
 
         int endHeading = gyro.getIntegratedZValue();
@@ -213,9 +217,9 @@ public class Blue_Auton_Backup extends LinearOpMode {
             if (color.blue() > 1) { //sees the blue side
                 wheels.strafe(3, .6, TurnDirection.LEFT, this);
                 Thread.sleep(500);
-                wheels.strafe(12, .8, TurnDirection.RIGHT, this);
+                wheels.strafe(12, .5, TurnDirection.RIGHT, this);
             } else {
-                wheels.strafe(10, .8, TurnDirection.RIGHT, this);
+                wheels.strafe(10, .5, TurnDirection.RIGHT, this);
             }
 
             //First beacon (Gears) is complete
@@ -236,7 +240,7 @@ public class Blue_Auton_Backup extends LinearOpMode {
             DbgLog.msg("[Phoenix] Leaving first beacon, Reached beacon turn RIGHT, turningAngle= %d, heading= %d endHeading=%d", turningAngle, heading, endHeading);
 
         if (Math.abs(turningAngle) > 5){
-            wheels.turnWithGyro(Math.abs(turningAngle), .25, d, gyro, this);
+            wheels.turnWithGyro(Math.abs(turningAngle), .2, d, gyro, this);
             DbgLog.msg("[Phoenix] Leaving first beacon, performed Reached beacon turningAngle= %d, heading= %d endHeading=%d", turningAngle, heading, endHeading);
         }
 
@@ -262,7 +266,7 @@ public class Blue_Auton_Backup extends LinearOpMode {
 
         heading = gyro.getIntegratedZValue();
         wheels.resetMotorSpeed();
-        lastX = wheels.strafe(180, 0.8, TurnDirection.LEFT, tracker.get(2), this);
+        lastX = wheels.strafe(180, 0.5, TurnDirection.LEFT, tracker.get(2), this);
 
         endHeading = gyro.getIntegratedZValue();
         turningAngle = heading - endHeading;
@@ -278,7 +282,7 @@ public class Blue_Auton_Backup extends LinearOpMode {
             DbgLog.msg("[Phoenix] At 2nd beacon, Reached beacon turn RIGHT, turningAngle= %d, heading= %d endHeading=%d", turningAngle, heading, endHeading);
 
         if (Math.abs(turningAngle) > 5){
-            wheels.turnWithGyro(Math.abs(turningAngle), .25, d, gyro, this);
+            wheels.turnWithGyro(Math.abs(turningAngle), .2, d, gyro, this);
             DbgLog.msg("[Phoenix] At beacon, performed Reached beacon turningAngle= %d, heading= %d endHeading=%d", turningAngle, heading, endHeading);
         }
 
@@ -322,17 +326,17 @@ public class Blue_Auton_Backup extends LinearOpMode {
         }
 
         if (color.blue() > 1) { //sees the blue side
-            wheels.strafe(5, .8, 2, TurnDirection.LEFT, this);
+            wheels.strafe(5, .5, 2, TurnDirection.LEFT, this);
             Thread.sleep(500);
-            wheels.strafe(8, .8, TurnDirection.RIGHT, this);
+            wheels.strafe(8, .5, TurnDirection.RIGHT, this);
         }
         else {
-            wheels.strafe(8, .8, TurnDirection.RIGHT, this);
+            wheels.strafe(8, .5, TurnDirection.RIGHT, this);
         }
 
         wheels.turnWithGyro(35, .5, TurnDirection.RIGHT, gyro, this);
         collecter.setPower(-1);
-        wheels.drive(52, Direction.FORWARD, .8, 6, this);
+        wheels.drive(52, Direction.FORWARD, .5, 6, this);
     }
 }
 

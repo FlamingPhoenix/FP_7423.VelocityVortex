@@ -83,11 +83,11 @@ public class RedFar extends LinearOpMode {
 
         this.sleep(500);
 
-        wheels.turnWithGyro(52, .35, TurnDirection.RIGHT, gyro, this);
+        wheels.turnWithGyro(52, .25, TurnDirection.RIGHT, gyro, this);
 
         this.sleep(500);
 
-        wheels.strafe(16, .8, TurnDirection.LEFT, this);
+        wheels.strafe(16, .5, TurnDirection.LEFT, this);
 
         shooter.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         this.idle();
@@ -99,7 +99,7 @@ public class RedFar extends LinearOpMode {
 
         shooter.setPower(1);
 
-        this.sleep(1500);
+        this.sleep(3000);
 
         stopper.setPosition(.20);
         Thread.sleep(250);
@@ -121,11 +121,11 @@ public class RedFar extends LinearOpMode {
 
         Thread.sleep(4000);
 
-        wheels.turnWithGyro(34, .3, TurnDirection.RIGHT, gyro, this);
+        wheels.turnWithGyro(34, .25, TurnDirection.RIGHT, gyro, this);
 
         Thread.sleep(8000);
 
-        wheels.drive(95, Direction.BACKWARD, 0.9, 10, this);
+        wheels.drive(95, Direction.BACKWARD, 0.75, 10, this);
     } 
 
 }

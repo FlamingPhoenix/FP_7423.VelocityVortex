@@ -83,11 +83,11 @@ public class BlueFar extends LinearOpMode{
 
         this.sleep(500);
 
-        wheels.turnWithGyro(132, .35, TurnDirection.RIGHT, gyro, this);
+        wheels.turnWithGyro(132, .25, TurnDirection.RIGHT, gyro, this);
 
         this.sleep(500);
 
-        wheels.strafe(14, .8, TurnDirection.LEFT, this);
+        wheels.strafe(14, .5, TurnDirection.LEFT, this);
 
         shooter.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         this.idle();
@@ -99,7 +99,7 @@ public class BlueFar extends LinearOpMode{
 
         shooter.setPower(1);
 
-        this.sleep(1500);
+        this.sleep(3000);
 
         stopper.setPosition(.20);
         Thread.sleep(250);
@@ -121,10 +121,10 @@ public class BlueFar extends LinearOpMode{
 
         Thread.sleep(4000);
 
-        wheels.turnWithGyro(45, .3, TurnDirection.LEFT, gyro, this);
+        wheels.turnWithGyro(45, .25, TurnDirection.LEFT, gyro, this);
 
         Thread.sleep(8000);
 
-        wheels.drive(95, Direction.FORWARD, 0.9, 10, this);
+        wheels.drive(95, Direction.FORWARD, 0.75, 10, this);
     }
 }
