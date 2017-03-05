@@ -35,7 +35,7 @@ public class MecanumDriveTrain {
     private int encoderPPR; //wheel encoder PPR (Pulse per Rotation)
     private ElapsedTime runtime = new ElapsedTime();
 
-    public MecanumDriveTrain(String FrontLeftName, String FrontRightName, String BackLeftName, String BackRightName, ModernRoboticsI2cGyro gyroscope, OpMode OperatorMode) {
+    public MecanumDriveTrain(String FrontLeftName, String FrontRightName, String BackLeftName, String BackRightName, ModernRoboticsI2cGyro gyroscope, OpMode OperatorMode) throws InterruptedException {
         opMode = OperatorMode;
 
         frontLeft = opMode.hardwareMap.dcMotor.get(FrontLeftName);
@@ -51,6 +51,16 @@ public class MecanumDriveTrain {
         wheelDiameter = 4; //default is 4 inch, most of wheels we have used are 4 inch diamete;
         //encoderPPR = 1320; //default to Tetrix encoder;  AndyMark will have different values
         encoderPPR = 560;
+
+        backLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        backRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        frontLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        frontRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        Thread.sleep(40);
+        backLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        backRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        frontLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        frontRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
     }
 
     public MecanumDriveTrain(String FrontLeftName, String FrontRightName, String BackLeftName, String BackRightName, OpMode OperatorMode) {
@@ -190,18 +200,9 @@ public class MecanumDriveTrain {
 
     //Drive by using PIDControl - Run to Position
     public void drive(double d, Direction direction, double power, int timeout, LinearOpMode opMode) throws InterruptedException {
-        backLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         backRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        frontLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        frontRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         opMode.idle();
-
-        backLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         backRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        frontLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        frontRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        opMode.idle();
-        opMode.idle();
 
         int pulseNeeded = (int) Math.round(((double) encoderPPR * d) / (wheelDiameter * Math.PI));
         if (direction == Direction.BACKWARD) {
@@ -251,19 +252,6 @@ public class MecanumDriveTrain {
     //Drive by controlling the motor rotation speed using encoder
     @Deprecated()
     public void drive(double d, Direction direction, int speed, LinearOpMode opMode) throws InterruptedException {
-        backLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        backLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        backRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        backRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        frontLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        frontLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        frontRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        frontRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        opMode.idle();
-        backLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        backRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        frontLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        frontRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
         speed = Math.abs(speed); //let's make sure it is positive value
 
@@ -424,14 +412,9 @@ public class MecanumDriveTrain {
 
     public void strafe(int distance, double power, TurnDirection direction, LinearOpMode opMode) throws InterruptedException {
         backLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        backRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        frontLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        frontRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         opMode.idle();
         backLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        backRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        frontLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        frontRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        opMode.idle();
 
         int pulseNeeded = (int) Math.round((encoderPPR * distance) / (wheelDiameter * Math.PI));
 
@@ -459,14 +442,9 @@ public class MecanumDriveTrain {
 
     public void strafe(int distance, double power, int timeout, TurnDirection direction, LinearOpMode opMode) throws InterruptedException {
         backLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        backRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        frontLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        frontRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         opMode.idle();
         backLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        backRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        frontLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        frontRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        opMode.idle();
 
         int pulseNeeded = (int) Math.round((encoderPPR * distance) / (wheelDiameter * Math.PI));
 
@@ -494,19 +472,6 @@ public class MecanumDriveTrain {
     }
 
     public boolean strafe(int distance, int speed, TurnDirection direction, VuforiaTrackable imageObject, LinearOpMode opMode) throws InterruptedException {
-            backLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-            backLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-            backRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-            backRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-            frontLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-            frontLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-            frontRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-            frontRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-            opMode.idle();
-            backLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            backRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            frontLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            frontRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
         VuforiaTrackableDefaultListener image = (VuforiaTrackableDefaultListener) imageObject.getListener();
 
@@ -634,18 +599,9 @@ public class MecanumDriveTrain {
     //Use power to control the robot by following Vuforia object
     public double strafe(int distance, double power, TurnDirection direction, VuforiaTrackable imageObject, LinearOpMode opMode) throws InterruptedException {
         backLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        backLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        backRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        backRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        frontLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        frontLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        frontRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        frontRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         opMode.idle();
         backLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        backRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        frontLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        frontRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        opMode.idle();
 
         VuforiaTrackableDefaultListener image = (VuforiaTrackableDefaultListener) imageObject.getListener();
 
@@ -797,18 +753,9 @@ public class MecanumDriveTrain {
 
     public boolean strafe(int distance, int speed, TurnDirection direction, VuforiaTrackable imageObject, ModernRoboticsI2cGyro gyro, LinearOpMode opMode) throws InterruptedException {
         backLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        backLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        backRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        backRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        frontLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        frontLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        frontRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        frontRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         opMode.idle();
         backLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        backRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        frontLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        frontRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        opMode.idle();
 
         VuforiaTrackableDefaultListener image = (VuforiaTrackableDefaultListener) imageObject.getListener();
 
@@ -942,19 +889,10 @@ public class MecanumDriveTrain {
     }
 
     public void driveUntilImage(int distance, double power, Direction d, VuforiaTrackable imageObject, LinearOpMode opMode) {
-        backLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        backLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         backRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        backRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        frontLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        frontLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        frontRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        frontRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         opMode.idle();
-        backLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         backRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        frontLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        frontRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        opMode.idle();
 
         DbgLog.msg("[Phoenix:driveuntilimage] Starting");
 
@@ -1023,6 +961,31 @@ public class MecanumDriveTrain {
         frontLeft.setPower(0);
         frontRight.setPower(0);
 
+    }
+
+    public void turnAjdustment(double power, TurnDirection d, LinearOpMode opMode) {
+        DbgLog.msg("[Phoenix:turnAdjustment] we made it");
+
+        if(d == TurnDirection.RIGHT) { //negative means turning right and vice versa
+                frontRight.setPower(power * -1);
+                backRight.setPower(power * -1);
+                frontLeft.setPower(power);
+                backLeft.setPower(power);
+        } else {
+                frontRight.setPower(power);
+                backRight.setPower(power);
+                frontLeft.setPower(power * -1);
+                backLeft.setPower(power * -1);
+        }
+
+        for(int i = 0; i <= 5; i++) {
+            opMode.idle();
+        }
+
+        frontRight.setPower(0);
+        backRight.setPower(0);
+        frontLeft.setPower(0);
+        backLeft.setPower(0);
     }
 
 }

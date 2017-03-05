@@ -98,7 +98,7 @@ public class Red_Auton extends LinearOpMode {
 
         wheels.strafe(6, 0.7, TurnDirection.LEFT, this);
 
-        Thread.sleep(600);
+        Thread.sleep(1000);
 
         stopper.setPosition(.20); //Shoot
         Thread.sleep(250);
@@ -181,7 +181,11 @@ public class Red_Auton extends LinearOpMode {
                 DbgLog.msg("[Phoenix:Beacon Adjustment 1] At beacon, Reached beacon turn RIGHT, turningAngle= %d, heading= %d endHeading=%d", turningAngle, heading, endHeading);
 
             if (Math.abs(turningAngle) > 5) { //The robot is not parallel to the beacon, need to adjust
-                wheels.turnWithGyro(Math.abs(turningAngle), .2, d, gyro, this);
+
+                if(turningAngle > 8)
+                    wheels.turnWithGyro(Math.abs(turningAngle), .2, d, gyro, this);
+                else
+                    wheels.turnAjdustment(.2, d, this);
                 DbgLog.msg("[Phoenix:Beacon Adjustment 1] At beacon, performed Reached beacon turningAngle= %d, heading= %d endHeading=%d", turningAngle, heading, endHeading);
             }
 
@@ -265,7 +269,7 @@ public class Red_Auton extends LinearOpMode {
         }
 
         //Now, got to 2nd beacon/image
-        wheels.drive(49 + didWeGoBack, Direction.FORWARD, 0.4, 4, this);
+        wheels.drive(45 + didWeGoBack, Direction.FORWARD, 0.5, 4, this);
 
         wheels.driveUntilImage(15, 0.15, Direction.FORWARD, tracker.get(1), this);
 
@@ -302,8 +306,11 @@ public class Red_Auton extends LinearOpMode {
         else
             DbgLog.msg("[Phoenix] At 2nd beacon, Reached beacon turn RIGHT, turningAngle= %d, heading= %d endHeading=%d", turningAngle, heading, endHeading);
 
-        if (Math.abs(turningAngle) > 5){ //robot is not parallel by more than 5 degree, adjust
-            wheels.turnWithGyro(Math.abs(turningAngle), .2, d, gyro, this);
+        if (Math.abs(turningAngle) >= 5){ //robot is not parallel by more than 5 degree, adjust
+            if(turningAngle > 8)
+                wheels.turnWithGyro(Math.abs(turningAngle), .2, d, gyro, this);
+            else
+                wheels.turnAjdustment(.2, d, this);
             DbgLog.msg("[Phoenix] At beacon, performed Reached beacon turningAngle= %d, heading= %d endHeading=%d", turningAngle, heading, endHeading);
         }
 
@@ -338,7 +345,8 @@ public class Red_Auton extends LinearOpMode {
 
         if(adjustmentDistance >= 1) {
             DbgLog.msg("[Phoenix:Beacon Distance Adjustment 2] Performed 2nd Beacon X position adjustment %7.3f", adjustmentDistance);
-            wheels.drive((int) adjustmentDistance, adjustDirection, 0.2, 5, this);
+
+            wheels.drive((int) adjustmentDistance, adjustDirection, 0.3, 2, this);
         }
 
         boolean pushAnyway = false;  //if see blue on one side, then, the other side got to be red
