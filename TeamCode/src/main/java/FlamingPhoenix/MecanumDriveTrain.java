@@ -260,16 +260,31 @@ public class MecanumDriveTrain {
         double speed = Math.abs(power);
 
         int currentHeading = gyro.getIntegratedZValue();
-        int priorLoopHeading = currentHeading;
+        int turnedAngle;
+        int slopeStartAngle = 0;
+        long slopeStartTime = 0;
+        int priorTurnedAngle = currentHeading;
         DbgLog.msg("[Phoenix] currentHeading = " + currentHeading);
 
         if(direction == TurnDirection.RIGHT) { //negative means turning right and vice versa
             while((currentHeading > targetHeading) && (opMode.opModeIsActive())) {
+
+                turnedAngle = Math.abs(currentHeading - startHeading);
+                int angleDifferential = Math.abs(turnedAngle - priorTurnedAngle);
+
+                if (angleDifferential >= 4) {
+                    slopeStartAngle = turnedAngle;
+                    slopeStartTime = System.currentTimeMillis();
+                }
+
                 if((Math.abs(currentHeading - targetHeading) < 10) && degree > 10)
                     break;
 
                 if ((Math.abs(currentHeading - targetHeading) < 20) && (Math.abs(power) > 0.2)){
-                    speed = 0.20;
+
+                    double slope = ((double)(turnedAngle - slopeStartAngle)) / ((double)(System.currentTimeMillis() - slopeStartTime));
+
+                    speed = .2 + (.066 - slope) * 3;
                 }
 
                 frontRight.setPower(speed * -1);
@@ -277,24 +292,36 @@ public class MecanumDriveTrain {
                 frontLeft.setPower(speed);
                 backLeft.setPower(speed);
 
-                int changedAngle = Math.abs(currentHeading - startHeading);
+                turnedAngle = Math.abs(currentHeading - startHeading);
                 long changedTime = System.currentTimeMillis() - startTime;
 
-                if (currentHeading != priorLoopHeading) {
-                    DbgLog.msg("[Phoenix:TurnRight] power=%7.2f; time=%d; angle=%d", speed, changedTime, changedAngle);
-                    priorLoopHeading = currentHeading;
+                if (turnedAngle != priorTurnedAngle) {
+                    DbgLog.msg("[Phoenix:TurnRight] power=%7.2f; time=%d; angle=%d", speed, changedTime, turnedAngle);
                 }
 
+                priorTurnedAngle = currentHeading;
                 currentHeading = gyro.getIntegratedZValue();
             }
         } else {
             DbgLog.msg("[Phoenix:Turn] Turning Left, speed = %6.3f ", speed);
             while((currentHeading < targetHeading) && (opMode.opModeIsActive())){
-                if((Math.abs(targetHeading - currentHeading) < 10) && degree > 10)
+
+                turnedAngle = Math.abs(currentHeading - startHeading);
+                int angleDifferential = Math.abs(turnedAngle - priorTurnedAngle);
+
+                if (angleDifferential >= 4) {
+                    slopeStartAngle = turnedAngle;
+                    slopeStartTime = System.currentTimeMillis();
+                }
+
+                if((Math.abs(currentHeading - targetHeading) < 10) && degree > 10)
                     break;
 
-                if ((Math.abs(currentHeading - targetHeading) < 20) && (Math.abs(power) > 0.2)) {
-                    speed = 0.20;
+                if ((Math.abs(currentHeading - targetHeading) < 20) && (Math.abs(power) > 0.2)){
+
+                    double slope = ((double)(turnedAngle - slopeStartAngle)) / ((double)(System.currentTimeMillis() - slopeStartTime));
+
+                    speed = .2 + (.066 - slope) * 3;
                 }
 
                 frontRight.setPower(speed);
@@ -305,9 +332,8 @@ public class MecanumDriveTrain {
                 int changedAngle = Math.abs(currentHeading - startHeading);
                 long changedTime = System.currentTimeMillis() - startTime;
 
-                if (currentHeading != priorLoopHeading) {
+                if (currentHeading != priorTurnedAngle) {
                     DbgLog.msg("[Phoenix:TurnLeft] power=%7.2f; time=%d; angle=%d", speed, changedTime, changedAngle);
-                    priorLoopHeading = currentHeading;
                 }
 
                 currentHeading = gyro.getIntegratedZValue();
