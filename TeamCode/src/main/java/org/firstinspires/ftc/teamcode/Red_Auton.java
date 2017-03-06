@@ -48,6 +48,10 @@ public class Red_Auton extends LinearOpMode {
 
     DcMotor collecter;
 
+    MecanumDriveTrain wheels;
+
+    ModernRoboticsI2cGyro gyro;
+
     @Override
     public void runOpMode() throws InterruptedException {
         shooter = hardwareMap.dcMotor.get("farriswheel");
@@ -71,14 +75,14 @@ public class Red_Auton extends LinearOpMode {
         Vuforia.setHint(HINT.HINT_MAX_SIMULTANEOUS_IMAGE_TARGETS, 4);
         tracker.activate();
 
-        ModernRoboticsI2cGyro gyro = (ModernRoboticsI2cGyro) hardwareMap.gyroSensor.get("gyro");
+        gyro = (ModernRoboticsI2cGyro) hardwareMap.gyroSensor.get("gyro");
         gyro.resetZAxisIntegrator();
         gyro.resetZAxisIntegrator();
         gyro.calibrate();
 
         opt = hardwareMap.opticalDistanceSensor.get("opt");
 
-        MecanumDriveTrain wheels = new MecanumDriveTrain("frontleft", "frontright", "backleft", "backright", this);
+        wheels = new MecanumDriveTrain("frontleft", "frontright", "backleft", "backright", this);
 
         shooter.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         this.idle();

@@ -203,6 +203,7 @@ public class MecanumDriveTrain {
         backRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         opMode.idle();
         backRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        opMode.idle();
 
         int pulseNeeded = (int) Math.round(((double) encoderPPR * d) / (wheelDiameter * Math.PI));
         if (direction == Direction.BACKWARD) {
@@ -249,67 +250,9 @@ public class MecanumDriveTrain {
 
     }
 
-    //Drive by controlling the motor rotation speed using encoder
-    @Deprecated()
-    public void drive(double d, Direction direction, int speed, LinearOpMode opMode) throws InterruptedException {
-
-        speed = Math.abs(speed); //let's make sure it is positive value
-
-        int pulseNeeded = (int) (Math.round(((double) encoderPPR * d) / (wheelDiameter * Math.PI)));
-        double power = 1;
-        if (direction == Direction.BACKWARD)
-            power = -1;
-
-        int currentTicks = backLeft.getCurrentPosition();
-        while ((Math.abs(currentTicks) < pulseNeeded) && opMode.opModeIsActive()) {
-            try {
-                currentTicks = backLeft.getCurrentPosition();
-                opMode.telemetry.addData("Encoder: ", currentTicks);
-
-                if ((Math.abs(currentTicks) <= 400) && (speed > 600)) { //start slow
-                    backLeft.setMaxSpeed(600);
-                    backRight.setMaxSpeed(600);
-                    frontLeft.setMaxSpeed(600);
-                    frontRight.setMaxSpeed(600);
-                } else if (((pulseNeeded - Math.abs(currentTicks)) < 400) && (speed > 800)) { //slow down
-                    backLeft.setMaxSpeed(600);
-                    backRight.setMaxSpeed(600);
-                    frontLeft.setMaxSpeed(600);
-                    frontRight.setMaxSpeed(600);
-                    DbgLog.msg("[Phoenix:Drive] Almost reached; with original speed " + speed);
-
-                } else {
-                    backLeft.setMaxSpeed(speed);
-                    backRight.setMaxSpeed(speed);
-                    frontLeft.setMaxSpeed(speed);
-                    frontRight.setMaxSpeed(speed);
-                }
-
-                frontLeft.setPower(power);
-                frontRight.setPower(power);
-                backRight.setPower(power);
-                backLeft.setPower(power);
-            }
-            catch (NullPointerException e) {
-                DbgLog.msg("[Phoenix:Drive] you got a null pointer exception");
-            }
-        }
-
-        frontLeft.setPower(0);
-        frontRight.setPower(0);
-        backRight.setPower(0);
-        backLeft.setPower(0);
-
-        DbgLog.msg("[Phoenix:Drive] Reached destination");
-    }
-
     public void turnWithGyro(int degree, double power, TurnDirection direction, ModernRoboticsI2cGyro gyro, LinearOpMode opMode) throws InterruptedException {
-        backLeft.setMaxSpeed(2400);
-        backRight.setMaxSpeed(2400);
-        frontLeft.setMaxSpeed(2400);
-        frontRight.setMaxSpeed(2400);
-
         int startHeading = gyro.getIntegratedZValue();
+        long startTime = System.currentTimeMillis();
         int targetHeading = startHeading + (direction == TurnDirection.RIGHT ? degree * -1 : degree);
 
         DbgLog.msg("[Phoenix:Turn] targetHeading = " + targetHeading);
@@ -317,6 +260,7 @@ public class MecanumDriveTrain {
         double speed = Math.abs(power);
 
         int currentHeading = gyro.getIntegratedZValue();
+        int priorLoopHeading = currentHeading;
         DbgLog.msg("[Phoenix] currentHeading = " + currentHeading);
 
         if(direction == TurnDirection.RIGHT) { //negative means turning right and vice versa
@@ -324,18 +268,24 @@ public class MecanumDriveTrain {
                 if((Math.abs(currentHeading - targetHeading) < 10) && degree > 10)
                     break;
 
-                if (Math.abs(currentHeading - targetHeading) < 20) {
+                if ((Math.abs(currentHeading - targetHeading) < 20) && (Math.abs(power) > 0.2)){
                     speed = 0.20;
-                    //DbgLog.msg("[Phoenix:Turn] cut the speed to = " + speed);
                 }
 
                 frontRight.setPower(speed * -1);
                 backRight.setPower(speed * -1);
                 frontLeft.setPower(speed);
                 backLeft.setPower(speed);
-                currentHeading = gyro.getIntegratedZValue();
 
-                //DbgLog.msg("[Phoenix:Turn] currentHeading = " + currentHeading);
+                int changedAngle = Math.abs(currentHeading - startHeading);
+                long changedTime = System.currentTimeMillis() - startTime;
+
+                if (currentHeading != priorLoopHeading) {
+                    DbgLog.msg("[Phoenix:TurnRight] power=%7.2f; time=%d; angle=%d", speed, changedTime, changedAngle);
+                    priorLoopHeading = currentHeading;
+                }
+
+                currentHeading = gyro.getIntegratedZValue();
             }
         } else {
             DbgLog.msg("[Phoenix:Turn] Turning Left, speed = %6.3f ", speed);
@@ -343,15 +293,23 @@ public class MecanumDriveTrain {
                 if((Math.abs(targetHeading - currentHeading) < 10) && degree > 10)
                     break;
 
-                if (Math.abs(currentHeading - targetHeading) < 20) {
+                if ((Math.abs(currentHeading - targetHeading) < 20) && (Math.abs(power) > 0.2)) {
                     speed = 0.20;
-                    //DbgLog.msg("[Phoenix:Turn] cut the speed to = " + speed);
                 }
 
                 frontRight.setPower(speed);
                 backRight.setPower(speed);
                 frontLeft.setPower(speed * -1);
                 backLeft.setPower(speed * -1);
+
+                int changedAngle = Math.abs(currentHeading - startHeading);
+                long changedTime = System.currentTimeMillis() - startTime;
+
+                if (currentHeading != priorLoopHeading) {
+                    DbgLog.msg("[Phoenix:TurnLeft] power=%7.2f; time=%d; angle=%d", speed, changedTime, changedAngle);
+                    priorLoopHeading = currentHeading;
+                }
+
                 currentHeading = gyro.getIntegratedZValue();
             }
         }
@@ -978,9 +936,7 @@ public class MecanumDriveTrain {
                 backLeft.setPower(power * -1);
         }
 
-        for(int i = 0; i <= 5; i++) {
-            opMode.idle();
-        }
+        opMode.sleep(250);
 
         frontRight.setPower(0);
         backRight.setPower(0);
