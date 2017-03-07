@@ -198,12 +198,12 @@ public class MecanumDriveTrain {
         frontRight.setMaxSpeed(2400);
     }
 
-    //Drive by using PIDControl - Run to Position
+    //Drive by Power
     public void drive(double d, Direction direction, double power, int timeout, LinearOpMode opMode) throws InterruptedException {
         backRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        opMode.idle();
+        Thread.sleep(30);
         backRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        opMode.idle();
+        Thread.sleep(10);
 
         int pulseNeeded = (int) Math.round(((double) encoderPPR * d) / (wheelDiameter * Math.PI));
         if (direction == Direction.BACKWARD) {
@@ -267,6 +267,11 @@ public class MecanumDriveTrain {
         DbgLog.msg("[Phoenix] currentHeading = " + currentHeading);
 
         if(direction == TurnDirection.RIGHT) { //negative means turning right and vice versa
+
+            slopeStartAngle = 0;
+            slopeStartTime = System.currentTimeMillis();
+
+            boolean isFinalTurn = false;
             while((currentHeading > targetHeading) && (opMode.opModeIsActive())) {
 
                 turnedAngle = Math.abs(currentHeading - startHeading);
@@ -277,7 +282,7 @@ public class MecanumDriveTrain {
                     DbgLog.msg("[Phoenix:TurnRight] power=%7.2f; time=%d; angle=%d", speed, changedTime, turnedAngle);
                 }
 
-                if (angleDifferential >= 4) {
+                if ((angleDifferential >= 4) && (slopeStartAngle == 0)) {
                     slopeStartAngle = turnedAngle;
                     slopeStartTime = System.currentTimeMillis();
                 }
@@ -285,11 +290,26 @@ public class MecanumDriveTrain {
                 if((Math.abs(currentHeading - targetHeading) < 10) && degree > 10)
                     break;
 
-                if ((Math.abs(currentHeading - targetHeading) < 20) && (Math.abs(power) > 0.2)){
+                if ((Math.abs(currentHeading - targetHeading) < 20) && (Math.abs(power) > 0.2) && !isFinalTurn){
 
-                    double slope = ((double)(turnedAngle - slopeStartAngle)) / ((double)(System.currentTimeMillis() - slopeStartTime));
+                    double diffAngle = ((double)(turnedAngle - slopeStartAngle));
+                    double diffTime = ((double)(System.currentTimeMillis() - slopeStartTime));
 
-                    speed = .2 + (.066 - slope) * 3.0;
+                    double slope = 0;
+                    if (diffTime != 0)
+                        slope = diffAngle / diffTime;
+
+                    if (diffTime == 0)
+                        speed = 0.2;
+                    else {
+                        speed = .2 + (.066 - slope) * 2.75;
+
+                        if (speed < 0.06)
+                            speed = 0.06;
+                    }
+
+                    DbgLog.msg("[Phoenix:Turn] adjusted speed=%7.3f; slope=%7.3f; diffAngle=%7.3f; diffTime=%9.3f", speed, slope, diffAngle, diffTime);
+                    isFinalTurn = true;
                 }
 
                 frontRight.setPower(speed * -1);
@@ -300,8 +320,13 @@ public class MecanumDriveTrain {
                 priorTurnedAngle = currentHeading;
                 currentHeading = gyro.getIntegratedZValue();
             }
-        } else {
+        } else {//turn left
             DbgLog.msg("[Phoenix:Turn] Turning Left, speed = %6.3f ", speed);
+
+            slopeStartAngle = 0;
+            slopeStartTime = System.currentTimeMillis();
+
+            boolean isFinalTurn = false;
             while((currentHeading < targetHeading) && (opMode.opModeIsActive())){
 
                 turnedAngle = Math.abs(currentHeading - startHeading);
@@ -313,7 +338,7 @@ public class MecanumDriveTrain {
                     DbgLog.msg("[Phoenix:TurnLeft] power=%7.2f; time=%d; angle=%d", speed, changedTime, turnedAngle);
                 }
 
-                if (angleDifferential >= 4) {
+                if ((angleDifferential >= 4) && (slopeStartAngle == 0)) {
                     slopeStartAngle = turnedAngle;
                     slopeStartTime = System.currentTimeMillis();
                 }
@@ -321,11 +346,26 @@ public class MecanumDriveTrain {
                 if((Math.abs(currentHeading - targetHeading) < 10) && degree > 10)
                     break;
 
-                if ((Math.abs(currentHeading - targetHeading) < 20) && (Math.abs(power) > 0.2)){
+                if ((Math.abs(currentHeading - targetHeading) < 20) && (Math.abs(power) > 0.2) && !isFinalTurn) {
 
-                    double slope = ((double)(turnedAngle - slopeStartAngle)) / ((double)(System.currentTimeMillis() - slopeStartTime));
+                    double diffAngle = ((double)(turnedAngle - slopeStartAngle));
+                    double diffTime = ((double)(System.currentTimeMillis() - slopeStartTime));
 
-                    speed = .2 + (.066 - slope) * 3.0;
+                    double slope = 0;
+                    if (diffTime != 0)
+                        slope =  diffAngle / diffTime;
+
+                    if (diffTime == 0)
+                        speed = 0.2;
+                    else {
+                        speed = .2 + (.066 - slope) * 2.75;
+
+                        if (speed < 0.06)
+                            speed = 0.06;
+                    }
+
+                    DbgLog.msg("[Phoenix:Turn] adjusted speed=%7.3f; slope=%7.3f; diffAngle=%7.3f; diffTime=%9.3f", speed, slope, diffAngle, diffTime);
+                    isFinalTurn = true;
                 }
 
                 frontRight.setPower(speed);
