@@ -272,6 +272,11 @@ public class MecanumDriveTrain {
                 turnedAngle = Math.abs(currentHeading - startHeading);
                 int angleDifferential = Math.abs(turnedAngle - priorTurnedAngle);
 
+                long changedTime = System.currentTimeMillis() - startTime;
+                if (turnedAngle != priorTurnedAngle) {
+                    DbgLog.msg("[Phoenix:TurnRight] power=%7.2f; time=%d; angle=%d", speed, changedTime, turnedAngle);
+                }
+
                 if (angleDifferential >= 4) {
                     slopeStartAngle = turnedAngle;
                     slopeStartTime = System.currentTimeMillis();
@@ -284,20 +289,13 @@ public class MecanumDriveTrain {
 
                     double slope = ((double)(turnedAngle - slopeStartAngle)) / ((double)(System.currentTimeMillis() - slopeStartTime));
 
-                    speed = .2 + (.066 - slope) * 3;
+                    speed = .2 + (.066 - slope) * 3.0;
                 }
 
                 frontRight.setPower(speed * -1);
                 backRight.setPower(speed * -1);
                 frontLeft.setPower(speed);
                 backLeft.setPower(speed);
-
-                turnedAngle = Math.abs(currentHeading - startHeading);
-                long changedTime = System.currentTimeMillis() - startTime;
-
-                if (turnedAngle != priorTurnedAngle) {
-                    DbgLog.msg("[Phoenix:TurnRight] power=%7.2f; time=%d; angle=%d", speed, changedTime, turnedAngle);
-                }
 
                 priorTurnedAngle = currentHeading;
                 currentHeading = gyro.getIntegratedZValue();
@@ -309,6 +307,12 @@ public class MecanumDriveTrain {
                 turnedAngle = Math.abs(currentHeading - startHeading);
                 int angleDifferential = Math.abs(turnedAngle - priorTurnedAngle);
 
+                long changedTime = System.currentTimeMillis() - startTime;
+
+                if (turnedAngle != priorTurnedAngle) {
+                    DbgLog.msg("[Phoenix:TurnLeft] power=%7.2f; time=%d; angle=%d", speed, changedTime, turnedAngle);
+                }
+
                 if (angleDifferential >= 4) {
                     slopeStartAngle = turnedAngle;
                     slopeStartTime = System.currentTimeMillis();
@@ -321,7 +325,7 @@ public class MecanumDriveTrain {
 
                     double slope = ((double)(turnedAngle - slopeStartAngle)) / ((double)(System.currentTimeMillis() - slopeStartTime));
 
-                    speed = .2 + (.066 - slope) * 3;
+                    speed = .2 + (.066 - slope) * 3.0;
                 }
 
                 frontRight.setPower(speed);
@@ -329,13 +333,7 @@ public class MecanumDriveTrain {
                 frontLeft.setPower(speed * -1);
                 backLeft.setPower(speed * -1);
 
-                int changedAngle = Math.abs(currentHeading - startHeading);
-                long changedTime = System.currentTimeMillis() - startTime;
-
-                if (currentHeading != priorTurnedAngle) {
-                    DbgLog.msg("[Phoenix:TurnLeft] power=%7.2f; time=%d; angle=%d", speed, changedTime, changedAngle);
-                }
-
+                priorTurnedAngle = currentHeading;
                 currentHeading = gyro.getIntegratedZValue();
             }
         }

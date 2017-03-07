@@ -42,22 +42,22 @@ public class TestTurn extends LinearOpMode {
 
         int startHeading = gyro.getIntegratedZValue();
         long startTime = System.currentTimeMillis();
-        int priorChangedAngle = -1;
+        int priorTurnedAngle = -1;
+        int turnedAngle = 0;
 
         //wheels.turnAjdustment(0.25, TurnDirection.LEFT, this);
         wheels.turnWithGyro(88, 0.25, TurnDirection.LEFT, gyro, this);
 
-        for(int i=0; i<1000; i++) {
+        for(int i=0; i<500; i++) {
             int currentHeading = gyro.getIntegratedZValue();
-            int changedAngle = Math.abs(currentHeading - startHeading);
+            turnedAngle = Math.abs(currentHeading - startHeading);
             long changedTime = System.currentTimeMillis() - startTime;
 
-            DbgLog.msg("[Phoenix:TurnComplete] power=%7.2f; time=%d; angle=%d", 0.0f, changedTime, changedAngle);
-
-            if (changedAngle != priorChangedAngle) {
-
-                priorChangedAngle = changedAngle;
+            if (turnedAngle != priorTurnedAngle) {
+                DbgLog.msg("[Phoenix:TurnComplete] power=%7.2f; time=%d; angle=%d", 0.0f, changedTime, turnedAngle);
             }
+
+            priorTurnedAngle = turnedAngle;
 
             this.idle();
         }
