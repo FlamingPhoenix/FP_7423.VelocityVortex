@@ -254,6 +254,7 @@ public class Red_Auton extends LinearOpMode {
         //First beacon (Gears) is complete
 
         //Not yet, before go for 2nc Beacon, Adjust the angle first
+        Thread.sleep(50);
         endHeading = gyro.getIntegratedZValue();
         turningAngle = heading - endHeading;
 
@@ -267,13 +268,18 @@ public class Red_Auton extends LinearOpMode {
         else
             DbgLog.msg("[Phoenix: Beacon Adjustment 2] Leaving first beacon, Reached beacon turn RIGHT, turningAngle= %d, heading= %d endHeading=%d", turningAngle, heading, endHeading);
 
-        if (Math.abs(turningAngle) > 5){
-            wheels.turnWithGyro(Math.abs(turningAngle), .2, d, gyro, this);
+        if (Math.abs(turningAngle) > 4){
+
+            if (turningAngle < 6)
+                wheels.turnAjdustment(0.3, d, this);
+            else
+                wheels.turnWithGyro(Math.abs(turningAngle), .2, d, gyro, this);
+
             DbgLog.msg("[Phoenix: Beacon Adjustment 2] Leaving first beacon, performed Reached beacon turningAngle= %d, heading= %d endHeading=%d", turningAngle, heading, endHeading);
         }
 
         //Now, got to 2nd beacon/image
-        wheels.drive(45 + didWeGoBack, Direction.FORWARD, 0.5, 4, this);
+        wheels.drive(44 + didWeGoBack, Direction.FORWARD, 0.45, 4, this);
 
         wheels.driveUntilImage(15, 0.15, Direction.FORWARD, tracker.get(1), this);
 
