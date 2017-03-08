@@ -203,7 +203,7 @@ public class MecanumDriveTrain {
         backRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         Thread.sleep(30);
         backRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        Thread.sleep(10);
+        Thread.sleep(20);
 
         int pulseNeeded = (int) Math.round(((double) encoderPPR * d) / (wheelDiameter * Math.PI));
         if (direction == Direction.BACKWARD) {
@@ -1000,7 +1000,7 @@ public class MecanumDriveTrain {
                 backLeft.setPower(power * -1);
         }
 
-        opMode.sleep(250);
+        opMode.sleep(150);
 
         frontRight.setPower(0);
         backRight.setPower(0);
