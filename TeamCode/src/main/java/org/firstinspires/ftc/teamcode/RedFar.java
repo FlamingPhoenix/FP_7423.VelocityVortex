@@ -119,11 +119,11 @@ public class RedFar extends LinearOpMode {
         sleep(80);
         collecter.setPower(0);
 
-        Thread.sleep(4000);
+        Thread.sleep(2000);
 
         wheels.turnWithGyro(34, .25, TurnDirection.RIGHT, gyro, this);
 
-        Thread.sleep(8000);
+        Thread.sleep(4000);
 
         wheels.drive(95, Direction.BACKWARD, 0.75, 10, this);
     } 
