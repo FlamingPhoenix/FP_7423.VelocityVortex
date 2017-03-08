@@ -119,11 +119,11 @@ public class BlueFar extends LinearOpMode{
         sleep(80);
         collecter.setPower(0);
 
-        Thread.sleep(4000);
+        Thread.sleep(2000);
 
         wheels.turnWithGyro(45, .25, TurnDirection.LEFT, gyro, this);
 
-        Thread.sleep(8000);
+        Thread.sleep(4000);
 
         wheels.drive(95, Direction.FORWARD, 0.75, 10, this);
     }
