@@ -45,6 +45,7 @@ public class Red_Auton extends LinearOpMode {
     OpticalDistanceSensor opt;
 
     Servo pusher;
+    Servo poker;
 
     DcMotor collecter;
 
@@ -58,7 +59,9 @@ public class Red_Auton extends LinearOpMode {
         stopper = hardwareMap.servo.get("stopper");
         collecter = hardwareMap.dcMotor.get("collector");
         pusher = hardwareMap.servo.get("pusher");
+        poker = hardwareMap.servo.get("poker");
 
+        poker.setPosition(.55);
         pusher.setPosition(.5);
         stopper.setPosition(.75);
 
@@ -125,7 +128,7 @@ public class Red_Auton extends LinearOpMode {
 
         int angleBefore = gyro.getIntegratedZValue();
         int degreesNeeded = Math.abs(88 - angleBefore);
-        wheels.turnWithGyro(degreesNeeded, .2, TurnDirection.LEFT, gyro, this);
+        wheels.turnWithGyro(degreesNeeded, .24, TurnDirection.LEFT, gyro, this);
         int angleAfter = gyro.getIntegratedZValue();
 
         DbgLog.msg("[Phoenix] angleBefore= %d, degreeNeeded= %d, angleAfter= %d", angleBefore, degreesNeeded, angleAfter);
@@ -151,7 +154,7 @@ public class Red_Auton extends LinearOpMode {
                 DbgLog.msg("[Phoenix:Step 3 - AdjustHeading] Adjust to turn RIGHT by %d degree based on image angle of %d", turnAngle, angle);
 
                 if (turnAngle <= 10)
-                    wheels.turnAjdustment(0.2, TurnDirection.RIGHT, this);
+                    makeMinorTurn(heading);
                 else
                     wheels.turnWithGyro(turnAngle, .2, TurnDirection.RIGHT, gyro, this);
             }
@@ -159,7 +162,7 @@ public class Red_Auton extends LinearOpMode {
                 DbgLog.msg("[Phoenix:Step 3 AdjustHeading] Adjust to turn left by %d degree based on image angle of %d", turnAngle, angle);
 
                 if (turnAngle <= 10)
-                    wheels.turnAjdustment(0.2, TurnDirection.RIGHT, this);
+                    makeMinorTurn(heading);
                 else
                     wheels.turnWithGyro(turnAngle, .2, TurnDirection.LEFT, gyro, this);
             }
@@ -195,10 +198,11 @@ public class Red_Auton extends LinearOpMode {
 
             if (Math.abs(turningAngle) > 5) { //The robot is not parallel to the beacon, need to adjust
 
-                if(turningAngle > 8)
+                if(turningAngle > 10)
                     wheels.turnWithGyro(Math.abs(turningAngle), .2, d, gyro, this);
                 else
-                    wheels.turnAjdustment(.2, d, this);
+                    makeMinorTurn(heading);
+
                 DbgLog.msg("[Phoenix:Step 4Beacon Adjustment 1] At beacon, performed Reached beacon turningAngle= %d, heading= %d endHeading=%d", turningAngle, heading, endHeading);
             }
 
@@ -253,10 +257,10 @@ public class Red_Auton extends LinearOpMode {
                 pusher.setPosition(1);
                 Thread.sleep(500);
 
-                wheels.strafe(12, .5, TurnDirection.RIGHT, this);
+                wheels.strafe(14, .5, TurnDirection.RIGHT, this);
                 pusher.setPosition(.5);
             } else {
-                wheels.strafe(12, .5, TurnDirection.RIGHT, this);
+                wheels.strafe(13, .5, TurnDirection.RIGHT, this);
                 pusher.setPosition(.5);
             }
         }
@@ -279,8 +283,8 @@ public class Red_Auton extends LinearOpMode {
 
         if (Math.abs(turningAngle) > 4){
 
-            if (Math.abs(turningAngle) <= 7)
-                wheels.turnAjdustment(0.2, d, this);
+            if (Math.abs(turningAngle) < 10)
+                makeMinorTurn(heading);
             else
                 wheels.turnWithGyro(Math.abs(turningAngle), .2, d, gyro, this);
 
@@ -299,12 +303,19 @@ public class Red_Auton extends LinearOpMode {
             int turnAngle = Math.abs(90 - angle);
 
             if(angle < 85) {
-                DbgLog.msg("[Phoenix] Adjust to turn RIGHT by %d degree based on 2nd image angle of %d", turnAngle, angle);
-                wheels.turnWithGyro(turnAngle, .2, TurnDirection.RIGHT, gyro, this);
+                DbgLog.msg("[Phoenix:Step 6] Adjust to turn RIGHT by %d degree based on 2nd image angle of %d", turnAngle, angle);
+                if (turnAngle > 10)
+                    wheels.turnWithGyro(turnAngle, .2, TurnDirection.RIGHT, gyro, this);
+                else
+                    makeMinorTurn(turnAngle, TurnDirection.RIGHT);
             }
             else if(angle > 95) {
-                DbgLog.msg("[Phoenix] Adjust to turn left by %d degree based on 2nd image angle of %d", turnAngle, angle);
-                wheels.turnWithGyro(turnAngle, .2, TurnDirection.LEFT, gyro, this);
+                DbgLog.msg("[Phoenix:Step 6] Adjust to turn left by %d degree based on 2nd image angle of %d", turnAngle, angle);
+
+                if (turnAngle > 10)
+                    wheels.turnWithGyro(turnAngle, .2, TurnDirection.LEFT, gyro, this);
+                else
+                    makeMinorTurn(turnAngle, TurnDirection.RIGHT);
             }
         }
 
@@ -321,16 +332,17 @@ public class Red_Auton extends LinearOpMode {
             d = TurnDirection.LEFT;
 
         if (d == TurnDirection.LEFT)
-            DbgLog.msg("[Phoenix] At 2nd beacon, Reached beacon turn LEFT, turningAngle= %d, heading= %d endHeading=%d", turningAngle, heading, endHeading);
+            DbgLog.msg("[Phoenix:Step 7] At 2nd beacon, Reached beacon turn LEFT, turningAngle= %d, heading= %d endHeading=%d", turningAngle, heading, endHeading);
         else
-            DbgLog.msg("[Phoenix] At 2nd beacon, Reached beacon turn RIGHT, turningAngle= %d, heading= %d endHeading=%d", turningAngle, heading, endHeading);
+            DbgLog.msg("[Phoenix:Step 7] At 2nd beacon, Reached beacon turn RIGHT, turningAngle= %d, heading= %d endHeading=%d", turningAngle, heading, endHeading);
 
         if (Math.abs(turningAngle) >= 5){ //robot is not parallel by more than 5 degree, adjust
-            if(turningAngle > 8)
+            if(turningAngle > 10)
                 wheels.turnWithGyro(Math.abs(turningAngle), .2, d, gyro, this);
             else
-                wheels.turnAjdustment(.2, d, this);
-            DbgLog.msg("[Phoenix] At beacon, performed Reached beacon turningAngle= %d, heading= %d endHeading=%d", turningAngle, heading, endHeading);
+                makeMinorTurn(heading);
+
+            DbgLog.msg("[Phoenix:Step 6] At beacon, performed Reached beacon turningAngle= %d, heading= %d endHeading=%d", turningAngle, heading, endHeading);
         }
 
         imageX = MyUtility.getImageXPosition(tracker.get(1));
@@ -413,6 +425,34 @@ public class Red_Auton extends LinearOpMode {
         wheels.turnWithGyro(40, .5, TurnDirection.LEFT, gyro, this);
         pusher.setPosition(0.5);
         wheels.drive(55, Direction.BACKWARD, .5, 6, this);
+    }
+
+    //Make small angle turn
+    void makeMinorTurn(int targetGyroHeading) {
+        int currentHeading = gyro.getIntegratedZValue();
+        int turningAngle = targetGyroHeading - currentHeading;
+
+        TurnDirection d;
+        if(turningAngle < 0)
+            d = TurnDirection.RIGHT;
+        else
+            d = TurnDirection.LEFT;
+
+        makeMinorTurn(turningAngle, d);
+    }
+    //Make small angle turn
+    void makeMinorTurn(int turningAngle, TurnDirection direction) {
+
+        turningAngle = Math.abs(turningAngle);
+
+        if (turningAngle < 5)
+            wheels.turnAjdustment(0.2, direction, this);
+        else if (turningAngle < 8)
+            wheels.turnAjdustment(0.22, direction, this);
+        else if (turningAngle < 10)
+            wheels.turnAjdustment(0.26, direction, this);
+        else
+            wheels.turnAjdustment(0.35, direction, this);
     }
 
     void pushBeacon(Direction d, double ms) throws InterruptedException {

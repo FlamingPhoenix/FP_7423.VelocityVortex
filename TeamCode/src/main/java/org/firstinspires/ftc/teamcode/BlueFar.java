@@ -39,6 +39,7 @@ public class BlueFar extends LinearOpMode{
     ColorSensor color;
 
     Servo pusher;
+    Servo poker;
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -50,8 +51,10 @@ public class BlueFar extends LinearOpMode{
         color.enableLed(false);
 
         pusher = hardwareMap.servo.get("pusher");
+        poker = hardwareMap.servo.get("poker");
 
         pusher.setPosition(.5);
+        poker.setPosition(.55);
 
         collecter = hardwareMap.dcMotor.get("collector");
 

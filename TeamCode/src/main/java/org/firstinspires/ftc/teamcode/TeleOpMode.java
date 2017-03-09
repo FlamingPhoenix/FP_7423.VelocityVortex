@@ -26,6 +26,7 @@ public class TeleOpMode extends OpMode {
 
     Servo stopper;
     Servo pusher;
+    Servo poker;
 
     boolean isInPosition = false;
 
@@ -42,9 +43,11 @@ public class TeleOpMode extends OpMode {
 
         shooter = hardwareMap.dcMotor.get("farriswheel");
         collector = hardwareMap.dcMotor.get("collector");
+        poker = hardwareMap.servo.get("poker");
 
         pusher = hardwareMap.servo.get("pusher");
         pusher.setPosition(.5);
+        poker.setPosition(0.55);
 
         //stopper = hardwareMap.servo.get("");
 
