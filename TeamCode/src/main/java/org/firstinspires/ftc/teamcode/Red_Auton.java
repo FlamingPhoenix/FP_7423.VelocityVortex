@@ -281,7 +281,7 @@ public class Red_Auton extends LinearOpMode {
         else
             DbgLog.msg("[Phoenix:Step 5 Beacon Adjustment 2] Leaving first beacon, Reached beacon turn RIGHT, turningAngle= %d, heading= %d endHeading=%d", turningAngle, heading, endHeading);
 
-        if (Math.abs(turningAngle) > 4){
+        if (Math.abs(turningAngle) > 3){
 
             if (Math.abs(turningAngle) < 10)
                 makeMinorTurn(heading);
@@ -292,7 +292,7 @@ public class Red_Auton extends LinearOpMode {
         }
 
         //Now, got to 2nd beacon/image
-        wheels.drive(44 + didWeGoBack, Direction.FORWARD, 0.45, 4, this);
+        wheels.drive(43 + didWeGoBack, Direction.FORWARD, 0.45, 4, this);
 
         wheels.driveUntilImage(15, 0.15, Direction.FORWARD, tracker.get(1), this);
 
@@ -322,6 +322,10 @@ public class Red_Auton extends LinearOpMode {
         heading = gyro.getIntegratedZValue();
         wheels.resetMotorSpeed();
         lastX = wheels.strafe(180, 0.5, TurnDirection.LEFT, tracker.get(1), this);
+
+        poker.setPosition(1);
+        this.sleep(500);
+        poker.setPosition(.55);
 
         endHeading = gyro.getIntegratedZValue();
         turningAngle = heading - endHeading;
@@ -367,7 +371,7 @@ public class Red_Auton extends LinearOpMode {
 
         adjustmentDistance = Math.abs(( (imageX * 100.0f))/ 254.0f) / 10.0f ;
         if (adjustDirection == Direction.FORWARD)
-            adjustmentDistance = adjustmentDistance + 1; //need to move forward a bit more to handle the strafing problem
+            adjustmentDistance = adjustmentDistance + 0.5f; //need to move forward a bit more to handle the strafing problem
 
         if (adjustDirection == Direction.BACKWARD)
             DbgLog.msg("[Phoenix:Beacon Distance Adjustment 2] 2nd Beacon X position adjustment backward %7.3f and image X %7.3f", adjustmentDistance, imageX);
@@ -392,15 +396,19 @@ public class Red_Auton extends LinearOpMode {
 
         if ((color.red() > 1) || pushAnyway) { //sees the red side or the other side is blue
             pusher.setPosition(0);
+            poker.setPosition(0);
             Thread.sleep(1100);
             wheels.strafe(3, 1.0, 2, TurnDirection.LEFT, this);
+            poker.setPosition(.55);
             Thread.sleep(200);
 
             pusher.setPosition(1);
             wheels.strafe(10, .5, 5, TurnDirection.RIGHT, this);
         }
         else {
+            poker.setPosition(0);
             wheels.strafe(8, .5, TurnDirection.RIGHT, this);
+            poker.setPosition(0.55);
         }
 
         //Adjust before going for the center vortex
