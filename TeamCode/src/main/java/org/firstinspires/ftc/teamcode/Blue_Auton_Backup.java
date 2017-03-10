@@ -26,7 +26,7 @@ import FlamingPhoenix.TurnDirection;
  */
 
 @Autonomous(name = "Blue_Auton_Old", group = "Autonomous")
-
+@Disabled
 public class Blue_Auton_Backup extends LinearOpMode {
 
     private VuforiaLocalizer vuforia;
