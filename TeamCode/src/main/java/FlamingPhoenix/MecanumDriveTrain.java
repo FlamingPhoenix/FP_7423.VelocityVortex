@@ -6,10 +6,12 @@ import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorController;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.GyroSensor;
 import com.qualcomm.robotcore.hardware.OpticalDistanceSensor;
+import com.qualcomm.robotcore.hardware.VoltageSensor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
@@ -29,13 +31,14 @@ public class MecanumDriveTrain {
 
     private OpMode opMode;
 
-    private ModernRoboticsI2cGyro gyro;
+    private VoltageSensor vSen1;
+    private VoltageSensor vSen2;
 
     private float wheelDiameter;  //wheel diameter in inch
     private int encoderPPR; //wheel encoder PPR (Pulse per Rotation)
     private ElapsedTime runtime = new ElapsedTime();
 
-    public MecanumDriveTrain(String FrontLeftName, String FrontRightName, String BackLeftName, String BackRightName, ModernRoboticsI2cGyro gyroscope, OpMode OperatorMode) throws InterruptedException {
+    public MecanumDriveTrain(String FrontLeftName, String FrontRightName, String BackLeftName, String BackRightName, String mc1, String mc2, OpMode OperatorMode) throws InterruptedException {
         opMode = OperatorMode;
 
         frontLeft = opMode.hardwareMap.dcMotor.get(FrontLeftName);
@@ -46,7 +49,6 @@ public class MecanumDriveTrain {
         frontLeft.setDirection(DcMotorSimple.Direction.REVERSE);
         backLeft.setDirection(DcMotorSimple.Direction.REVERSE);
 
-        gyro = gyroscope;
 
         wheelDiameter = 4; //default is 4 inch, most of wheels we have used are 4 inch diamete;
         //encoderPPR = 1320; //default to Tetrix encoder;  AndyMark will have different values
@@ -61,9 +63,12 @@ public class MecanumDriveTrain {
         backRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         frontLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         frontRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
+        vSen1 = opMode.hardwareMap.voltageSensor.get(mc1);
+        vSen2 = opMode.hardwareMap.voltageSensor.get(mc2);
     }
 
-    public MecanumDriveTrain(String FrontLeftName, String FrontRightName, String BackLeftName, String BackRightName, OpMode OperatorMode) {
+    public MecanumDriveTrain(String FrontLeftName, String FrontRightName, String BackLeftName, String BackRightName, OpMode OperatorMode) throws InterruptedException {
         opMode = OperatorMode;
 
         frontLeft = opMode.hardwareMap.dcMotor.get(FrontLeftName);
@@ -77,6 +82,16 @@ public class MecanumDriveTrain {
         wheelDiameter = 4; //default is 4 inch, most of wheels we have used are 4 inch diamete;
         //encoderPPR = 1320; //default to Tetrix encoder;  AndyMark will have different values
         encoderPPR = 560;
+
+        backLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        backRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        frontLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        frontRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        Thread.sleep(40);
+        backLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        backRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        frontLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        frontRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
     }
 
 
@@ -254,6 +269,8 @@ public class MecanumDriveTrain {
         int startHeading = gyro.getIntegratedZValue();
         long startTime = System.currentTimeMillis();
         int targetHeading = startHeading + (direction == TurnDirection.RIGHT ? degree * -1 : degree);
+
+        DbgLog.msg("[Phoenix:Voltage] MotorController1Val: " + vSen1.getVoltage() + ". MotorController2Val: " + vSen2.getVoltage() + ". Average: " + ((vSen1.getVoltage() + vSen2.getVoltage()) / 2));
 
         DbgLog.msg("[Phoenix:Turn] targetHeading = " + targetHeading);
 
@@ -1006,6 +1023,17 @@ public class MecanumDriveTrain {
         backRight.setPower(0);
         frontLeft.setPower(0);
         backLeft.setPower(0);
+    }
+
+    public double getVoltage() {
+        return (vSen1.getVoltage() + vSen2.getVoltage()) / 2;
+    }
+
+    public double turnPower() {
+        if(getVoltage() >= 14)
+            return .2;
+        else
+            return .2 + (14 - getVoltage()) * .025;
     }
 
 }

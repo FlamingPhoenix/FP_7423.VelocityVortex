@@ -12,7 +12,7 @@ import com.qualcomm.robotcore.hardware.*;
  */
 
 @TeleOp(name = "colortest", group = "none")
-@Disabled
+
 public class ColorSensorTest extends OpMode {
 
     ColorSensor color;

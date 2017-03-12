@@ -19,7 +19,9 @@ public class WarnerBot extends OpMode {
 
     @Override
     public void init()  {
-        DriveTrain = new MecanumDriveTrain("frontleft", "frontright", "backleft", "backright", this); //Initialize a drive train using MecanumDriveTrain
+        try {
+            DriveTrain = new MecanumDriveTrain("frontleft", "frontright", "backleft", "backright", this); //Initialize a drive train using MecanumDriveTrain
+        } catch (InterruptedException e) {}
     }
 
     @Override

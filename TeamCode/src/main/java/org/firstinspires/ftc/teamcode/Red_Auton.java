@@ -45,7 +45,6 @@ public class Red_Auton extends LinearOpMode {
     OpticalDistanceSensor opt;
 
     Servo pusher;
-    Servo poker;
 
     DcMotor collecter;
 
@@ -59,9 +58,7 @@ public class Red_Auton extends LinearOpMode {
         stopper = hardwareMap.servo.get("stopper");
         collecter = hardwareMap.dcMotor.get("collector");
         pusher = hardwareMap.servo.get("pusher");
-        poker = hardwareMap.servo.get("poker");
 
-        poker.setPosition(.55);
         pusher.setPosition(.5);
         stopper.setPosition(.75);
 
@@ -85,7 +82,7 @@ public class Red_Auton extends LinearOpMode {
 
         opt = hardwareMap.opticalDistanceSensor.get("opt");
 
-        wheels = new MecanumDriveTrain("frontleft", "frontright", "backleft", "backright", this);
+        wheels = new MecanumDriveTrain("frontleft", "frontright", "backleft", "backright", "leftwheels", "rightwheels",this);
 
         shooter.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         this.idle();
@@ -98,9 +95,10 @@ public class Red_Auton extends LinearOpMode {
 
         waitForStart();
 
-        collecter.setPower(.5);
-        sleep(80);
-        collecter.setPower(0);
+        Thread.sleep(5);
+        pusher.setPosition(0);
+        sleep(40);
+        pusher.setPosition(.5);
         shooter.setPower(1);
 
         wheels.strafe(6, 0.7, TurnDirection.LEFT, this);
@@ -108,11 +106,10 @@ public class Red_Auton extends LinearOpMode {
         Thread.sleep(1000);
 
         stopper.setPosition(.20); //Shoot
-        Thread.sleep(250);
-        stopper.setPosition(.75); //Stop shooting
-        Thread.sleep(1500);
-        stopper.setPosition(0.20); //Shoot
-        Thread.sleep(500);
+        //stopper.setPosition(.75); //Stop shooting
+        //Thread.sleep(1000);
+        //stopper.setPosition(0.20); //Shoot
+        Thread.sleep(1000);
         stopper.setPosition(.75); //Stop shooting
 
         wheels.strafe(14, 0.7, TurnDirection.LEFT, this);
@@ -128,7 +125,7 @@ public class Red_Auton extends LinearOpMode {
 
         int angleBefore = gyro.getIntegratedZValue();
         int degreesNeeded = Math.abs(88 - angleBefore);
-        wheels.turnWithGyro(degreesNeeded, .24, TurnDirection.LEFT, gyro, this);
+        wheels.turnWithGyro(degreesNeeded, wheels.turnPower(), TurnDirection.LEFT, gyro, this);
         int angleAfter = gyro.getIntegratedZValue();
 
         DbgLog.msg("[Phoenix] angleBefore= %d, degreeNeeded= %d, angleAfter= %d", angleBefore, degreesNeeded, angleAfter);
@@ -170,7 +167,7 @@ public class Red_Auton extends LinearOpMode {
 
         DbgLog.msg("[Phoenix:Step 3 CalculateHeading] ImageAngle= %d ; GyroBeforeAdjustment= %d ; TargetGyroHeading= %d", angle, nowsHeading, heading);
 
-        double lastX = wheels.strafe(180, 0.5, TurnDirection.LEFT, tracker.get(3), this); //IMPLEMENT A TIMEOUT WITHIN THIS STRAFING METHOD
+        double lastX = wheels.strafe(180, 0.65, TurnDirection.LEFT, tracker.get(3), this); //IMPLEMENT A TIMEOUT WITHIN THIS STRAFING METHOD
         DbgLog.msg("[Phoenix:ApproachImage 1] lastX After Strafe = " + lastX);
         float imageX;
 
@@ -255,10 +252,10 @@ public class Red_Auton extends LinearOpMode {
                 pusher.setPosition(1);
                 Thread.sleep(500);
 
-                wheels.strafe(14, .5, TurnDirection.RIGHT, this);
+                wheels.strafe(14, .65, TurnDirection.RIGHT, this);
                 pusher.setPosition(.5);
             } else {
-                wheels.strafe(13, .5, TurnDirection.RIGHT, this);
+                wheels.strafe(13, .65, TurnDirection.RIGHT, this);
                 pusher.setPosition(.5);
             }
         }
@@ -319,11 +316,7 @@ public class Red_Auton extends LinearOpMode {
 
         heading = gyro.getIntegratedZValue();
         wheels.resetMotorSpeed();
-        lastX = wheels.strafe(180, 0.5, TurnDirection.LEFT, tracker.get(1), this);
-
-        poker.setPosition(1);
-        this.sleep(500);
-        poker.setPosition(.55);
+        lastX = wheels.strafe(180, 0.65, TurnDirection.LEFT, tracker.get(1), this);
 
         endHeading = gyro.getIntegratedZValue();
         turningAngle = heading - endHeading;
@@ -394,19 +387,14 @@ public class Red_Auton extends LinearOpMode {
 
         if ((color.red() > 1) || pushAnyway) { //sees the red side or the other side is blue
             pusher.setPosition(0);
-            poker.setPosition(0);
-            Thread.sleep(1100);
-            wheels.strafe(3, 1.0, 2, TurnDirection.LEFT, this);
-            poker.setPosition(.55);
+            Thread.sleep(1700);
             Thread.sleep(200);
 
             pusher.setPosition(1);
-            wheels.strafe(10, .5, 5, TurnDirection.RIGHT, this);
+            wheels.strafe(5, .5, 5, TurnDirection.RIGHT, this);
         }
         else {
-            poker.setPosition(0);
             wheels.strafe(8, .5, TurnDirection.RIGHT, this);
-            poker.setPosition(0.55);
         }
 
         //Adjust before going for the center vortex
@@ -430,7 +418,7 @@ public class Red_Auton extends LinearOpMode {
         //Go for center vortex
         wheels.turnWithGyro(40, .5, TurnDirection.LEFT, gyro, this);
         pusher.setPosition(0.5);
-        wheels.drive(55, Direction.BACKWARD, .5, 6, this);
+        wheels.drive(55, Direction.BACKWARD, .7, 6, this);
     }
 
     //Make small angle turn

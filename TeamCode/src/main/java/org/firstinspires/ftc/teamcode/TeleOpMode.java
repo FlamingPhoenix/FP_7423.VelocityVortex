@@ -37,9 +37,12 @@ public class TeleOpMode extends OpMode {
     int previousCount;
     long prevTime;
 
+
     @Override
     public void init() {
-        DriveTrain = new MecanumDriveTrain("frontleft", "frontright", "backleft", "backright", this);
+        try {
+            DriveTrain = new MecanumDriveTrain("frontleft", "frontright", "backleft", "backright", this);
+        } catch (InterruptedException e) {}
 
         shooter = hardwareMap.dcMotor.get("farriswheel");
         collector = hardwareMap.dcMotor.get("collector");
@@ -57,7 +60,7 @@ public class TeleOpMode extends OpMode {
 
         shooter.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         shooter.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        shooter.setMaxSpeed(2650);
+        shooter.setMaxSpeed(2625);
         Onoroff = 0;
 
         counter = 0;
@@ -140,6 +143,12 @@ public class TeleOpMode extends OpMode {
 
             this.telemetry.addData("speed", speed);
             this.telemetry.update();
+        }
+
+        if(gamepad1.dpad_down) {
+            poker.setPosition(0);
+        } else {
+            poker.setPosition(.55);
         }
 
     }

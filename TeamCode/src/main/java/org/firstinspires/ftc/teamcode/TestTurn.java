@@ -5,6 +5,7 @@ import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cGyro;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.hardware.DcMotorController;
 
 import FlamingPhoenix.*;
 import FlamingPhoenix.MecanumDriveTrain;
@@ -15,7 +16,7 @@ import FlamingPhoenix.TurnDirection;
  */
 
 @Autonomous(name = "Test Turn", group = "Practice")
-@Disabled()
+
 public class TestTurn extends LinearOpMode {
 
     MecanumDriveTrain wheels;
@@ -24,8 +25,8 @@ public class TestTurn extends LinearOpMode {
     ///Initialize the routine
     private void initialize() throws InterruptedException {
 
-        wheels = new FlamingPhoenix.MecanumDriveTrain("frontleft", "frontright", "backleft", "backright", this);
         gyro = (ModernRoboticsI2cGyro) hardwareMap.gyroSensor.get("gyro");
+        wheels = new FlamingPhoenix.MecanumDriveTrain("frontleft", "frontright", "backleft", "backright", "leftwheels", "rightwheels", this);
 
         gyro.resetZAxisIntegrator();
         gyro.resetZAxisIntegrator();
