@@ -101,15 +101,16 @@ public class Red_Auton extends LinearOpMode {
         pusher.setPosition(.5);
         shooter.setPower(1);
 
-        wheels.strafe(6, 0.7, TurnDirection.LEFT, this);
+        wheels.strafe(6, 0.6, TurnDirection.LEFT, this);
 
-        Thread.sleep(1000);
+        Thread.sleep(1400);
 
         stopper.setPosition(.20); //Shoot
-        //stopper.setPosition(.75); //Stop shooting
-        //Thread.sleep(1000);
-        //stopper.setPosition(0.20); //Shoot
-        Thread.sleep(1000);
+        Thread.sleep(250);
+        stopper.setPosition(.75); //Stop shooting
+        Thread.sleep(1500);
+        stopper.setPosition(0.20); //Shoot
+        Thread.sleep(500);
         stopper.setPosition(.75); //Stop shooting
 
         wheels.strafe(14, 0.7, TurnDirection.LEFT, this);
@@ -167,7 +168,7 @@ public class Red_Auton extends LinearOpMode {
 
         DbgLog.msg("[Phoenix:Step 3 CalculateHeading] ImageAngle= %d ; GyroBeforeAdjustment= %d ; TargetGyroHeading= %d", angle, nowsHeading, heading);
 
-        double lastX = wheels.strafe(180, 0.65, TurnDirection.LEFT, tracker.get(3), this); //IMPLEMENT A TIMEOUT WITHIN THIS STRAFING METHOD
+        double lastX = wheels.strafe(180, wheels.strafePowerToBeacon(), TurnDirection.LEFT, tracker.get(3), this); //IMPLEMENT A TIMEOUT WITHIN THIS STRAFING METHOD
         DbgLog.msg("[Phoenix:ApproachImage 1] lastX After Strafe = " + lastX);
         float imageX;
 
@@ -287,36 +288,38 @@ public class Red_Auton extends LinearOpMode {
         }
 
         //Now, got to 2nd beacon/image
-        wheels.drive(43 + didWeGoBack, Direction.FORWARD, 0.45, 4, this);
+        wheels.drive(43 + didWeGoBack, Direction.FORWARD, wheels.drivePowerToBeacon2(), 4, this);
 
-        wheels.driveUntilImage(15, 0.15, Direction.FORWARD, tracker.get(1), this);
+        wheels.driveUntilImage(15, 0.12, Direction.FORWARD, tracker.get(1), this);
 
-        angle = MyUtility.getImageAngle(tracker.get(1));
-        DbgLog.msg("[Phoenix] 2nd beeacon angle: " + angle);
+        //Don't use Camera to get the angle.  It is too close and may not be accurate.
+        //angle = MyUtility.getImageAngle(tracker.get(1));
+        //DbgLog.msg("[Phoenix] 2nd beeacon angle: " + angle);
 
+        endHeading = gyro.getIntegratedZValue(); //Read the current Gyro heading
         if (angle != -999) {//saw image and found the angle of the image
-            int turnAngle = Math.abs(90 - angle);
+            turningAngle = heading - endHeading;
 
-            if(angle < 85) {
-                DbgLog.msg("[Phoenix:Step 6] Adjust to turn RIGHT by %d degree based on 2nd image angle of %d", turnAngle, angle);
-                if (turnAngle > 10)
-                    wheels.turnWithGyro(turnAngle, .2, TurnDirection.RIGHT, gyro, this);
-                else
-                    makeMinorTurn(turnAngle, TurnDirection.RIGHT);
-            }
-            else if(angle > 95) {
-                DbgLog.msg("[Phoenix:Step 6] Adjust to turn left by %d degree based on 2nd image angle of %d", turnAngle, angle);
+            if (turningAngle < 0)
+                d = TurnDirection.RIGHT;
+            else
+                d = TurnDirection.LEFT;
 
-                if (turnAngle > 10)
-                    wheels.turnWithGyro(turnAngle, .2, TurnDirection.LEFT, gyro, this);
+            if (Math.abs(turningAngle) >= 4) {
+                if (Math.abs(turningAngle) > 10)
+                    wheels.turnWithGyro(Math.abs(turningAngle), .2, d, gyro, this);
                 else
-                    makeMinorTurn(turnAngle, TurnDirection.RIGHT);
+                    makeMinorTurn(Math.abs(turningAngle), d);
+
+                if (d == TurnDirection.LEFT)
+                    DbgLog.msg("[Phoenix:Step 6] Adjust to turn left by %d degree based on 2nd image angle of %d", Math.abs(turningAngle), angle);
+                else
+                    DbgLog.msg("[Phoenix:Step 6] Adjust to turn right by %d degree based on 2nd image angle of %d", Math.abs(turningAngle), angle);
+
             }
         }
 
-        heading = gyro.getIntegratedZValue();
-        wheels.resetMotorSpeed();
-        lastX = wheels.strafe(180, 0.65, TurnDirection.LEFT, tracker.get(1), this);
+        lastX = wheels.strafe(195, wheels.strafePowerToBeacon(), TurnDirection.LEFT, tracker.get(1), this);
 
         endHeading = gyro.getIntegratedZValue();
         turningAngle = heading - endHeading;
@@ -331,7 +334,7 @@ public class Red_Auton extends LinearOpMode {
         else
             DbgLog.msg("[Phoenix:Step 7] At 2nd beacon, Reached beacon turn RIGHT, turningAngle= %d, heading= %d endHeading=%d", turningAngle, heading, endHeading);
 
-        if (Math.abs(turningAngle) >= 5){ //robot is not parallel by more than 5 degree, adjust
+        if (Math.abs(turningAngle) >= 4){ //robot is not parallel by more than 5 degree, adjust
             if(turningAngle > 10)
                 wheels.turnWithGyro(Math.abs(turningAngle), .2, d, gyro, this);
             else
@@ -387,8 +390,7 @@ public class Red_Auton extends LinearOpMode {
 
         if ((color.red() > 1) || pushAnyway) { //sees the red side or the other side is blue
             pusher.setPosition(0);
-            Thread.sleep(1700);
-            Thread.sleep(200);
+            Thread.sleep(1900);
 
             pusher.setPosition(1);
             wheels.strafe(5, .5, 5, TurnDirection.RIGHT, this);
@@ -418,7 +420,8 @@ public class Red_Auton extends LinearOpMode {
         //Go for center vortex
         wheels.turnWithGyro(40, .5, TurnDirection.LEFT, gyro, this);
         pusher.setPosition(0.5);
-        wheels.drive(55, Direction.BACKWARD, .7, 6, this);
+        wheels.drive(63, Direction.BACKWARD, .7, 6, this);
+
     }
 
     //Make small angle turn
@@ -447,21 +450,5 @@ public class Red_Auton extends LinearOpMode {
             wheels.turnAjdustment(0.26, direction, this);
         else
             wheels.turnAjdustment(0.35, direction, this);
-    }
-
-    void pushBeacon(Direction d, double ms) throws InterruptedException {
-        int direction;
-
-        if(d == Direction.FORWARD)
-            direction = 0;
-        else
-            direction = 1;
-
-        double wantedTime = this.getRuntime() + ms; //determine when this should end
-        while((this.getRuntime() < wantedTime) && opModeIsActive()) {
-            pusher.setPosition(direction);
-        }
-
-        pusher.setPosition(.5);
     }
 }

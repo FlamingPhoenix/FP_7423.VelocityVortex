@@ -1029,11 +1029,27 @@ public class MecanumDriveTrain {
         return (vSen1.getVoltage() + vSen2.getVoltage()) / 2;
     }
 
+    //Get the turn power based on battery voltage
     public double turnPower() {
         if(getVoltage() >= 14)
             return .2;
         else
             return .2 + (14 - getVoltage()) * .025;
+    }
+
+    //Get the drive power toward the second beacon based on battery voltage
+    public double drivePowerToBeacon2() {
+        if(getVoltage() >= 14)
+            return 0.4;
+        else
+            return 0.4 + (14 - getVoltage()) * 0.3;
+    }
+
+    public double strafePowerToBeacon() {
+        if (getVoltage() >= 14)
+            return 0.50;
+        else
+            return 0.50 + (14 - getVoltage()) * 0.2;
     }
 
 }
