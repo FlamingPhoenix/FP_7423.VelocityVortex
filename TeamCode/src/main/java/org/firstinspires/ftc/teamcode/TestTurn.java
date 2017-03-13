@@ -16,7 +16,7 @@ import FlamingPhoenix.TurnDirection;
  */
 
 @Autonomous(name = "Test Turn", group = "Practice")
-
+@Disabled()
 public class TestTurn extends LinearOpMode {
 
     MecanumDriveTrain wheels;
