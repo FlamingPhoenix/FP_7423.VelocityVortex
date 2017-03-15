@@ -61,7 +61,7 @@ public class BlueFar extends LinearOpMode{
         while (gyro.isCalibrating() && this.opModeIsActive())
             Thread.sleep(50);
 
-        MecanumDriveTrain wheels = new MecanumDriveTrain("frontleft", "frontright", "backleft", "backright", this);
+        MecanumDriveTrain wheels = new MecanumDriveTrain("frontleft", "frontright", "backleft", "backright", "leftwheels", "rightwheels", this);
 
         shooter = hardwareMap.dcMotor.get("farriswheel");
         stopper = hardwareMap.servo.get("stopper");
@@ -70,8 +70,7 @@ public class BlueFar extends LinearOpMode{
 
         shooter.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         this.idle();
-        shooter.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        shooter.setMaxSpeed(960);
+        shooter.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
         gyro.resetZAxisIntegrator();
         gyro.calibrate();
@@ -98,7 +97,7 @@ public class BlueFar extends LinearOpMode{
         this.idle();
         this.idle();
 
-        shooter.setMaxSpeed(2650);
+        shooter.setMaxSpeed(2550);
 
         shooter.setPower(1);
 

@@ -379,6 +379,7 @@ public class Red_Auton extends LinearOpMode {
         }
 
         boolean pushAnyway = false;  //if see blue on one side, then, the other side got to be red
+        boolean turnSize = false;
         if(color.red() <= 1) {
             DbgLog.msg("[Phoenix:Beacon Distance Adjustment 2] Can't see red, move back 6 inches");
 
@@ -386,6 +387,7 @@ public class Red_Auton extends LinearOpMode {
                 pushAnyway = true; //if see blue on one side, then, the other side got to be red
 
             wheels.drive(7, Direction.BACKWARD, 0.2, 5, this);
+            turnSize = true;
         }
 
         if ((color.red() > 1) || pushAnyway) { //sees the red side or the other side is blue
@@ -394,10 +396,13 @@ public class Red_Auton extends LinearOpMode {
 
             pusher.setPosition(1);
             wheels.strafe(5, .5, 5, TurnDirection.RIGHT, this);
+            pusher.setPosition(0.5);
         }
         else {
             wheels.strafe(8, .5, TurnDirection.RIGHT, this);
         }
+
+        pusher.setPosition(0.5);
 
         //Adjust before going for the center vortex
         endHeading = gyro.getIntegratedZValue();
@@ -418,8 +423,16 @@ public class Red_Auton extends LinearOpMode {
             DbgLog.msg("[PhoenixPhoenix:Adjust before going for center Vortex] Leaving first beacon, performed Reached beacon turningAngle= %d, heading= %d endHeading=%d", turningAngle, heading, endHeading);
         }
         //Go for center vortex
-        wheels.turnWithGyro(40, .5, TurnDirection.LEFT, gyro, this);
-        pusher.setPosition(0.5);
+
+        angleBefore = gyro.getIntegratedZValue();
+
+        if(turnSize)
+            degreesNeeded = Math.abs(135 - angleBefore);
+        else
+            degreesNeeded = Math.abs(130 - angleBefore);
+
+        wheels.turnWithGyro(degreesNeeded, .5, TurnDirection.LEFT, gyro, this);
+
         wheels.drive(63, Direction.BACKWARD, .7, 6, this);
 
     }

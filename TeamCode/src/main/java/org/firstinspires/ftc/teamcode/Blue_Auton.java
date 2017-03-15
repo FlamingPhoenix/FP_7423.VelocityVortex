@@ -104,6 +104,7 @@ public class Blue_Auton extends LinearOpMode {
         //collecter.setPower(.5);
         //sleep(80);
         //collecter.setPower(0);
+        Thread.sleep(5);
         shooter.setPower(1);
 
         wheels.strafe(6, 0.6, TurnDirection.LEFT, this);
@@ -377,6 +378,7 @@ public class Blue_Auton extends LinearOpMode {
         }
 
         boolean pushAnyway = false;  //if see blue on one side, then, the other side got to be red
+        boolean turnSize = false;
         if(color.blue() <= 1) {
             DbgLog.msg("[Phoenix:Beacon Distance Adjustment 2] Can't see red, move back 6 inches");
 
@@ -384,21 +386,29 @@ public class Blue_Auton extends LinearOpMode {
                 pushAnyway = true; //if see blue on one side, then, the other side got to be red
 
             wheels.drive(7, Direction.BACKWARD, 0.2, 5, this);
+            turnSize = true;
         }
 
         if ((color.blue() > 1) || pushAnyway) { //sees the blue side or otherside is red
             pusher.setPosition(0);
-            Thread.sleep(2000);
+            Thread.sleep(1700);
 
             pusher.setPosition(1);
             wheels.strafe(5, .5, 5, TurnDirection.RIGHT, this);
+            pusher.setPosition(0.5);
         }
         else {
             wheels.strafe(8, .5, TurnDirection.RIGHT, this);
         }
 
-        wheels.turnWithGyro(35, .5, TurnDirection.RIGHT, gyro, this);
-        wheels.drive(52, Direction.FORWARD, .8, 6, this);
+        angleBefore = gyro.getIntegratedZValue();
+        if(turnSize)
+            degreesNeeded = Math.abs(-55 - angleBefore);
+        else
+            degreesNeeded = Math.abs(-60 - angleBefore);
+
+        wheels.turnWithGyro(degreesNeeded, .5, TurnDirection.RIGHT, gyro, this);
+        wheels.drive(62, Direction.FORWARD, .8, 6, this);
     }
 
     //Make small angle turn
