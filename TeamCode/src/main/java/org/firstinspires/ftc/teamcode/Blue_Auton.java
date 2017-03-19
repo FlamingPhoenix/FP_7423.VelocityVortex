@@ -90,7 +90,7 @@ public class Blue_Auton extends LinearOpMode {
         shooter.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         this.idle();
         shooter.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        shooter.setMaxSpeed(2550);
+        shooter.setMaxSpeed(2500);
 
         gyro.resetZAxisIntegrator();
         gyro.calibrate();
@@ -137,7 +137,7 @@ public class Blue_Auton extends LinearOpMode {
 
         DbgLog.msg("[Phoenix] angleBefore= %d, degreeNeeded= %d, angleAfter= %d", angleBefore, degreesNeeded, angleAfter);
 
-        wheels.drive(30, Direction.BACKWARD, 0.3, 5, this);
+        wheels.drive(27, Direction.BACKWARD, 0.3, 5, this);
 
         wheels.driveUntilImage(15, .15, Direction.BACKWARD, tracker.get(0), this);
 
@@ -249,7 +249,7 @@ public class Blue_Auton extends LinearOpMode {
 
             if ((color.blue() > 1) || pushAnyway)  { //sees the blue side or the other side is red
                 pusher.setPosition(0);
-                Thread.sleep(1000);
+                Thread.sleep(1500);
                 wheels.strafe(1, .5, 1, TurnDirection.LEFT, this);
                 Thread.sleep(200);
 
@@ -289,7 +289,7 @@ public class Blue_Auton extends LinearOpMode {
             DbgLog.msg("[Phoenix:Step 5 Beacon Adjustment 2] Leaving first beacon, performed Reached beacon turningAngle= %d, heading= %d endHeading=%d", turningAngle, heading, endHeading);
         }
 
-        wheels.drive(48 - didWeGoBack, Direction.BACKWARD, wheels.drivePowerToBeacon2(), 4, this);
+        wheels.drive(45 - didWeGoBack, Direction.BACKWARD, wheels.drivePowerToBeacon2(), 4, this);
 
         wheels.driveUntilImage(5, 0.12, Direction.BACKWARD, tracker.get(2), this);
 
@@ -319,7 +319,7 @@ public class Blue_Auton extends LinearOpMode {
             }
         }
 
-        lastX = wheels.strafe(195, wheels.strafePowerToBeacon(), TurnDirection.LEFT, tracker.get(2), this);
+        lastX = wheels.strafe(180, wheels.strafePowerToBeacon(), TurnDirection.LEFT, tracker.get(2), this);
 
         endHeading = gyro.getIntegratedZValue();
         turningAngle = heading - endHeading;
@@ -334,7 +334,7 @@ public class Blue_Auton extends LinearOpMode {
         else
             DbgLog.msg("[Phoenix:Step 7] At 2nd beacon, Reached beacon turn RIGHT, turningAngle= %d, heading= %d endHeading=%d", turningAngle, heading, endHeading);
 
-        if (Math.abs(turningAngle) >= 5){ //robot is not parallel by more than 5 degree, adjust
+        if (Math.abs(turningAngle) > 5){ //robot is not parallel by more than 5 degree, adjust
             if(turningAngle > 10)
                 wheels.turnWithGyro(Math.abs(turningAngle), .2, d, gyro, this);
             else
@@ -391,10 +391,11 @@ public class Blue_Auton extends LinearOpMode {
 
         if ((color.blue() > 1) || pushAnyway) { //sees the blue side or otherside is red
             pusher.setPosition(0);
-            Thread.sleep(1700);
+            Thread.sleep(1000);
+            wheels.strafe(2, .5, 1, TurnDirection.LEFT, this);
 
             pusher.setPosition(1);
-            wheels.strafe(5, .5, 5, TurnDirection.RIGHT, this);
+            wheels.strafe(7, .5, 5, TurnDirection.RIGHT, this);
             pusher.setPosition(0.5);
         }
         else {

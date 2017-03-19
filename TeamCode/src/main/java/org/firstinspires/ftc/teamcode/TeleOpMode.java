@@ -84,7 +84,7 @@ public class TeleOpMode extends OpMode {
             stop = false;
 
         }
-        else if((counter > 10) && (Onoroff != 0)) { //25 loops is approximately 1 seconds
+        else if((counter > 10) && (Onoroff != 0)) { //10 loops is approximately 1 seconds
             if(stop)
                 Onoroff = 0;
             else
@@ -143,12 +143,6 @@ public class TeleOpMode extends OpMode {
 
             this.telemetry.addData("speed", speed);
             this.telemetry.update();
-        }
-
-        if(gamepad1.dpad_down) {
-            poker.setPosition(0);
-        } else {
-            poker.setPosition(.55);
         }
 
     }

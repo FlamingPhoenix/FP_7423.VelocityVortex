@@ -87,7 +87,7 @@ public class Red_Auton extends LinearOpMode {
         shooter.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         this.idle();
         shooter.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        shooter.setMaxSpeed(2550);
+        shooter.setMaxSpeed(2500);
 
         while(gyro.isCalibrating()) {
             Thread.sleep(50);
@@ -131,9 +131,9 @@ public class Red_Auton extends LinearOpMode {
 
         DbgLog.msg("[Phoenix] angleBefore= %d, degreeNeeded= %d, angleAfter= %d", angleBefore, degreesNeeded, angleAfter);
 
-        wheels.drive(15, Direction.FORWARD, 0.3, 5, this);
+        wheels.drive(12, Direction.FORWARD, 0.3, 5, this);
 
-        wheels.driveUntilImage(15, .15, Direction.FORWARD, tracker.get(3), this);
+        wheels.driveUntilImage(15, .12, Direction.FORWARD, tracker.get(3), this);
 
         //Get the first image angle
         int angle = MyUtility.getImageAngle(tracker.get(3));
@@ -247,7 +247,7 @@ public class Red_Auton extends LinearOpMode {
             if ((color.red() > 1) || pushAnyway)  { //sees the red side or the other side is blue
                 pusher.setPosition(0);
                 Thread.sleep(1000);
-                wheels.strafe(1, .5, TurnDirection.LEFT, this);
+                wheels.strafe(3, .5, 1, TurnDirection.LEFT, this);
                 Thread.sleep(200);
 
                 pusher.setPosition(1);
@@ -288,7 +288,7 @@ public class Red_Auton extends LinearOpMode {
         }
 
         //Now, got to 2nd beacon/image
-        wheels.drive(43 + didWeGoBack, Direction.FORWARD, wheels.drivePowerToBeacon2(), 4, this);
+        wheels.drive(41 + didWeGoBack, Direction.FORWARD, wheels.drivePowerToBeacon2(), 4, this);
 
         wheels.driveUntilImage(15, 0.12, Direction.FORWARD, tracker.get(1), this);
 
@@ -319,7 +319,7 @@ public class Red_Auton extends LinearOpMode {
             }
         }
 
-        lastX = wheels.strafe(195, wheels.strafePowerToBeacon(), TurnDirection.LEFT, tracker.get(1), this);
+        lastX = wheels.strafe(170, wheels.strafePowerToBeacon(), TurnDirection.LEFT, tracker.get(1), this);
 
         endHeading = gyro.getIntegratedZValue();
         turningAngle = heading - endHeading;
@@ -392,10 +392,11 @@ public class Red_Auton extends LinearOpMode {
 
         if ((color.red() > 1) || pushAnyway) { //sees the red side or the other side is blue
             pusher.setPosition(0);
-            Thread.sleep(1900);
+            Thread.sleep(1000);
+            wheels.strafe(2, .5, 1, TurnDirection.LEFT, this);
 
             pusher.setPosition(1);
-            wheels.strafe(5, .5, 5, TurnDirection.RIGHT, this);
+            wheels.strafe(7, .5, 5, TurnDirection.RIGHT, this);
             pusher.setPosition(0.5);
         }
         else {
@@ -429,11 +430,13 @@ public class Red_Auton extends LinearOpMode {
         if(turnSize)
             degreesNeeded = Math.abs(135 - angleBefore);
         else
-            degreesNeeded = Math.abs(130 - angleBefore);
+           degreesNeeded = Math.abs(130 - angleBefore);
 
         wheels.turnWithGyro(degreesNeeded, .5, TurnDirection.LEFT, gyro, this);
 
         wheels.drive(63, Direction.BACKWARD, .7, 6, this);
+
+       // wheels.drive(110, Direction.BACKWARD, 1, 6, this);
 
     }
 

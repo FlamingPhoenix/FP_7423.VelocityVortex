@@ -1046,10 +1046,12 @@ public class MecanumDriveTrain {
     }
 
     public double strafePowerToBeacon() {
-        if (getVoltage() >= 14)
+        /*if (getVoltage() >= 14)
             return 0.50;
         else
-            return 0.50 + (14 - getVoltage()) * 0.2;
+            return 0.45 + (14 - getVoltage()) * 0.06;
+            */
+        return .5;
     }
 
 }
