@@ -1,13 +1,8 @@
 package org.firstinspires.ftc.teamcode;
 
-import android.graphics.Color;
-
-import com.qualcomm.ftccommon.DbgLog;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.OpticalDistanceSensor;
 import com.qualcomm.robotcore.hardware.Servo;
 
 import FlamingPhoenix.MecanumDriveTrain;
@@ -16,8 +11,8 @@ import FlamingPhoenix.MecanumDriveTrain;
  * Created by HwaA1 on 12/10/2016.
  */
 
-@TeleOp (name = "TeleOp", group = "none")
-public class TeleOpMode extends OpMode {
+@TeleOp (name = "TeleOpOneController", group = "none")
+public class TeleOpModeOneHanded extends OpMode {
 
     MecanumDriveTrain DriveTrain;
 
@@ -32,7 +27,7 @@ public class TeleOpMode extends OpMode {
 
     double Onoroff;
     int counter;
-    boolean stop = false;
+    boolean stop;
 
     int previousCount;
     long prevTime;
@@ -52,8 +47,6 @@ public class TeleOpMode extends OpMode {
         pusher.setPosition(.5);
         poker.setPosition(0.55);
 
-        //stopper = hardwareMap.servo.get("");
-
         stopper = hardwareMap.servo.get("stopper");
 
         stopper.setPosition(.75);
@@ -72,12 +65,12 @@ public class TeleOpMode extends OpMode {
     @Override
     public void loop() {
 
-        if(gamepad2.right_bumper && gamepad2.left_bumper) {
+        if(gamepad1.b) {
             Onoroff = .1;
             shooter.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             stop = true;
         }
-        else if(gamepad2.y) {
+        else if(gamepad1.x) {
             shooter.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             Onoroff = .1;
             counter = 0;
@@ -93,10 +86,10 @@ public class TeleOpMode extends OpMode {
 
         shooter.setPower(Onoroff);
 
-        if(gamepad2.right_bumper) {
+        if(gamepad1.right_bumper) {
             collector.setPower(1);
         }
-        else if(gamepad2.left_bumper)
+        else if(gamepad1.left_bumper)
             collector.setPower(-1);
         else
             collector.setPower(0);
@@ -114,7 +107,7 @@ public class TeleOpMode extends OpMode {
 
         DriveTrain.Drive(gamepad1);
 
-        if((gamepad2.right_trigger > .2) && !(gamepad2.right_bumper) && !stop) {
+        if((gamepad1.right_trigger > .2) && !(gamepad1.right_bumper) && !stop) {
             stopper.setPosition(.25);
             this.resetStartTime();
             isInPosition = true;
@@ -134,7 +127,7 @@ public class TeleOpMode extends OpMode {
         long timeDifference = currentTime - prevTime;
         double speed = 0;
         int newCount = shooter.getCurrentPosition();
-        if(timeDifference > 500) {
+        if(timeDifference > 1000) {
             speed = ((newCount - previousCount) * 1000 / timeDifference);
 
 

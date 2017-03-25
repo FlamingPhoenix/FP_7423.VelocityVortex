@@ -224,7 +224,7 @@ public class Blue_Auton extends LinearOpMode {
 
             adjustmentDistance = Math.abs(((imageX * 100.0f)) / 254.0f) / 10.0f;
             if (adjustDirection == Direction.FORWARD)
-                adjustmentDistance = adjustmentDistance + 1.0f; //need to move forward a bit more to handle the strafing problem
+                adjustmentDistance = adjustmentDistance + .5f; //need to move forward a bit more to handle the strafing problem
 
             if (adjustDirection == Direction.BACKWARD)
                 DbgLog.msg("[Phoenix] Beacon X position adjustment backward %7.3f and image X %7.3f", adjustmentDistance, imageX);
@@ -291,7 +291,7 @@ public class Blue_Auton extends LinearOpMode {
 
         wheels.drive(45 - didWeGoBack, Direction.BACKWARD, wheels.drivePowerToBeacon2(), 4, this);
 
-        wheels.driveUntilImage(5, 0.12, Direction.BACKWARD, tracker.get(2), this);
+        wheels.driveUntilImage(15, 0.12, Direction.BACKWARD, tracker.get(2), this);
 
         angle = MyUtility.getImageAngle(tracker.get(2));
         DbgLog.msg("[Phoenix] 2nd beeacon angle: " + angle);
@@ -365,7 +365,7 @@ public class Blue_Auton extends LinearOpMode {
 
         adjustmentDistance = Math.abs(( (imageX * 100.0f))/ 254.0f) / 10.0f ;
         if (adjustDirection == Direction.FORWARD)
-            adjustmentDistance = adjustmentDistance + 1; //need to move forward a bit more to handle the strafing problem
+            adjustmentDistance = adjustmentDistance + .5f; //need to move forward a bit more to handle the strafing problem
 
         if (adjustDirection == Direction.BACKWARD)
             DbgLog.msg("[Phoenix] 2nd Beacon X position adjustment backward %7.3f and image X %7.3f", adjustmentDistance, imageX);

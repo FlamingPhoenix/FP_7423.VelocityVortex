@@ -642,6 +642,9 @@ public class MecanumDriveTrain {
         backLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         opMode.idle();
 
+        long startTime = System.currentTimeMillis();
+        long time;
+
         VuforiaTrackableDefaultListener image = (VuforiaTrackableDefaultListener) imageObject.getListener();
 
         double xAdjustmentUnit = 0.0005;
@@ -685,6 +688,8 @@ public class MecanumDriveTrain {
                 DbgLog.msg("[Phoenix:strafe] image angle: " + angle);
                 opMode.telemetry.addData("angle ", angle);
 
+                DbgLog.msg("[Phoenix:ImageStrafe] Voltage=%6.3; ImageAngle=%d; Distance=7.4F", getVoltage(), angle, y);
+
                 double frontLeftSpeed = Math.abs(power); //we need to determine if we need to adjust the left front power to adjust for direction to the right
                 double backLeftSpeed = Math.abs(power); //this is to increase the back left if we need to go left
                 double frontRightSpeed = Math.abs(power); //need to increase this power if need to move the left
@@ -723,34 +728,6 @@ public class MecanumDriveTrain {
 
                 try {
                     if (direction == TurnDirection.LEFT) {
-
-                        /*
-                        if (zAngle < 85)  //need to turn right by giving more power to the back wheels
-                        {
-                            backLeftSpeed += angleAdjustment;
-                            backRightSpeed += angleAdjustment;
-                        }
-                        else if (zAngle > 95)  //need to turn left by giving more power to the front wheels
-                        {
-                            frontLeftSpeed += angleAdjustment;
-                            frontRightSpeed += angleAdjustment;
-                        }
-                        else {
-                            frontLeftSpeed = frontLeftSpeed + (-1 * xPowerAdjustment);
-                            frontRightSpeed += xPowerAdjustment;
-                            backLeftSpeed += xPowerAdjustment;
-                            backRightSpeed = backRightSpeed + (-1 * xPowerAdjustment);
-                        }
-
-                        if (max(frontLeftSpeed, frontRightSpeed, backLeftSpeed, backRightSpeed) > 1) {
-                            double mv = max(frontLeftSpeed, frontRightSpeed, backLeftSpeed, backRightSpeed);
-                            frontLeftSpeed = frontLeftSpeed * (frontLeftSpeed /mv);
-                            frontRightSpeed = frontRightSpeed * (frontRightSpeed /mv);
-                            backLeftSpeed =backLeftSpeed * (backLeftSpeed/mv);
-                            backRightSpeed =backRightSpeed * (backRightSpeed/mv);
-                        }
-                        */
-
                         DbgLog.msg("[Phoenix:Strafe] frontLeft=%7.4f backLeft=%7.4f frontRight=%7.4f backRight=%7.4f", frontLeftSpeed, backLeftSpeed, frontRightSpeed, backRightSpeed);
 
                         frontLeft.setPower(-1 * frontLeftSpeed);
@@ -780,6 +757,9 @@ public class MecanumDriveTrain {
                 DbgLog.msg("[Phoenix:strafe] image last y= " + Double.toString(y));
             }
             opMode.idle();
+
+            time = Math.abs(startTime - System.currentTimeMillis());
+            DbgLog.msg("[Phoenix:ImageStrafe] power=%7.4f; time=%d; distance=%7.4f; x=%7.4", power, time, y, x);
         }
 
         frontLeft.setPower(0);
@@ -787,6 +767,14 @@ public class MecanumDriveTrain {
         backRight.setPower(0);
         backLeft.setPower(0);
         DbgLog.msg("[Phoenix:strafe] i done = " + i);
+
+        time = Math.abs(startTime - System.currentTimeMillis());
+        DbgLog.msg("[Phoenix:ImageStrafe] power=%7.4f; time=%d; distance=%7.4f; x=%7.4", power, time, y, x);
+
+        for(int j = 0; j < 500; j++) {
+            DbgLog.msg("[Phoenix:ImageStrafe] power=%7.4f; time=%d; distance=%7.4f; x=%7.4", power, time, y, x);
+        }
+
         return (x * -1); //return last x position;
     }
 

@@ -82,7 +82,7 @@ public class Red_Auton extends LinearOpMode {
 
         opt = hardwareMap.opticalDistanceSensor.get("opt");
 
-        wheels = new MecanumDriveTrain("frontleft", "frontright", "backleft", "backright", "leftwheels", "rightwheels",this);
+        wheels = new MecanumDriveTrain("frontleft", "frontright", "backleft", "backright", "leftwheels", "rightwheels", this);
 
         shooter.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         this.idle();
