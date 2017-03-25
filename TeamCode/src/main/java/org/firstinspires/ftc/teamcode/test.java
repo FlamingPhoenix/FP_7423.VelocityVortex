@@ -6,8 +6,10 @@ import com.vuforia.HINT;
 import com.vuforia.Vuforia;
 
 import org.firstinspires.ftc.robotcore.external.ClassFactory;
+import org.firstinspires.ftc.robotcore.external.matrices.OpenGLMatrix;
 import org.firstinspires.ftc.robotcore.external.matrices.VectorF;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
+import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackableDefaultListener;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackables;
 
 import FlamingPhoenix.MecanumDriveTrain;
@@ -27,6 +29,8 @@ public class test extends LinearOpMode {
 
     MyUtility myUtility;
 
+    int pic = 0;
+
     @Override
     public void runOpMode() throws InterruptedException {
         VuforiaLocalizer.Parameters parms = new VuforiaLocalizer.Parameters(R.id.cameraMonitorViewId);
@@ -43,7 +47,21 @@ public class test extends LinearOpMode {
 
         waitForStart();
 
-        double lastX = wheels.strafe(180, wheels.strafePowerToBeacon(), TurnDirection.LEFT, tracker.get(3), this);
+        long startTime = System.currentTimeMillis();
+
+
+        VuforiaTrackableDefaultListener image = (VuforiaTrackableDefaultListener) tracker.get(pic).getListener();
+        OpenGLMatrix pos = image.getPose();
+        VectorF position = pos.getTranslation();
+        double y = position.get(2) * -1;
+
+        DbgLog.msg("[Phoenix:ImageStrafe] Voltage=%6.3; ImageAngle=%d; Distance=7.4F", wheels.getVoltage(), myUtility.getImageAngle(tracker.get(pic)), y);
+
+        double lastX = wheels.strafe(180, wheels.strafePowerToBeacon(), TurnDirection.LEFT, tracker.get(pic), this);
+
+        for(int i = 0; i < 500; i++) {
+            DbgLog.msg("[Phoenix:ImageStrafe] Voltage=%6.3; ImageAngle=%d; Distance=7.4F", wheels.getVoltage(), myUtility.getImageAngle(tracker.get(pic)), y);
+        }
 
 
     }

@@ -688,8 +688,6 @@ public class MecanumDriveTrain {
                 DbgLog.msg("[Phoenix:strafe] image angle: " + angle);
                 opMode.telemetry.addData("angle ", angle);
 
-                DbgLog.msg("[Phoenix:ImageStrafe] Voltage=%6.3; ImageAngle=%d; Distance=7.4F", getVoltage(), angle, y);
-
                 double frontLeftSpeed = Math.abs(power); //we need to determine if we need to adjust the left front power to adjust for direction to the right
                 double backLeftSpeed = Math.abs(power); //this is to increase the back left if we need to go left
                 double frontRightSpeed = Math.abs(power); //need to increase this power if need to move the left
