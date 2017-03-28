@@ -757,7 +757,7 @@ public class MecanumDriveTrain {
             opMode.idle();
 
             time = Math.abs(startTime - System.currentTimeMillis());
-            DbgLog.msg("[Phoenix:ImageStrafe] power=%7.4f; time=%d; distance=%7.4f; x=%7.4", power, time, y, x);
+            DbgLog.msg("[Phoenix:ImageStrafe] power=%7.4f; time=%d; distance=%7.4f; x=%7.4f", power, time, y, x);
         }
 
         frontLeft.setPower(0);
@@ -767,10 +767,10 @@ public class MecanumDriveTrain {
         DbgLog.msg("[Phoenix:strafe] i done = " + i);
 
         time = Math.abs(startTime - System.currentTimeMillis());
-        DbgLog.msg("[Phoenix:ImageStrafe] power=%7.4f; time=%d; distance=%7.4f; x=%7.4", power, time, y, x);
+        DbgLog.msg("[Phoenix:ImageStrafe] power=%7.4f; time=%d; distance=%7.4f; x=%7.4f", power, time, y, x);
 
         for(int j = 0; j < 500; j++) {
-            DbgLog.msg("[Phoenix:ImageStrafe] power=%7.4f; time=%d; distance=%7.4f; x=%7.4", power, time, y, x);
+            DbgLog.msg("[Phoenix:ImageStrafe] power=%7.4f; time=%d; distance=%7.4f; x=%7.4f", power, time, y, x);
         }
 
         return (x * -1); //return last x position;

@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.ftccommon.DbgLog;
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.vuforia.HINT;
 import com.vuforia.Vuforia;
@@ -20,6 +21,8 @@ import FlamingPhoenix.TurnDirection;
  * Created by HwaA1 on 3/25/2017.
  */
 
+@Autonomous(name = "TestStrafe", group = "none")
+
 public class test extends LinearOpMode {
 
     private VuforiaLocalizer vuforia;
@@ -29,7 +32,7 @@ public class test extends LinearOpMode {
 
     MyUtility myUtility;
 
-    int pic = 0;
+    int pic = 3;
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -45,22 +48,54 @@ public class test extends LinearOpMode {
         wheels = new MecanumDriveTrain("frontleft", "frontright", "backleft", "backright", "leftwheels", "rightwheels", this);
         myUtility = new MyUtility();
 
+        //double speed = .8;
+        //boolean ready = false;
+
+        /*while(!ready) {
+            if (gamepad1.x) {
+                speed += .05;
+            } else if (gamepad1.b) {
+                speed -= .05;
+            } else if (gamepad1.a) {
+                ready = true;
+            }
+
+            telemetry.addData("power", speed);
+            telemetry.update();
+        }*/
+
         waitForStart();
 
         long startTime = System.currentTimeMillis();
 
+        VuforiaTrackableDefaultListener image =(VuforiaTrackableDefaultListener) tracker.get(pic).getListener();;
 
-        VuforiaTrackableDefaultListener image = (VuforiaTrackableDefaultListener) tracker.get(pic).getListener();
+        for(int x = 0; x < 100; x++) {
+            image = (VuforiaTrackableDefaultListener) tracker.get(pic).getListener();
+            if(image != null)
+                break;
+        }
+
         OpenGLMatrix pos = image.getPose();
         VectorF position = pos.getTranslation();
         double y = position.get(2) * -1;
+        double x = position.get(0) * -1;
 
-        DbgLog.msg("[Phoenix:ImageStrafe] Voltage=%6.3; ImageAngle=%d; Distance=7.4F", wheels.getVoltage(), myUtility.getImageAngle(tracker.get(pic)), y);
+        DbgLog.msg("[Phoenix:ImageStrafe] Voltage=%6.3f; ImageAngle=%d; Distance=%7.4f; imageX=%7.4f", wheels.getVoltage(), myUtility.getImageAngle(tracker.get(pic)), y, x);
 
-        double lastX = wheels.strafe(180, wheels.strafePowerToBeacon(), TurnDirection.LEFT, tracker.get(pic), this);
+        double lastX = wheels.strafe(180, .9, TurnDirection.LEFT, tracker.get(pic), this);
 
         for(int i = 0; i < 500; i++) {
-            DbgLog.msg("[Phoenix:ImageStrafe] Voltage=%6.3; ImageAngle=%d; Distance=7.4F", wheels.getVoltage(), myUtility.getImageAngle(tracker.get(pic)), y);
+            pos = image.getPose();
+            if(pos != null) {
+                position = pos.getTranslation();
+                y = position.get(2) * -1;
+                x = position.get(0) * -1;
+                DbgLog.msg("[Phoenix:ImageStrafe] Voltage=%6.3f; ImageAngle=%d; Distance=%7.4f; imageX=%7.4f", wheels.getVoltage(), myUtility.getImageAngle(tracker.get(pic)), y, x);
+            }
+            else {
+                DbgLog.msg("[Phoenix:ImageStrafe] Can't see the image anymore");
+            }
         }
 
 
