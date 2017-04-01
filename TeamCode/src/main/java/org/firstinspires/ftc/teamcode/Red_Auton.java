@@ -168,7 +168,7 @@ public class Red_Auton extends LinearOpMode {
 
         DbgLog.msg("[Phoenix:Step 3 CalculateHeading] ImageAngle= %d ; GyroBeforeAdjustment= %d ; TargetGyroHeading= %d", angle, nowsHeading, heading);
 
-        double lastX = wheels.strafe(180, wheels.strafePowerToBeacon(), TurnDirection.LEFT, tracker.get(3), this); //IMPLEMENT A TIMEOUT WITHIN THIS STRAFING METHOD
+        double lastX = wheels.strafe(100, wheels.strafePowerToBeacon(), TurnDirection.LEFT, tracker.get(3), this); //IMPLEMENT A TIMEOUT WITHIN THIS STRAFING METHOD
         DbgLog.msg("[Phoenix:ApproachImage 1] lastX After Strafe = " + lastX);
         float imageX;
 
@@ -246,17 +246,14 @@ public class Red_Auton extends LinearOpMode {
 
             if ((color.red() > 1) || pushAnyway)  { //sees the red side or the other side is blue
                 pusher.setPosition(0);
-                Thread.sleep(1000);
-                wheels.strafe(3, .5, 1, TurnDirection.LEFT, this);
-                Thread.sleep(200);
+                Thread.sleep(1500);
 
                 pusher.setPosition(1);
-                Thread.sleep(500);
 
                 wheels.strafe(14, .65, TurnDirection.RIGHT, this);
                 pusher.setPosition(.5);
             } else {
-                wheels.strafe(13, .65, TurnDirection.RIGHT, this);
+                wheels.strafe(14, .65, TurnDirection.RIGHT, this);
                 pusher.setPosition(.5);
             }
         }
@@ -319,7 +316,7 @@ public class Red_Auton extends LinearOpMode {
             }
         }
 
-        lastX = wheels.strafe(170, wheels.strafePowerToBeacon(), TurnDirection.LEFT, tracker.get(1), this);
+        lastX = wheels.strafe(100, wheels.strafePowerToBeacon(), TurnDirection.LEFT, tracker.get(1), this);
 
         endHeading = gyro.getIntegratedZValue();
         turningAngle = heading - endHeading;
@@ -392,11 +389,10 @@ public class Red_Auton extends LinearOpMode {
 
         if ((color.red() > 1) || pushAnyway) { //sees the red side or the other side is blue
             pusher.setPosition(0);
-            Thread.sleep(1000);
-            wheels.strafe(2, .5, 1, TurnDirection.LEFT, this);
+            Thread.sleep(1500);
 
             pusher.setPosition(1);
-            wheels.strafe(7, .5, 5, TurnDirection.RIGHT, this);
+            wheels.strafe(9, .5, 5, TurnDirection.RIGHT, this);
             pusher.setPosition(0.5);
         }
         else {

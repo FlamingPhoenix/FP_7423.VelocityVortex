@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.ftccommon.DbgLog;
+import com.qualcomm.hardware.adafruit.BNO055IMU;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.vuforia.HINT;
@@ -66,8 +67,6 @@ public class test extends LinearOpMode {
 
         waitForStart();
 
-        long startTime = System.currentTimeMillis();
-
         VuforiaTrackableDefaultListener image =(VuforiaTrackableDefaultListener) tracker.get(pic).getListener();;
 
         for(int x = 0; x < 100; x++) {
@@ -83,7 +82,9 @@ public class test extends LinearOpMode {
 
         DbgLog.msg("[Phoenix:ImageStrafe] Voltage=%6.3f; ImageAngle=%d; Distance=%7.4f; imageX=%7.4f", wheels.getVoltage(), myUtility.getImageAngle(tracker.get(pic)), y, x);
 
-        double lastX = wheels.strafe(180, .9, TurnDirection.LEFT, tracker.get(pic), this);
+        long startTime = System.currentTimeMillis();
+
+        double lastX = wheels.strafe(100, .9, TurnDirection.LEFT, tracker.get(pic), this);
 
         for(int i = 0; i < 500; i++) {
             pos = image.getPose();
@@ -91,7 +92,8 @@ public class test extends LinearOpMode {
                 position = pos.getTranslation();
                 y = position.get(2) * -1;
                 x = position.get(0) * -1;
-                DbgLog.msg("[Phoenix:ImageStrafe] Voltage=%6.3f; ImageAngle=%d; Distance=%7.4f; imageX=%7.4f", wheels.getVoltage(), myUtility.getImageAngle(tracker.get(pic)), y, x);
+                long timeElasped = Math.abs(System.currentTimeMillis() - startTime);
+                DbgLog.msg("[Phoenix:ImageStrafe] Voltage=%6.3f; Time=%d; ImageAngle=%d; Distance=%7.4f; imageX=%7.4f", wheels.getVoltage(), timeElasped, myUtility.getImageAngle(tracker.get(pic)), y, x);
             }
             else {
                 DbgLog.msg("[Phoenix:ImageStrafe] Can't see the image anymore");

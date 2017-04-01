@@ -649,9 +649,11 @@ public class MecanumDriveTrain {
 
         double xAdjustmentUnit = 0.0005;
         double angleAdjustmentUnit = 0.06;
-        double angleAdjustment = 0;
+        double angleAdjustment;
         double angleDifference = 0;
 
+        double startDistance = -1;
+        double s = 0;
 
         DbgLog.msg("[Phoenix:strafe] adjustmentUnit: " + xAdjustmentUnit);
 
@@ -684,6 +686,28 @@ public class MecanumDriveTrain {
                 x = translation.get(0) * -1;
                 y = translation.get(2) * -1;
 
+
+                double currentDistance = y;
+                double currentTime = System.currentTimeMillis();
+
+                if(Math.abs(currentTime - startTime) > 500) {
+                    if (startDistance == -1){
+                        startDistance = y;
+                        startTime = System.currentTimeMillis();
+
+                    }
+                    s = Math.abs((currentDistance - startDistance) / (currentTime - startTime));
+
+                    double d = 44 + (s - .29) * 252.53;
+                    DbgLog.msg("[Phoenix:ImageStrafe] d = " + d);
+
+                    if(d >= (y - distance)) {
+                        break;
+                    }
+                }
+
+
+
                 double angle = Math.toDegrees(Math.atan2(x, y));
                 DbgLog.msg("[Phoenix:strafe] image angle: " + angle);
                 opMode.telemetry.addData("angle ", angle);
@@ -704,7 +728,7 @@ public class MecanumDriveTrain {
 
                 DbgLog.msg("[Phoenix:Strafe] x=%7.2f powerAdjustment=%5.2f", x, xPowerAdjustment);
 
-                //Adjust the power to turn the robot so it would be perpendecular to the image
+                //Adjust the power to turn the robot so it would be perpendicular to the image
                 double zAngle = (double) MyUtility.getImageAngle(imageObject);
                 if (Math.abs(90 - zAngle) > 1)  //The robot is no longer parallel to beacon
                 {
@@ -768,10 +792,6 @@ public class MecanumDriveTrain {
 
         time = Math.abs(startTime - System.currentTimeMillis());
         DbgLog.msg("[Phoenix:ImageStrafe] power=%7.4f; time=%d; distance=%7.4f; x=%7.4f", power, time, y, x);
-
-        for(int j = 0; j < 500; j++) {
-            DbgLog.msg("[Phoenix:ImageStrafe] power=%7.4f; time=%d; distance=%7.4f; x=%7.4f", power, time, y, x);
-        }
 
         return (x * -1); //return last x position;
     }
@@ -1037,7 +1057,7 @@ public class MecanumDriveTrain {
         else
             return 0.45 + (14 - getVoltage()) * 0.06;
             */
-        return .5;
+        return .9;
     }
 
 }
