@@ -748,14 +748,23 @@ public class MecanumDriveTrain {
 
                 DbgLog.msg("[Phoenix:Strafe] zAngle=%5.2f  angleAdjustment=%5.2f angleDifference=%5.2f angleAdjustmentUnit=%7.5f", zAngle, angleAdjustment, angleDifference, angleAdjustmentUnit);
 
+                double speedAdjustment = 0;
+
+                if(x < -15) {
+                    speedAdjustment = -.05;
+                } else if (x > 15) {
+                    speedAdjustment = .1;
+                }
+
+
                 try {
                     if (direction == TurnDirection.LEFT) {
                         DbgLog.msg("[Phoenix:Strafe] frontLeft=%7.4f backLeft=%7.4f frontRight=%7.4f backRight=%7.4f", frontLeftSpeed, backLeftSpeed, frontRightSpeed, backRightSpeed);
 
-                        frontLeft.setPower(-1 * frontLeftSpeed);
-                        backLeft.setPower(1 * backLeftSpeed);
-                        frontRight.setPower(1 * frontRightSpeed);
-                        backRight.setPower(-1 * backRightSpeed);
+                        frontLeft.setPower(-1 * frontLeftSpeed + speedAdjustment);
+                        backLeft.setPower(1 * backLeftSpeed + speedAdjustment);
+                        frontRight.setPower(1 * frontRightSpeed + speedAdjustment);
+                        backRight.setPower(-1 * backRightSpeed + speedAdjustment);
                     } else {
                         frontLeftSpeed += xPowerAdjustment;
                         frontRightSpeed = frontLeftSpeed * -1 + xPowerAdjustment;

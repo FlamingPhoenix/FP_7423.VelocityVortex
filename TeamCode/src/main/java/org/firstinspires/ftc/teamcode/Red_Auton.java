@@ -220,8 +220,8 @@ public class Red_Auton extends LinearOpMode {
             }
 
             adjustmentDistance = Math.abs(((imageX * 100.0f)) / 254.0f) / 10.0f;
-            if (adjustDirection == Direction.FORWARD)
-                adjustmentDistance = adjustmentDistance + 1.0f; //need to move forward a bit more to handle the strafing problem
+            /*if (adjustDirection == Direction.FORWARD)
+                adjustmentDistance = adjustmentDistance + 1.0f;*/ //need to move forward a bit more to handle the strafing problem
 
             if (adjustDirection == Direction.BACKWARD)
                 DbgLog.msg("[Phoenix:Step 4 Beacon Distance Adjustment] Beacon X position adjustment backward %7.3f and image X %7.3f", adjustmentDistance, imageX);
@@ -245,14 +245,28 @@ public class Red_Auton extends LinearOpMode {
             }
 
             if ((color.red() > 1) || pushAnyway)  { //sees the red side or the other side is blue
+                wheels.strafe(1, .5, 1,TurnDirection.LEFT, this);
                 pusher.setPosition(0);
                 Thread.sleep(1500);
 
                 pusher.setPosition(1);
 
-                wheels.strafe(14, .65, TurnDirection.RIGHT, this);
+                wheels.strafe(15, .65, TurnDirection.RIGHT, this);
                 pusher.setPosition(.5);
-            } else {
+            } else if (color.blue() > 1 && didWeGoBack > 0) {
+                wheels.drive(7, Direction.FORWARD, 0.15, 5, this);
+
+                wheels.strafe(1, .5, 1,TurnDirection.LEFT, this);
+                pusher.setPosition(0);
+                Thread.sleep(1500);
+
+                pusher.setPosition(1);
+
+                wheels.strafe(15, .65, TurnDirection.RIGHT, this);
+                pusher.setPosition(.5);
+                didWeGoBack = 0;
+            }
+            else {
                 wheels.strafe(14, .65, TurnDirection.RIGHT, this);
                 pusher.setPosition(.5);
             }
@@ -285,7 +299,7 @@ public class Red_Auton extends LinearOpMode {
         }
 
         //Now, got to 2nd beacon/image
-        wheels.drive(41 + didWeGoBack, Direction.FORWARD, wheels.drivePowerToBeacon2(), 4, this);
+        wheels.drive(38 + didWeGoBack, Direction.FORWARD, wheels.drivePowerToBeacon2(), 4, this);
 
         wheels.driveUntilImage(15, 0.12, Direction.FORWARD, tracker.get(1), this);
 
@@ -316,7 +330,7 @@ public class Red_Auton extends LinearOpMode {
             }
         }
 
-        lastX = wheels.strafe(100, wheels.strafePowerToBeacon(), TurnDirection.LEFT, tracker.get(1), this);
+        lastX = wheels.strafe(110, wheels.strafePowerToBeacon(), TurnDirection.LEFT, tracker.get(1), this);
 
         endHeading = gyro.getIntegratedZValue();
         turningAngle = heading - endHeading;
@@ -361,8 +375,8 @@ public class Red_Auton extends LinearOpMode {
         }
 
         adjustmentDistance = Math.abs(( (imageX * 100.0f))/ 254.0f) / 10.0f ;
-        if (adjustDirection == Direction.FORWARD)
-            adjustmentDistance = adjustmentDistance + 0.5f; //need to move forward a bit more to handle the strafing problem
+        /*if (adjustDirection == Direction.FORWARD)
+            adjustmentDistance = adjustmentDistance + 0.5f;*/ //need to move forward a bit more to handle the strafing problem
 
         if (adjustDirection == Direction.BACKWARD)
             DbgLog.msg("[Phoenix:Beacon Distance Adjustment 2] 2nd Beacon X position adjustment backward %7.3f and image X %7.3f", adjustmentDistance, imageX);
@@ -384,19 +398,33 @@ public class Red_Auton extends LinearOpMode {
                 pushAnyway = true; //if see blue on one side, then, the other side got to be red
 
             wheels.drive(7, Direction.BACKWARD, 0.2, 5, this);
+            didWeGoBack = 7;
             turnSize = true;
         }
 
         if ((color.red() > 1) || pushAnyway) { //sees the red side or the other side is blue
+            wheels.strafe(1, .5, 1,TurnDirection.LEFT, this);
             pusher.setPosition(0);
             Thread.sleep(1500);
 
             pusher.setPosition(1);
-            wheels.strafe(9, .5, 5, TurnDirection.RIGHT, this);
+            wheels.strafe(11, .8, 5, TurnDirection.RIGHT, this);
             pusher.setPosition(0.5);
+        } else if (color.blue() > 1 && didWeGoBack > 0) {
+            wheels.drive(7, Direction.FORWARD, 0.15, 5, this);
+
+            wheels.strafe(1, .5, 1,TurnDirection.LEFT, this);
+            pusher.setPosition(0);
+            Thread.sleep(1500);
+
+            pusher.setPosition(1);
+
+            wheels.strafe(11, .8, TurnDirection.RIGHT, this);
+            pusher.setPosition(.5);
+            turnSize = false;
         }
         else {
-            wheels.strafe(8, .5, TurnDirection.RIGHT, this);
+            wheels.strafe(8, .8, TurnDirection.RIGHT, this);
         }
 
         pusher.setPosition(0.5);
@@ -424,9 +452,9 @@ public class Red_Auton extends LinearOpMode {
         angleBefore = gyro.getIntegratedZValue();
 
         if(turnSize)
-            degreesNeeded = Math.abs(135 - angleBefore);
+            degreesNeeded = Math.abs(138 - angleBefore);
         else
-           degreesNeeded = Math.abs(130 - angleBefore);
+           degreesNeeded = Math.abs(123 - angleBefore);
 
         wheels.turnWithGyro(degreesNeeded, .5, TurnDirection.LEFT, gyro, this);
 
