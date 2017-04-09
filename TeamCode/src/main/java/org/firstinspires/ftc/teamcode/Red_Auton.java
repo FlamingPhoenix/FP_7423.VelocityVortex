@@ -52,6 +52,8 @@ public class Red_Auton extends LinearOpMode {
 
     ModernRoboticsI2cGyro gyro;
 
+    double voltage;
+
     @Override
     public void runOpMode() throws InterruptedException {
         shooter = hardwareMap.dcMotor.get("farriswheel");
@@ -89,6 +91,8 @@ public class Red_Auton extends LinearOpMode {
         shooter.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         shooter.setMaxSpeed(2500);
 
+        voltage = wheels.getVoltage();
+
         while(gyro.isCalibrating()) {
             Thread.sleep(50);
         }
@@ -96,9 +100,12 @@ public class Red_Auton extends LinearOpMode {
         waitForStart();
 
         Thread.sleep(5);
-        pusher.setPosition(0);
-        sleep(40);
-        pusher.setPosition(.5);
+
+        shooter.setPower(.6);
+
+        wheels.strafe(6, 0.6, TurnDirection.LEFT, this);
+        shooter.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        shooter.setMaxSpeed(2525);
         shooter.setPower(1);
 
         wheels.strafe(6, 0.6, TurnDirection.LEFT, this);
@@ -126,7 +133,7 @@ public class Red_Auton extends LinearOpMode {
 
         int angleBefore = gyro.getIntegratedZValue();
         int degreesNeeded = Math.abs(88 - angleBefore);
-        wheels.turnWithGyro(degreesNeeded, wheels.turnPower(), TurnDirection.LEFT, gyro, this);
+        wheels.turnWithGyro(degreesNeeded, wheels.turnPower(voltage), TurnDirection.LEFT, gyro, this);
         int angleAfter = gyro.getIntegratedZValue();
 
         DbgLog.msg("[Phoenix] angleBefore= %d, degreeNeeded= %d, angleAfter= %d", angleBefore, degreesNeeded, angleAfter);
@@ -168,7 +175,7 @@ public class Red_Auton extends LinearOpMode {
 
         DbgLog.msg("[Phoenix:Step 3 CalculateHeading] ImageAngle= %d ; GyroBeforeAdjustment= %d ; TargetGyroHeading= %d", angle, nowsHeading, heading);
 
-        double lastX = wheels.strafe(100, wheels.strafePowerToBeacon(), TurnDirection.LEFT, tracker.get(3), this); //IMPLEMENT A TIMEOUT WITHIN THIS STRAFING METHOD
+        double lastX = wheels.strafe(120, wheels.strafePowerToBeacon(), TurnDirection.LEFT, tracker.get(3), this); //IMPLEMENT A TIMEOUT WITHIN THIS STRAFING METHOD
         DbgLog.msg("[Phoenix:ApproachImage 1] lastX After Strafe = " + lastX);
         float imageX;
 
@@ -220,8 +227,6 @@ public class Red_Auton extends LinearOpMode {
             }
 
             adjustmentDistance = Math.abs(((imageX * 100.0f)) / 254.0f) / 10.0f;
-            /*if (adjustDirection == Direction.FORWARD)
-                adjustmentDistance = adjustmentDistance + 1.0f;*/ //need to move forward a bit more to handle the strafing problem
 
             if (adjustDirection == Direction.BACKWARD)
                 DbgLog.msg("[Phoenix:Step 4 Beacon Distance Adjustment] Beacon X position adjustment backward %7.3f and image X %7.3f", adjustmentDistance, imageX);
@@ -299,7 +304,7 @@ public class Red_Auton extends LinearOpMode {
         }
 
         //Now, got to 2nd beacon/image
-        wheels.drive(38 + didWeGoBack, Direction.FORWARD, wheels.drivePowerToBeacon2(), 4, this);
+        wheels.drive(38 + didWeGoBack, Direction.FORWARD, wheels.drivePowerToBeacon2(voltage), 4, this);
 
         wheels.driveUntilImage(15, 0.12, Direction.FORWARD, tracker.get(1), this);
 
@@ -330,7 +335,7 @@ public class Red_Auton extends LinearOpMode {
             }
         }
 
-        lastX = wheels.strafe(110, wheels.strafePowerToBeacon(), TurnDirection.LEFT, tracker.get(1), this);
+        lastX = wheels.strafe(125, wheels.strafePowerToBeacon(), TurnDirection.LEFT, tracker.get(1), this);
 
         endHeading = gyro.getIntegratedZValue();
         turningAngle = heading - endHeading;
@@ -375,8 +380,6 @@ public class Red_Auton extends LinearOpMode {
         }
 
         adjustmentDistance = Math.abs(( (imageX * 100.0f))/ 254.0f) / 10.0f ;
-        /*if (adjustDirection == Direction.FORWARD)
-            adjustmentDistance = adjustmentDistance + 0.5f;*/ //need to move forward a bit more to handle the strafing problem
 
         if (adjustDirection == Direction.BACKWARD)
             DbgLog.msg("[Phoenix:Beacon Distance Adjustment 2] 2nd Beacon X position adjustment backward %7.3f and image X %7.3f", adjustmentDistance, imageX);

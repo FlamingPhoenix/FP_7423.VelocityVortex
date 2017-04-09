@@ -698,14 +698,13 @@ public class MecanumDriveTrain {
                     }
                     s = Math.abs((currentDistance - startDistance) / (currentTime - startTime));
 
-                    double d = 44 + (s - .29) * 252.53;
+                    double d = 44 + (s - .29) * 265; //calculate how long it will stop
                     DbgLog.msg("[Phoenix:ImageStrafe] d = " + d);
 
                     if(d >= (y - distance)) {
                         break;
                     }
                 }
-
 
 
                 double angle = Math.toDegrees(Math.atan2(x, y));
@@ -1052,12 +1051,26 @@ public class MecanumDriveTrain {
             return .2 + (14 - getVoltage()) * .025;
     }
 
+    public double turnPower(double voltage) {
+        if(voltage >= 14)
+            return .25;
+        else
+            return .25 + (14 - voltage) * .025;
+    }
+
     //Get the drive power toward the second beacon based on battery voltage
     public double drivePowerToBeacon2() {
         if(getVoltage() >= 14)
             return 0.4;
         else
             return 0.4 + (14 - getVoltage()) * 0.3;
+    }
+
+    public double drivePowerToBeacon2(double voltage) {
+        if(voltage >= 14)
+            return 0.4;
+        else
+            return 0.4 + (14 - voltage) * 0.3;
     }
 
     public double strafePowerToBeacon() {
