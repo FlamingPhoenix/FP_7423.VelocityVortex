@@ -143,7 +143,7 @@ public class Blue_Auton extends LinearOpMode {
 
         DbgLog.msg("[Phoenix] angleBefore= %d, degreeNeeded= %d, angleAfter= %d", angleBefore, degreesNeeded, angleAfter);
 
-        wheels.drive(27, Direction.BACKWARD, 0.3, 5, this);
+        wheels.drive(29, Direction.BACKWARD, 0.3, 5, this);
 
         wheels.driveUntilImage(15, .125, Direction.BACKWARD, tracker.get(0), this);
 
@@ -178,7 +178,7 @@ public class Blue_Auton extends LinearOpMode {
             }
         }
 
-        double lastX = wheels.strafe(120, .75, TurnDirection.LEFT, tracker.get(0), this);
+        double lastX = wheels.strafe(120, .9, TurnDirection.LEFT, tracker.get(0), this);
         float imageX;
 
         int endHeading = gyro.getIntegratedZValue();
@@ -311,6 +311,7 @@ public class Blue_Auton extends LinearOpMode {
         angle = MyUtility.getImageAngle(tracker.get(2));
         DbgLog.msg("[Phoenix] 2nd beeacon angle: " + angle);
 
+        this.sleep(50);
         endHeading = gyro.getIntegratedZValue(); //Read the current Gyro heading
         if (angle != -999) {//saw image and found the angle of the image
             turningAngle = heading - endHeading;
@@ -320,7 +321,7 @@ public class Blue_Auton extends LinearOpMode {
             else
                 d = TurnDirection.LEFT;
 
-            if (Math.abs(turningAngle) >= 4) {
+            if (Math.abs(turningAngle) >= 3) {
                 if (Math.abs(turningAngle) > 10)
                     wheels.turnWithGyro(Math.abs(turningAngle), .2, d, gyro, this);
                 else
@@ -334,7 +335,7 @@ public class Blue_Auton extends LinearOpMode {
             }
         }
 
-        lastX = wheels.strafe(120, .75, TurnDirection.LEFT, tracker.get(2), this);
+        lastX = wheels.strafe(125, .8, TurnDirection.LEFT, tracker.get(2), this);
 
         endHeading = gyro.getIntegratedZValue();
         turningAngle = heading - endHeading;
@@ -400,6 +401,7 @@ public class Blue_Auton extends LinearOpMode {
 
             wheels.drive(7, Direction.BACKWARD, 0.15, 5, this);
             didWeGoBack = 5;
+            turnSize = true;
         }
 
         if ((color.blue() > 1) || pushAnyway)  { //sees the red side or the other side is blue
@@ -461,12 +463,14 @@ public class Blue_Auton extends LinearOpMode {
 
         turningAngle = Math.abs(turningAngle);
 
-        if (turningAngle < 5)
+        if (turningAngle < 3)
             wheels.turnAjdustment(0.2, direction, this);
+        else if (turningAngle < 5)
+            wheels.turnAjdustment(0.25, direction, this);
         else if (turningAngle < 8)
-            wheels.turnAjdustment(0.22, direction, this);
+            wheels.turnAjdustment(0.3, direction, this);
         else if (turningAngle < 10)
-            wheels.turnAjdustment(0.26, direction, this);
+            wheels.turnAjdustment(0.33, direction, this);
         else
             wheels.turnAjdustment(0.35, direction, this);
     }

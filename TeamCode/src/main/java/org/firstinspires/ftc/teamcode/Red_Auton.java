@@ -484,12 +484,14 @@ public class Red_Auton extends LinearOpMode {
 
         turningAngle = Math.abs(turningAngle);
 
-        if (turningAngle < 5)
+        if (turningAngle < 3)
             wheels.turnAjdustment(0.2, direction, this);
+        else if (turningAngle < 5)
+            wheels.turnAjdustment(0.25, direction, this);
         else if (turningAngle < 8)
-            wheels.turnAjdustment(0.22, direction, this);
+            wheels.turnAjdustment(0.3, direction, this);
         else if (turningAngle < 10)
-            wheels.turnAjdustment(0.26, direction, this);
+            wheels.turnAjdustment(0.33, direction, this);
         else
             wheels.turnAjdustment(0.35, direction, this);
     }

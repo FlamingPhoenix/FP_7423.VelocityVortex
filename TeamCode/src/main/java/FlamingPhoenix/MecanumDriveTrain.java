@@ -690,7 +690,7 @@ public class MecanumDriveTrain {
                 double currentDistance = y;
                 double currentTime = System.currentTimeMillis();
 
-                if(Math.abs(currentTime - startTime) > 500) {
+                if(Math.abs(currentTime - startTime) > 400) {
                     if (startDistance == -1){
                         startDistance = y;
                         startTime = System.currentTimeMillis();
