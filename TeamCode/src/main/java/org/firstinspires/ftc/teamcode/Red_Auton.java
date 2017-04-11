@@ -88,8 +88,7 @@ public class Red_Auton extends LinearOpMode {
 
         shooter.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         this.idle();
-        shooter.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        shooter.setMaxSpeed(2500);
+        shooter.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         voltage = wheels.getVoltage();
 
@@ -455,7 +454,7 @@ public class Red_Auton extends LinearOpMode {
         angleBefore = gyro.getIntegratedZValue();
 
         if(turnSize)
-            degreesNeeded = Math.abs(138 - angleBefore);
+            degreesNeeded = Math.abs(128 - angleBefore);
         else
            degreesNeeded = Math.abs(123 - angleBefore);
 
