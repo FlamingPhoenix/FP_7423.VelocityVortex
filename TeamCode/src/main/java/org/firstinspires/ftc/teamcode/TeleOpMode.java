@@ -76,17 +76,17 @@ public class TeleOpMode extends OpMode {
 
         if(gamepad2.right_bumper && gamepad2.left_bumper) {
             Onoroff = .1;
-            if(!done) {
-                shooter.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                done = true;
-            }
+            //if(!done) {
+            //    shooter.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            //    done = true;
+            //}
             stop = true;
         }
         else if(gamepad2.y) {
-            if(done) {
-                shooter.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-                done = false;
-            }
+            //if(done) {
+            //    //shooter.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            //    done = false;
+            //}
             Onoroff = .1;
             counter = 0;
             stop = false;

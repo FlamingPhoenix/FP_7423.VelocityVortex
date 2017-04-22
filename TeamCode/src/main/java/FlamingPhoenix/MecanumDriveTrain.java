@@ -698,7 +698,7 @@ public class MecanumDriveTrain {
                     }
                     s = Math.abs((currentDistance - startDistance) / (currentTime - startTime));
 
-                    double d = 44 + (s - .29) * 265; //calculate how long it will stop
+                    double d = 44 + (s - .29) * 270; //calculate how long it will stop
                     DbgLog.msg("[Phoenix:ImageStrafe] d = " + d);
 
                     if(d >= (y - distance)) {

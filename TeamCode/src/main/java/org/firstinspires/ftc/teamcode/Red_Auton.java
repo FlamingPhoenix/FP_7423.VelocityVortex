@@ -104,12 +104,10 @@ public class Red_Auton extends LinearOpMode {
 
         wheels.strafe(6, 0.6, TurnDirection.LEFT, this);
         shooter.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        shooter.setMaxSpeed(2525);
+        shooter.setMaxSpeed(2500);
         shooter.setPower(1);
 
-        wheels.strafe(6, 0.6, TurnDirection.LEFT, this);
-
-        Thread.sleep(1400);
+        Thread.sleep(1500);
 
         stopper.setPosition(.20); //Shoot
         Thread.sleep(250);
@@ -249,24 +247,24 @@ public class Red_Auton extends LinearOpMode {
             }
 
             if ((color.red() > 1) || pushAnyway)  { //sees the red side or the other side is blue
-                wheels.strafe(1, .5, 1,TurnDirection.LEFT, this);
+                wheels.strafe(2, .5, 1,TurnDirection.LEFT, this);
                 pusher.setPosition(0);
                 Thread.sleep(1500);
 
                 pusher.setPosition(1);
 
-                wheels.strafe(15, .65, TurnDirection.RIGHT, this);
+                wheels.strafe(16, .65, TurnDirection.RIGHT, this);
                 pusher.setPosition(.5);
             } else if (color.blue() > 1 && didWeGoBack > 0) {
                 wheels.drive(7, Direction.FORWARD, 0.15, 5, this);
 
-                wheels.strafe(1, .5, 1,TurnDirection.LEFT, this);
+                wheels.strafe(2, .5, 1,TurnDirection.LEFT, this);
                 pusher.setPosition(0);
                 Thread.sleep(1500);
 
                 pusher.setPosition(1);
 
-                wheels.strafe(15, .65, TurnDirection.RIGHT, this);
+                wheels.strafe(16, .65, TurnDirection.RIGHT, this);
                 pusher.setPosition(.5);
                 didWeGoBack = 0;
             }
@@ -405,23 +403,23 @@ public class Red_Auton extends LinearOpMode {
         }
 
         if ((color.red() > 1) || pushAnyway) { //sees the red side or the other side is blue
-            wheels.strafe(1, .5, 1,TurnDirection.LEFT, this);
+            wheels.strafe(2, .5, 1,TurnDirection.LEFT, this);
             pusher.setPosition(0);
             Thread.sleep(1500);
 
             pusher.setPosition(1);
-            wheels.strafe(11, .8, 5, TurnDirection.RIGHT, this);
+            wheels.strafe(12, .8, 5, TurnDirection.RIGHT, this);
             pusher.setPosition(0.5);
         } else if (color.blue() > 1 && didWeGoBack > 0) {
             wheels.drive(7, Direction.FORWARD, 0.15, 5, this);
 
-            wheels.strafe(1, .5, 1,TurnDirection.LEFT, this);
+            wheels.strafe(2, .5, 1,TurnDirection.LEFT, this);
             pusher.setPosition(0);
             Thread.sleep(1500);
 
             pusher.setPosition(1);
 
-            wheels.strafe(11, .8, TurnDirection.RIGHT, this);
+            wheels.strafe(12, .8, TurnDirection.RIGHT, this);
             pusher.setPosition(.5);
             turnSize = false;
         }
