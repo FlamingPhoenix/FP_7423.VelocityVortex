@@ -137,7 +137,7 @@ public class Auton_New extends LinearOpMode {
 
         int heading = gyro.getIntegratedZValue();
         wheels.resetMotorSpeed();
-        double lastX = wheels.strafe(180, 0.8, TurnDirection.LEFT, tracker.get(3), this);
+        double lastX = wheels.strafe(180, 0.8, TurnDirection.LEFT, tracker.get(3), heading, this);
 
 
         int endHeading = gyro.getIntegratedZValue();
@@ -253,7 +253,7 @@ public class Auton_New extends LinearOpMode {
 
         heading = gyro.getIntegratedZValue();
         wheels.resetMotorSpeed();
-        lastX = wheels.strafe(120, 0.8, TurnDirection.LEFT, tracker.get(1), this);
+        lastX = wheels.strafe(120, 0.8, TurnDirection.LEFT, tracker.get(1), heading,this);
 
         endHeading = gyro.getIntegratedZValue();
         turningAngle = heading - endHeading;

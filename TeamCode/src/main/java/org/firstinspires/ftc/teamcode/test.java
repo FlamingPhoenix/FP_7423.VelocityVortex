@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.ftccommon.DbgLog;
 import com.qualcomm.hardware.adafruit.BNO055IMU;
+import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cGyro;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.vuforia.HINT;
@@ -35,6 +36,8 @@ public class test extends LinearOpMode {
 
     int pic = 3;
 
+    ModernRoboticsI2cGyro gyro;
+
     @Override
     public void runOpMode() throws InterruptedException {
         VuforiaLocalizer.Parameters parms = new VuforiaLocalizer.Parameters(R.id.cameraMonitorViewId);
@@ -46,24 +49,16 @@ public class test extends LinearOpMode {
         Vuforia.setHint(HINT.HINT_MAX_SIMULTANEOUS_IMAGE_TARGETS, 4);
         tracker.activate();
 
-        wheels = new MecanumDriveTrain("frontleft", "frontright", "backleft", "backright", "leftwheels", "rightwheels", this);
+        gyro = (ModernRoboticsI2cGyro) hardwareMap.gyroSensor.get("gyro");
+
+        wheels = new MecanumDriveTrain("frontleft", "frontright", "backleft", "backright", "leftwheels", "rightwheels", gyro,this);
         myUtility = new MyUtility();
 
-        //double speed = .8;
-        //boolean ready = false;
+        gyro.calibrate();
 
-        /*while(!ready) {
-            if (gamepad1.x) {
-                speed += .05;
-            } else if (gamepad1.b) {
-                speed -= .05;
-            } else if (gamepad1.a) {
-                ready = true;
-            }
-
-            telemetry.addData("power", speed);
-            telemetry.update();
-        }*/
+        while(gyro.isCalibrating()){
+            Thread.sleep(50);
+        }
 
         waitForStart();
 
@@ -84,7 +79,9 @@ public class test extends LinearOpMode {
 
         long startTime = System.currentTimeMillis();
 
-        double lastX = wheels.strafe(100, .9, TurnDirection.LEFT, tracker.get(pic), this);
+        int heading = gyro.getIntegratedZValue();
+
+        double lastX = wheels.strafe(100, wheels.strafePowerToBeacon(), TurnDirection.LEFT, tracker.get(pic), heading, this);
 
         for(int i = 0; i < 500; i++) {
             pos = image.getPose();

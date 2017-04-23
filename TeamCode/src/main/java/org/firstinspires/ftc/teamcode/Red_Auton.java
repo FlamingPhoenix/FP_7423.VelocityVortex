@@ -84,7 +84,7 @@ public class Red_Auton extends LinearOpMode {
 
         opt = hardwareMap.opticalDistanceSensor.get("opt");
 
-        wheels = new MecanumDriveTrain("frontleft", "frontright", "backleft", "backright", "leftwheels", "rightwheels", this);
+        wheels = new MecanumDriveTrain("frontleft", "frontright", "backleft", "backright", "leftwheels", "rightwheels", gyro, this);
 
         shooter.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         this.idle();
@@ -172,7 +172,7 @@ public class Red_Auton extends LinearOpMode {
 
         DbgLog.msg("[Phoenix:Step 3 CalculateHeading] ImageAngle= %d ; GyroBeforeAdjustment= %d ; TargetGyroHeading= %d", angle, nowsHeading, heading);
 
-        double lastX = wheels.strafe(120, wheels.strafePowerToBeacon(), TurnDirection.LEFT, tracker.get(3), this); //IMPLEMENT A TIMEOUT WITHIN THIS STRAFING METHOD
+        double lastX = wheels.strafe(120, wheels.strafePowerToBeacon(), TurnDirection.LEFT, tracker.get(3), heading, this); //IMPLEMENT A TIMEOUT WITHIN THIS STRAFING METHOD
         DbgLog.msg("[Phoenix:ApproachImage 1] lastX After Strafe = " + lastX);
         float imageX;
 
@@ -197,6 +197,11 @@ public class Red_Auton extends LinearOpMode {
                 DbgLog.msg("[Phoenix:Step 4 Beacon Adjustment 1] At beacon, Reached beacon turn RIGHT, turningAngle= %d, heading= %d endHeading=%d", turningAngle, heading, endHeading);
 
             if (Math.abs(turningAngle) > 5) { //The robot is not parallel to the beacon, need to adjust
+                DbgLog.msg("[Phoenix:LastX] Last X before = " + lastX);
+
+                lastX = wheels.newX(lastX, 120, heading);
+
+                DbgLog.msg("[Phoenix:LastX] Last X after = " + lastX);
 
                 if(turningAngle > 10)
                     wheels.turnWithGyro(Math.abs(turningAngle), .2, d, gyro, this);
@@ -235,6 +240,8 @@ public class Red_Auton extends LinearOpMode {
                 wheels.drive((int) adjustmentDistance, adjustDirection, 0.15, 3, this);
             }
 
+            Thread.sleep(50);
+
             boolean pushAnyway = false;  //if see blue on one side, then, the other side got to be red
             if (color.red() <= 1) {
                 DbgLog.msg("[Phoenix:Step 4] Can't see red, move back 5 inches");
@@ -244,6 +251,8 @@ public class Red_Auton extends LinearOpMode {
 
                 wheels.drive(7, Direction.BACKWARD, 0.15, 5, this);
                 didWeGoBack = 5;
+
+                Thread.sleep(50);
             }
 
             if ((color.red() > 1) || pushAnyway)  { //sees the red side or the other side is blue
@@ -332,7 +341,7 @@ public class Red_Auton extends LinearOpMode {
             }
         }
 
-        lastX = wheels.strafe(125, wheels.strafePowerToBeacon(), TurnDirection.LEFT, tracker.get(1), this);
+        lastX = wheels.strafe(125, wheels.strafePowerToBeacon(), TurnDirection.LEFT, tracker.get(1), heading, this);
 
         endHeading = gyro.getIntegratedZValue();
         turningAngle = heading - endHeading;
@@ -352,6 +361,8 @@ public class Red_Auton extends LinearOpMode {
                 wheels.turnWithGyro(Math.abs(turningAngle), .2, d, gyro, this);
             else
                 makeMinorTurn(heading);
+
+            lastX = wheels.newX(lastX, 125, heading);
 
             DbgLog.msg("[Phoenix:Step 6] At beacon, performed Reached beacon turningAngle= %d, heading= %d endHeading=%d", turningAngle, heading, endHeading);
         }
@@ -389,6 +400,8 @@ public class Red_Auton extends LinearOpMode {
             wheels.drive((int) adjustmentDistance, adjustDirection, 0.3, 2, this);
         }
 
+        Thread.sleep(50);
+
         boolean pushAnyway = false;  //if see blue on one side, then, the other side got to be red
         boolean turnSize = false;
         if(color.red() <= 1) {
@@ -400,6 +413,7 @@ public class Red_Auton extends LinearOpMode {
             wheels.drive(7, Direction.BACKWARD, 0.2, 5, this);
             didWeGoBack = 7;
             turnSize = true;
+            Thread.sleep(50);
         }
 
         if ((color.red() > 1) || pushAnyway) { //sees the red side or the other side is blue

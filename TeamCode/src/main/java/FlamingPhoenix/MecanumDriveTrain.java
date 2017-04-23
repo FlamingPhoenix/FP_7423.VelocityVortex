@@ -33,6 +33,7 @@ public class MecanumDriveTrain {
 
     private VoltageSensor vSen1;
     private VoltageSensor vSen2;
+    private ModernRoboticsI2cGyro gyro;
 
     private float wheelDiameter;  //wheel diameter in inch
     private int encoderPPR; //wheel encoder PPR (Pulse per Rotation)
@@ -92,6 +93,37 @@ public class MecanumDriveTrain {
         backRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         frontLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         frontRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+    }
+
+    public MecanumDriveTrain(String FrontLeftName, String FrontRightName, String BackLeftName, String BackRightName, String mc1, String mc2, ModernRoboticsI2cGyro gyro1, OpMode OperatorMode) throws InterruptedException {
+        opMode = OperatorMode;
+
+        frontLeft = opMode.hardwareMap.dcMotor.get(FrontLeftName);
+        frontRight = opMode.hardwareMap.dcMotor.get(FrontRightName);
+        backLeft = opMode.hardwareMap.dcMotor.get(BackLeftName);
+        backRight = opMode.hardwareMap.dcMotor.get(BackRightName);
+
+        frontLeft.setDirection(DcMotorSimple.Direction.REVERSE);
+        backLeft.setDirection(DcMotorSimple.Direction.REVERSE);
+
+
+        wheelDiameter = 4; //default is 4 inch, most of wheels we have used are 4 inch diamete;
+        //encoderPPR = 1320; //default to Tetrix encoder;  AndyMark will have different values
+        encoderPPR = 560;
+
+        backLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        backRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        frontLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        frontRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        Thread.sleep(40);
+        backLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        backRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        frontLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        frontRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
+        vSen1 = opMode.hardwareMap.voltageSensor.get(mc1);
+        vSen2 = opMode.hardwareMap.voltageSensor.get(mc2);
+        this.gyro = gyro1;
     }
 
 
@@ -636,7 +668,7 @@ public class MecanumDriveTrain {
     }
 
     //Use power to control the robot by following Vuforia object
-    public double strafe(int distance, double power, TurnDirection direction, VuforiaTrackable imageObject, LinearOpMode opMode) throws InterruptedException {
+    public double strafe(int distance, double power, TurnDirection direction, VuforiaTrackable imageObject, int heading, LinearOpMode opMode) throws InterruptedException {
         backLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         opMode.idle();
         backLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -647,15 +679,8 @@ public class MecanumDriveTrain {
 
         VuforiaTrackableDefaultListener image = (VuforiaTrackableDefaultListener) imageObject.getListener();
 
-        double xAdjustmentUnit = 0.0005;
-        double angleAdjustmentUnit = 0.06;
-        double angleAdjustment;
-        double angleDifference = 0;
-
         double startDistance = -1;
         double s = 0;
-
-        DbgLog.msg("[Phoenix:strafe] adjustmentUnit: " + xAdjustmentUnit);
 
         VectorF translation;
         double x = 0;
@@ -690,7 +715,7 @@ public class MecanumDriveTrain {
                 double currentDistance = y;
                 double currentTime = System.currentTimeMillis();
 
-                if(Math.abs(currentTime - startTime) > 400) {
+                if(Math.abs(currentTime - startTime) > 300) {
                     if (startDistance == -1){
                         startDistance = y;
                         startTime = System.currentTimeMillis();
@@ -706,7 +731,6 @@ public class MecanumDriveTrain {
                     }
                 }
 
-
                 double angle = Math.toDegrees(Math.atan2(x, y));
                 DbgLog.msg("[Phoenix:strafe] image angle: " + angle);
                 opMode.telemetry.addData("angle ", angle);
@@ -716,37 +740,6 @@ public class MecanumDriveTrain {
                 double frontRightSpeed = Math.abs(power); //need to increase this power if need to move the left
                 double backRightSpeed= Math.abs(power);
 
-                double xPowerAdjustment = 0;
-
-                if (x > 15) //distance is more than 15 mm, lets adjust the power proportionally, Robot is Right side of the image
-                    xPowerAdjustment = xAdjustmentUnit * Math.abs(x);
-                else if (x < -15)
-                    xPowerAdjustment = -30 * xAdjustmentUnit * Math.abs(x);
-                else
-                    xPowerAdjustment = 0;
-
-                DbgLog.msg("[Phoenix:Strafe] x=%7.2f powerAdjustment=%5.2f", x, xPowerAdjustment);
-
-                //Adjust the power to turn the robot so it would be perpendicular to the image
-                double zAngle = (double) MyUtility.getImageAngle(imageObject);
-                if (Math.abs(90 - zAngle) > 1)  //The robot is no longer parallel to beacon
-                {
-                    if ((angleDifference > 0 && (90-zAngle) <0) || (angleDifference < 0 && (90-zAngle) >0))
-                        angleAdjustmentUnit = angleAdjustmentUnit / 2.0;
-                    else if (Math.abs(90 - zAngle) > (Math.abs(angleDifference) + 4))
-                        angleAdjustmentUnit = angleAdjustmentUnit * 2.0;
-
-                    angleDifference = 90 - zAngle;
-                    angleAdjustment = Math.abs(angleDifference) * angleAdjustmentUnit;
-                }
-                else
-                    angleAdjustment = 0;
-
-                if(angleAdjustment > .35)
-                    angleAdjustment = .35;
-
-                DbgLog.msg("[Phoenix:Strafe] zAngle=%5.2f  angleAdjustment=%5.2f angleDifference=%5.2f angleAdjustmentUnit=%7.5f", zAngle, angleAdjustment, angleDifference, angleAdjustmentUnit);
-
                 double speedAdjustment = 0;
 
                 if(x < -15) {
@@ -755,6 +748,16 @@ public class MecanumDriveTrain {
                     speedAdjustment = .1;
                 }
 
+                double leftAdjustment = 0;
+                double rightAdjustment = 0;
+                double currentHeading = gyro.getIntegratedZValue();
+
+                if(currentHeading < (heading - 3))
+                    rightAdjustment = .1;
+                else if (currentHeading > (heading + 3))
+                    leftAdjustment = -.1;
+
+                DbgLog.msg("[Phoenix:StrafeAngleAdjust] leftAdjustment = " + leftAdjustment + " right Adjustment = " + rightAdjustment + " currentHeading = " + currentHeading + " heading = " + heading);
 
                 try {
                     if (direction == TurnDirection.LEFT) {
@@ -762,14 +765,9 @@ public class MecanumDriveTrain {
 
                         frontLeft.setPower(-1 * frontLeftSpeed + speedAdjustment);
                         backLeft.setPower(1 * backLeftSpeed + speedAdjustment);
-                        frontRight.setPower(1 * frontRightSpeed + speedAdjustment);
-                        backRight.setPower(-1 * backRightSpeed + speedAdjustment);
+                        frontRight.setPower(1 * frontRightSpeed + speedAdjustment + rightAdjustment);
+                        backRight.setPower(-1 * backRightSpeed + speedAdjustment + leftAdjustment);
                     } else {
-                        frontLeftSpeed += xPowerAdjustment;
-                        frontRightSpeed = frontLeftSpeed * -1 + xPowerAdjustment;
-                        backLeftSpeed = backLeftSpeed *-1 + xPowerAdjustment;
-                        backRightSpeed += xPowerAdjustment;
-
                         frontLeft.setPower(1 * frontLeftSpeed);
                         backLeft.setPower(-1 * backLeftSpeed);
                         frontRight.setPower(-1 * frontRightSpeed);
@@ -1079,7 +1077,17 @@ public class MecanumDriveTrain {
         else
             return 0.45 + (14 - getVoltage()) * 0.06;
             */
-        return .9;
+        return .8;
+    }
+
+    public double newX(double x, double z, double targetHeading) {
+        double currentHeading = gyro.getIntegratedZValue();
+
+        double finalValue = (z * Math.sin(Math.toRadians(currentHeading - targetHeading)));
+
+        DbgLog.msg("[Phoenix:LastX] lastX calc = %8.5f; currentHeading = %8.2f, targetHeading= %8.2f", finalValue, currentHeading, targetHeading);
+
+        return x - finalValue;
     }
 
 }

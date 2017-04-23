@@ -146,7 +146,7 @@ public class Blue_Auton_Backup extends LinearOpMode {
 
         int heading = gyro.getIntegratedZValue();
         wheels.resetMotorSpeed();
-        double lastX = wheels.strafe(180, 0.5, TurnDirection.LEFT, tracker.get(0), this);
+        double lastX = wheels.strafe(180, 0.5, TurnDirection.LEFT, tracker.get(0), heading, this);
         float imageX;
 
         int endHeading = gyro.getIntegratedZValue();
@@ -266,7 +266,7 @@ public class Blue_Auton_Backup extends LinearOpMode {
 
         heading = gyro.getIntegratedZValue();
         wheels.resetMotorSpeed();
-        lastX = wheels.strafe(180, 0.5, TurnDirection.LEFT, tracker.get(2), this);
+        lastX = wheels.strafe(180, 0.5, TurnDirection.LEFT, tracker.get(2), heading, this);
 
         endHeading = gyro.getIntegratedZValue();
         turningAngle = heading - endHeading;
